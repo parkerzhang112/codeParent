@@ -1,0 +1,10 @@
+/backapi/target/
+/backapi/.mvn/
+/backapi/.idea/
+
+/.idea/
+/payapi/.mvn/
+/payapi/.idea/
+
+/autoapi/.mvn/
+/autoapi/.idea/

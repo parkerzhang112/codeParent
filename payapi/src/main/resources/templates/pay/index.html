@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html data-dpr="1" style="font-size: 36px;">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width initial-scale=1.0 maximum-scale=1.0 user-scalable=yes">
+    <title></title>
+    <link rel="shortcut icon" href="./img/favicon.png" type="image/x-icon">
+    <link rel="apple-touch-icon" href="./img/favicon.png">
+    <script th:src="@{/js/jquery-1.8.3.min.js}"></script>
+    <script th:src="@{/js/flexible.js}"></script>
+</head>
+<style>
+    body{
+        font-family:'STHeiti','Microsoft YaHei',Helvetica,Arial,sans-serif;margin:0 auto;
+    }
+    #first {
+        margin: 0 auto;
+        max-width: 750px;
+        padding: 0.3rem 0.2rem;
+        background-color: #fafafe;
+    }
+    #first .header {
+        padding: 0.24rem 0;
+        position: relative;
+        z-index: 10;
+        box-shadow: 0 0.05rem 0.1rem rgba(65,71,85,0.09);
+        background: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0.2rem 0.5rem;
+    }
+    #first .header input {
+        margin: 0 auto;
+        flex: 1;
+        height: .6rem;
+        border: 1px solid #e1e1e2;
+        border-radius: 0.05rem;
+        padding-left: 0.2rem;
+        color: gray;
+    }
+    .info {
+        padding: 0.2rem 0 0 0.1rem;
+        color: red;
+    }
+    .inputCls {
+        background: linear-gradient(to right, blue, #497ff6);
+        line-height: 1rem;
+        text-align: center;
+        color: #fff;
+        border-radius: .2rem;
+        margin-top: 0.4rem;
+        cursor: pointer;
+    }
+    .tip {
+        margin-top: 0.5rem;
+    }
+    .tip li {
+        color: #a7a7b0;
+        margin-top: 0.3rem;
+    }
+
+    #second {
+        margin: 0 auto;
+        max-width: 750px;
+        padding: 0.3rem 0.2rem;
+    }
+    #second .header {
+        text-align: center;
+        line-height: 0.7rem;
+    }
+    #second .header b {
+        color: blue;
+    }
+    #second .tip {
+        text-align: center;
+        line-height: 0.7rem;
+        letter-spacing: 2px;
+    }
+    #second .tip b {
+        color: blue;
+    }
+    .container {
+        padding: 0.5rem;
+        box-shadow: 0 0.05rem 0.1rem rgba(65,71,85,0.09);
+        margin: 0 auto;
+        max-width: 80%;
+        background-color: #fafafe;
+    }
+    .title {
+        display: flex;
+        justify-content: center;
+        align-items: baseline;
+    }
+    .title u {
+        font-size: 0.7rem;
+        color: red;
+        padding: 0 0.3rem;
+        text-decoration: none;
+    }
+    .copy {
+        background-color: #1271ff;
+        padding: 0.2rem 0.5rem;
+        border-radius: .1rem;
+        color: #fff;
+        cursor: pointer;
+        line-height: 0.2rem;
+    }
+    .item li{
+        display: flex;
+        margin-top: 0.4rem;
+    }
+    .item li .name {
+        width: 20%;
+    }
+    .form {
+        flex: 1;
+    }
+    .form .copy {
+        padding: 0.1rem 0.5rem;
+    }
+    .show {
+        display: block;
+    }
+    .hide {
+        display: none;
+    }
+    html{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;font-size: 62.5%}
+    *{ margin:0; padding:0}
+    a{outline:none;text-decoration:none;}
+    a:hover{text-decoration:none;}
+    html{zoom:1;}
+    html *{outline:0;zoom:1;}
+    html button::-moz-focus-inner{border-color:transparent!important;}
+    body{overflow-x: hidden;}
+    body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}
+    fieldset,a img{border:0;}
+    address,caption,cite,code,dfn,em,th,var{font-style:normal;font-weight:normal;}
+    li{list-style:none;}
+    caption,th{text-align:left;}
+    h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}
+    q:before,q:after{content:'';}
+    input[type="submit"], input[type="reset"], input[type="button"], button{-webkit-appearance: none;}
+    em,i{font-style:normal;}
+
+    .clearfix:after {content: "."; display: block; height:0; clear:both; visibility: hidden;}
+    .clearfix { *zoom:1; }
+
+</style>
+
+<body style="font-size: 12px;">
+
+    <div id="first" class="show">
+        <div class="header">
+            <input type="hidden" th:value="${xrecharge.orderNo}" id="orderno" name="orderno" required>
+
+            付款人姓名：<input type="text" id="name" name="name" required>
+        </div>
+        <div class="info">
+            *请确保付款人姓名与平台注册名一致，否则无法到账
+        </div>
+        <div class="inputCls" onclick="submitName()">
+            确认输入
+        </div>
+        <ul class="tip">
+            <li>
+                1. 禁止使用支付宝,微信付款！！！
+            </li>
+            <li>
+                2. 倒计时结束后禁止付款
+            </li>
+            <li>
+                3. 请正确填写付款人姓名，否则不允出款
+            </li>
+            <li>
+                4. 请按照页面显示的<b style="color:red">小数点金额</b>付款，修改金额无法到账
+            </li>
+        </ul>
+    </div>
+    <div id="second" class="hide">
+        <div class="header">
+            下载<b>各大手机银行App</b>复制转账信息支付，成功率<b>99%</b>！<br />不支持微信支付！！
+        </div>
+        <div class="tip">
+            三步秒<b>转</b> 快速到<b>账</b>
+        </div>
+        <div class="container">
+            <div class="title">
+                <s>￥</s><u th:text="${xrecharge.payAmount}"></u><span class="copy" th:data-clipboard-text="${xrecharge.payAmount}">复制</span>
+            </div>
+            <ul class="item">
+                <li>
+                    <span class="name">姓名</span>
+                    <div class="form">
+                        <span class="real_name" th:text="${xcard.cardName}"></span>
+                        <span class="copy copy_name" th:data-clipboard-text="${xcard.cardName}">复制</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="name">卡号</span>
+                    <div class="form">
+                        <span th:text="${xcard.cardNum}" >***</span>
+                        <span class="copy" th:data-clipboard-text="${xcard.cardNum}">复制</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="name">银行</span>
+                    <div class="form">
+                        <span th:text="${xrecharge.cardType}">中国银行</span>
+                        <span class="copy" th:data-clipboard-text="${xrecharge.cardType}">复制</span>
+                    </div>
+                </li>
+                <li>
+                    <span class="name">开户行</span>
+                    <div class="form">
+                        <span th:text="${xcard.cardAddress}">中国银行</span>
+                        <span class="copy" th:data-clipboard-text="${xcard.cardAddress}">复制</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="tip">
+            不按<b>显示金额</b>付款不到账！
+        </div>
+    </div>
+    <script>
+        var h5Copy = document.querySelectorAll('.copy');
+        for (var ll = 0; ll < h5Copy.length; ll++) {
+            h5Copy[ll].index = ll;
+            h5Copy[ll].addEventListener('click', function () {
+                var cur = h5Copy[this.index].getAttribute('data-clipboard-text');
+                copyFn(cur)
+            })
+        }
+        function copyFn (val) {
+            // 创建输入框
+            var textarea = document.createElement('textarea');
+            document.body.appendChild(textarea);
+            // 隐藏此输入框
+            textarea.style.position = 'absolute';
+            textarea.style.clip = 'rect(0 0 0 0)';
+            // 赋值
+            textarea.value = val;
+            // 选中
+            textarea.select();
+            // 复制
+            document.execCommand('copy', true);
+            copyclick(val)
+        }
+        function toggle () {
+            var first = document.getElementById('first')
+            var second = document.getElementById('second')
+            if (first.classList.contains('show')) {
+                first.classList.remove('show')
+                first.classList.add('hide')
+                second.classList.remove('hide')
+                second.classList.add('show')
+                
+            } else {
+                second.classList.remove('show')
+                second.classList.add('hide')
+                first.classList.remove('hide')
+                first.classList.add('show')
+            }
+        }
+    </script>
+</body>
+
+<script>
+    var cardnum = "[[${xcard.cardNum}]]";
+    var cardname = "[[${xrecharge.name}]]";
+    $(function () {
+        if(cardname != null && cardname != ""){
+            toggle();
+        }
+    })
+
+    function submitName(){
+        var name =  $("#name").val();
+        if(name == ""){
+            alert("请填写姓名");
+            return;
+        }
+        var orderid = $("#orderno").val();
+        $.ajax({
+            type: 'POST',
+            url: "/recharge/update",
+            data: {"name":name, "merchant_order_no":orderid},
+            success:function (result){
+                toggle();
+            }
+        });
+    }
+
+    function copyclick(oper){
+        var orderid = $("#orderno").val();
+        $.ajax({
+            type: 'GET',
+            url: "/recharge/order/"+orderid + "/" + oper,
+            dataType:"json",
+            success:function (result){
+                return;
+            }
+        });
+    }
+
+    function checkOrder(){
+        var orderid = $("#orderno").val();
+        $.ajax({
+            type: 'GET',
+            url: "/recharge/order/getOrder/"+orderid,
+            dataType:"json",
+            success:function (result){
+                if(result.code != 0){
+                    window.location.reload();
+                }
+            }
+        });
+    }
+
+    setInterval(checkOrder, 1000);
+</script>
+</body>
+</html>

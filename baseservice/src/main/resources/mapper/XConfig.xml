@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiagao.baseservice.dao.XConfigDao">
+  <resultMap id="BaseResultMap" type="com.xiagao.baseservice.entity.XConfig">
+    <id column="config_id" jdbcType="INTEGER" property="configId" />
+    <result column="config_name" jdbcType="INTEGER" property="configName" />
+    <result column="config_key" jdbcType="VARCHAR" property="configKey" />
+    <result column="config_value" jdbcType="DECIMAL" property="configValue" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    config_id, config_name, config_key, config_value
+  </sql>
+  <select id="queryConfigByKey" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from pay_admin.sys_config
+    where config_key = #{configKey} limit 1;
+  </select>
+
+
+</mapper>
