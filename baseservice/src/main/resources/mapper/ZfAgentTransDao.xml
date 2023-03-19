@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.baseservice.dao.ZfAgentTransDao">
+
+    <resultMap type="com.code.baseservice.entity.ZfAgentTrans" id="ZfAgentTransMap">
+        <result property="agentId" column="agent_id" jdbcType=""/>
+        <result property="preBalance" column="pre_balance" jdbcType=""/>
+        <result property="balance" column="balance" jdbcType=""/>
+        <result property="amount" column="amount" jdbcType=""/>
+        <result property="orderNo" column="order_no" jdbcType=""/>
+        <result property="createTime" column="create_time" jdbcType=""/>
+        <result property="updateTime" column="update_time" jdbcType=""/>
+        <result property="remark" column="remark" jdbcType=""/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ZfAgentTransMap">
+        select
+          agent_id, pre_balance, balance, amount, order_no, create_time, update_time, remark
+        from zf_agent_trans
+        where agent_id = #{agentId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ZfAgentTransMap">
+        select
+          agent_id, pre_balance, balance, amount, order_no, create_time, update_time, remark
+        from zf_agent_trans
+        <where>
+            <if test="agentId != null">
+                and agent_id = #{agentId}
+            </if>
+            <if test="preBalance != null and preBalance != ''">
+                and pre_balance = #{preBalance}
+            </if>
+            <if test="balance != null and balance != ''">
+                and balance = #{balance}
+            </if>
+            <if test="amount != null and amount != ''">
+                and amount = #{amount}
+            </if>
+            <if test="orderNo != null">
+                and order_no = #{orderNo}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{updateTime}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from zf_agent_trans
+        <where>
+            <if test="agentId != null">
+                and agent_id = #{agentId}
+            </if>
+            <if test="preBalance != null and preBalance != ''">
+                and pre_balance = #{preBalance}
+            </if>
+            <if test="balance != null and balance != ''">
+                and balance = #{balance}
+            </if>
+            <if test="amount != null and amount != ''">
+                and amount = #{amount}
+            </if>
+            <if test="orderNo != null">
+                and order_no = #{orderNo}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{updateTime}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="agentId" useGeneratedKeys="true">
+        insert into zf_agent_trans(pre_balance, balance, amount, order_no, create_time, update_time, remark)
+        values (#{preBalance}, #{balance}, #{amount}, #{orderNo}, #{createTime}, #{updateTime}, #{remark})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="agentId" useGeneratedKeys="true">
+        insert into zf_agent_trans(pre_balance, balance, amount, order_no, create_time, update_time, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.preBalance}, #{entity.balance}, #{entity.amount}, #{entity.orderNo}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="agentId" useGeneratedKeys="true">
+        insert into zf_agent_trans(pre_balance, balance, amount, order_no, create_time, update_time, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.preBalance}, #{entity.balance}, #{entity.amount}, #{entity.orderNo}, #{entity.createTime}, #{entity.updateTime}, #{entity.remark})
+        </foreach>
+        on duplicate key update
+        pre_balance = values(pre_balance),
+        balance = values(balance),
+        amount = values(amount),
+        order_no = values(order_no),
+        create_time = values(create_time),
+        update_time = values(update_time),
+        remark = values(remark)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update zf_agent_trans
+        <set>
+            <if test="preBalance != null and preBalance != ''">
+                pre_balance = #{preBalance},
+            </if>
+            <if test="balance != null and balance != ''">
+                balance = #{balance},
+            </if>
+            <if test="amount != null and amount != ''">
+                amount = #{amount},
+            </if>
+            <if test="orderNo != null">
+                order_no = #{orderNo},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+        </set>
+        where agent_id = #{agentId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from zf_agent_trans where agent_id = #{agentId}
+    </delete>
+
+</mapper>
+

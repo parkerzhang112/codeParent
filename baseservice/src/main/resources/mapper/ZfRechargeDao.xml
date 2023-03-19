@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.baseservice.dao.ZfRechargeDao">
+
+    <resultMap type="com.code.baseservice.entity.ZfRecharge" id="ZfRechargeMap">
+        <result property="merchantOrderNo" column="merchant_order_no" jdbcType="VARCHAR"/>
+        <result property="payAmount" column="pay_amount" jdbcType="VARCHAR"/>
+        <result property="paidAmount" column="paid_amount" jdbcType="VARCHAR"/>
+        <result property="orderNo" column="order_no" jdbcType="VARCHAR"/>
+        <result property="notifyUrl" column="notify_url" jdbcType="VARCHAR"/>
+        <result property="codeId" column="code_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="merchantId" column="merchant_id" jdbcType="INTEGER"/>
+        <result property="channelId" column="channel_id" jdbcType="INTEGER"/>
+        <result property="agentId" column="agent_id" jdbcType="INTEGER"/>
+        <result property="orderStatus" column="order_status" jdbcType="INTEGER"/>
+        <result property="notifyStatus" column="notify_status" jdbcType="INTEGER"/>
+        <result property="merchantFee" column="merchant_fee" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ZfRechargeMap">
+        select
+          merchant_order_no, pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee
+        from zf_recharge
+        where merchant_order_no = #{merchantOrderNo}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ZfRechargeMap">
+        select
+          merchant_order_no, pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee
+        from zf_recharge
+        <where>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+                and merchant_order_no = #{merchantOrderNo}
+            </if>
+            <if test="payAmount != null">
+                and pay_amount = #{payAmount}
+            </if>
+            <if test="paidAmount != null">
+                and paid_amount = #{paidAmount}
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                and order_no = #{orderNo}
+            </if>
+            <if test="notifyUrl != null and notifyUrl != ''">
+                and notify_url = #{notifyUrl}
+            </if>
+            <if test="codeId != null">
+                and code_id = #{codeId}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{updateTime}
+            </if>
+            <if test="merchantId != null">
+                and merchant_id = #{merchantId}
+            </if>
+            <if test="channelId != null">
+                and channel_id = #{channelId}
+            </if>
+            <if test="agentId != null">
+                and agent_id = #{agentId}
+            </if>
+            <if test="orderStatus != null">
+                and order_status = #{orderStatus}
+            </if>
+            <if test="notifyStatus != null">
+                and notify_status = #{notifyStatus}
+            </if>
+            <if test="merchantFee != null">
+                and merchant_fee = #{merchantFee}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from zf_recharge
+        <where>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+                and merchant_order_no = #{merchantOrderNo}
+            </if>
+            <if test="payAmount != null">
+                and pay_amount = #{payAmount}
+            </if>
+            <if test="paidAmount != null">
+                and paid_amount = #{paidAmount}
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                and order_no = #{orderNo}
+            </if>
+            <if test="notifyUrl != null and notifyUrl != ''">
+                and notify_url = #{notifyUrl}
+            </if>
+            <if test="codeId != null">
+                and code_id = #{codeId}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{updateTime}
+            </if>
+            <if test="merchantId != null">
+                and merchant_id = #{merchantId}
+            </if>
+            <if test="channelId != null">
+                and channel_id = #{channelId}
+            </if>
+            <if test="agentId != null">
+                and agent_id = #{agentId}
+            </if>
+            <if test="orderStatus != null">
+                and order_status = #{orderStatus}
+            </if>
+            <if test="notifyStatus != null">
+                and notify_status = #{notifyStatus}
+            </if>
+            <if test="merchantFee != null">
+                and merchant_fee = #{merchantFee}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="merchantOrderNo" useGeneratedKeys="true">
+        insert into zf_recharge(pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee)
+        values (#{payAmount}, #{paidAmount}, #{orderNo}, #{notifyUrl}, #{codeId}, #{createTime}, #{updateTime}, #{merchantId}, #{channelId}, #{agentId}, #{orderStatus}, #{notifyStatus}, #{merchantFee})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="merchantOrderNo" useGeneratedKeys="true">
+        insert into zf_recharge(pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.payAmount}, #{entity.paidAmount}, #{entity.orderNo}, #{entity.notifyUrl}, #{entity.codeId}, #{entity.createTime}, #{entity.updateTime}, #{entity.merchantId}, #{entity.channelId}, #{entity.agentId}, #{entity.orderStatus}, #{entity.notifyStatus}, #{entity.merchantFee})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="merchantOrderNo" useGeneratedKeys="true">
+        insert into zf_recharge(pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.payAmount}, #{entity.paidAmount}, #{entity.orderNo}, #{entity.notifyUrl}, #{entity.codeId}, #{entity.createTime}, #{entity.updateTime}, #{entity.merchantId}, #{entity.channelId}, #{entity.agentId}, #{entity.orderStatus}, #{entity.notifyStatus}, #{entity.merchantFee})
+        </foreach>
+        on duplicate key update
+        pay_amount = values(pay_amount),
+        paid_amount = values(paid_amount),
+        order_no = values(order_no),
+        notify_url = values(notify_url),
+        code_id = values(code_id),
+        create_time = values(create_time),
+        update_time = values(update_time),
+        merchant_id = values(merchant_id),
+        channel_id = values(channel_id),
+        agent_id = values(agent_id),
+        order_status = values(order_status),
+        notify_status = values(notify_status),
+        merchant_fee = values(merchant_fee)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update zf_recharge
+        <set>
+            <if test="payAmount != null">
+                pay_amount = #{payAmount},
+            </if>
+            <if test="paidAmount != null">
+                paid_amount = #{paidAmount},
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                order_no = #{orderNo},
+            </if>
+            <if test="notifyUrl != null and notifyUrl != ''">
+                notify_url = #{notifyUrl},
+            </if>
+            <if test="codeId != null">
+                code_id = #{codeId},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="merchantId != null">
+                merchant_id = #{merchantId},
+            </if>
+            <if test="channelId != null">
+                channel_id = #{channelId},
+            </if>
+            <if test="agentId != null">
+                agent_id = #{agentId},
+            </if>
+            <if test="orderStatus != null">
+                order_status = #{orderStatus},
+            </if>
+            <if test="notifyStatus != null">
+                notify_status = #{notifyStatus},
+            </if>
+            <if test="merchantFee != null">
+                merchant_fee = #{merchantFee},
+            </if>
+        </set>
+        where merchant_order_no = #{merchantOrderNo}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from zf_recharge where merchant_order_no = #{merchantOrderNo}
+    </delete>
+
+</mapper>
+

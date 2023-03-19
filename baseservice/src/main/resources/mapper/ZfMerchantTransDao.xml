@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.baseservice.dao.ZfMerchantTransDao">
+
+    <resultMap type="com.code.baseservice.entity.ZfMerchantTrans" id="ZfMerchantTransMap">
+        <result property="merchantId" column="merchant_id" jdbcType="INTEGER"/>
+        <result property="preBalance" column="pre_balance" jdbcType="VARCHAR"/>
+        <result property="balance" column="balance" jdbcType="VARCHAR"/>
+        <result property="amount" column="amount" jdbcType="VARCHAR"/>
+        <result property="merchantFee" column="merchant_fee" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="merchantOrderNo" column="merchant_order_no" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ZfMerchantTransMap">
+        select
+          merchant_id, pre_balance, balance, amount, merchant_fee, create_time, remark, merchant_order_no
+        from zf_merchant_trans
+        where merchant_id = #{merchantId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ZfMerchantTransMap">
+        select
+          merchant_id, pre_balance, balance, amount, merchant_fee, create_time, remark, merchant_order_no
+        from zf_merchant_trans
+        <where>
+            <if test="merchantId != null">
+                and merchant_id = #{merchantId}
+            </if>
+            <if test="preBalance != null">
+                and pre_balance = #{preBalance}
+            </if>
+            <if test="balance != null">
+                and balance = #{balance}
+            </if>
+            <if test="amount != null">
+                and amount = #{amount}
+            </if>
+            <if test="merchantFee != null">
+                and merchant_fee = #{merchantFee}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+                and merchant_order_no = #{merchantOrderNo}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from zf_merchant_trans
+        <where>
+            <if test="merchantId != null">
+                and merchant_id = #{merchantId}
+            </if>
+            <if test="preBalance != null">
+                and pre_balance = #{preBalance}
+            </if>
+            <if test="balance != null">
+                and balance = #{balance}
+            </if>
+            <if test="amount != null">
+                and amount = #{amount}
+            </if>
+            <if test="merchantFee != null">
+                and merchant_fee = #{merchantFee}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+                and merchant_order_no = #{merchantOrderNo}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="merchantId" useGeneratedKeys="true">
+        insert into zf_merchant_trans(pre_balance, balance, amount, merchant_fee, create_time, remark, merchant_order_no)
+        values (#{preBalance}, #{balance}, #{amount}, #{merchantFee}, #{createTime}, #{remark}, #{merchantOrderNo})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="merchantId" useGeneratedKeys="true">
+        insert into zf_merchant_trans(pre_balance, balance, amount, merchant_fee, create_time, remark, merchant_order_no)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.preBalance}, #{entity.balance}, #{entity.amount}, #{entity.merchantFee}, #{entity.createTime}, #{entity.remark}, #{entity.merchantOrderNo})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="merchantId" useGeneratedKeys="true">
+        insert into zf_merchant_trans(pre_balance, balance, amount, merchant_fee, create_time, remark, merchant_order_no)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.preBalance}, #{entity.balance}, #{entity.amount}, #{entity.merchantFee}, #{entity.createTime}, #{entity.remark}, #{entity.merchantOrderNo})
+        </foreach>
+        on duplicate key update
+        pre_balance = values(pre_balance),
+        balance = values(balance),
+        amount = values(amount),
+        merchant_fee = values(merchant_fee),
+        create_time = values(create_time),
+        remark = values(remark),
+        merchant_order_no = values(merchant_order_no)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update zf_merchant_trans
+        <set>
+            <if test="preBalance != null">
+                pre_balance = #{preBalance},
+            </if>
+            <if test="balance != null">
+                balance = #{balance},
+            </if>
+            <if test="amount != null">
+                amount = #{amount},
+            </if>
+            <if test="merchantFee != null">
+                merchant_fee = #{merchantFee},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+                merchant_order_no = #{merchantOrderNo},
+            </if>
+        </set>
+        where merchant_id = #{merchantId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from zf_merchant_trans where merchant_id = #{merchantId}
+    </delete>
+
+</mapper>
+

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.baseservice.dao.ZfAgentDao">
+
+    <resultMap type="com.code.baseservice.entity.ZfAgent" id="ZfAgentMap">
+        <result property="agentId" column="agent_id" jdbcType="INTEGER"/>
+        <result property="balance" column="balance" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="rate" column="rate" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" jdbcType="INTEGER"/>
+        <result property="pwd" column="pwd" jdbcType="VARCHAR"/>
+        <result property="googleCode" column="google_code" jdbcType="VARCHAR"/>
+        <result property="agentAccount" column="agent_account" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ZfAgentMap">
+        select
+          agent_id, balance, name, rate, parent_id, pwd, google_code, agent_account
+        from zf_agent
+        where agent_id = #{agentId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ZfAgentMap">
+        select
+          agent_id, balance, name, rate, parent_id, pwd, google_code, agent_account
+        from zf_agent
+        <where>
+            <if test="agentId != null">
+                and agent_id = #{agentId}
+            </if>
+            <if test="balance != null">
+                and balance = #{balance}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="rate != null">
+                and rate = #{rate}
+            </if>
+            <if test="parentId != null">
+                and parent_id = #{parentId}
+            </if>
+            <if test="pwd != null and pwd != ''">
+                and pwd = #{pwd}
+            </if>
+            <if test="googleCode != null and googleCode != ''">
+                and google_code = #{googleCode}
+            </if>
+            <if test="agentAccount != null and agentAccount != ''">
+                and agent_account = #{agentAccount}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from zf_agent
+        <where>
+            <if test="agentId != null">
+                and agent_id = #{agentId}
+            </if>
+            <if test="balance != null">
+                and balance = #{balance}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="rate != null">
+                and rate = #{rate}
+            </if>
+            <if test="parentId != null">
+                and parent_id = #{parentId}
+            </if>
+            <if test="pwd != null and pwd != ''">
+                and pwd = #{pwd}
+            </if>
+            <if test="googleCode != null and googleCode != ''">
+                and google_code = #{googleCode}
+            </if>
+            <if test="agentAccount != null and agentAccount != ''">
+                and agent_account = #{agentAccount}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="agentId" useGeneratedKeys="true">
+        insert into zf_agent(balance, name, rate, parent_id, pwd, google_code, agent_account)
+        values (#{balance}, #{name}, #{rate}, #{parentId}, #{pwd}, #{googleCode}, #{agentAccount})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="agentId" useGeneratedKeys="true">
+        insert into zf_agent(balance, name, rate, parent_id, pwd, google_code, agent_account)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.balance}, #{entity.name}, #{entity.rate}, #{entity.parentId}, #{entity.pwd}, #{entity.googleCode}, #{entity.agentAccount})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="agentId" useGeneratedKeys="true">
+        insert into zf_agent(balance, name, rate, parent_id, pwd, google_code, agent_account)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.balance}, #{entity.name}, #{entity.rate}, #{entity.parentId}, #{entity.pwd}, #{entity.googleCode}, #{entity.agentAccount})
+        </foreach>
+        on duplicate key update
+        balance = values(balance),
+        name = values(name),
+        rate = values(rate),
+        parent_id = values(parent_id),
+        pwd = values(pwd),
+        google_code = values(google_code),
+        agent_account = values(agent_account)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update zf_agent
+        <set>
+            <if test="balance != null">
+                balance = #{balance},
+            </if>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="rate != null">
+                rate = #{rate},
+            </if>
+            <if test="parentId != null">
+                parent_id = #{parentId},
+            </if>
+            <if test="pwd != null and pwd != ''">
+                pwd = #{pwd},
+            </if>
+            <if test="googleCode != null and googleCode != ''">
+                google_code = #{googleCode},
+            </if>
+            <if test="agentAccount != null and agentAccount != ''">
+                agent_account = #{agentAccount},
+            </if>
+        </set>
+        where agent_id = #{agentId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from zf_agent where agent_id = #{agentId}
+    </delete>
+
+</mapper>
+

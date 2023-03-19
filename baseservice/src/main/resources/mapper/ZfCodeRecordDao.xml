@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.baseservice.dao.ZfCodeRecordDao">
+
+    <resultMap type="com.code.baseservice.entity.ZfCodeRecord" id="ZfCodeRecordMap">
+        <result property="codeId" column="code_id" jdbcType="INTEGER"/>
+        <result property="recordDate" column="record_date" jdbcType="TIMESTAMP"/>
+        <result property="rechargeAmount" column="recharge_amount" jdbcType="VARCHAR"/>
+        <result property="rechargeTimes" column="recharge_times" jdbcType="INTEGER"/>
+        <result property="fee" column="fee" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ZfCodeRecordMap">
+        select
+          code_id, record_date, recharge_amount, recharge_times, fee
+        from zf_code_record
+        where code_id = #{codeId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ZfCodeRecordMap">
+        select
+          code_id, record_date, recharge_amount, recharge_times, fee
+        from zf_code_record
+        <where>
+            <if test="codeId != null">
+                and code_id = #{codeId}
+            </if>
+            <if test="recordDate != null">
+                and record_date = #{recordDate}
+            </if>
+            <if test="rechargeAmount != null">
+                and recharge_amount = #{rechargeAmount}
+            </if>
+            <if test="rechargeTimes != null">
+                and recharge_times = #{rechargeTimes}
+            </if>
+            <if test="fee != null">
+                and fee = #{fee}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from zf_code_record
+        <where>
+            <if test="codeId != null">
+                and code_id = #{codeId}
+            </if>
+            <if test="recordDate != null">
+                and record_date = #{recordDate}
+            </if>
+            <if test="rechargeAmount != null">
+                and recharge_amount = #{rechargeAmount}
+            </if>
+            <if test="rechargeTimes != null">
+                and recharge_times = #{rechargeTimes}
+            </if>
+            <if test="fee != null">
+                and fee = #{fee}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="codeId" useGeneratedKeys="true">
+        insert into zf_code_record(record_date, recharge_amount, recharge_times, fee)
+        values (#{recordDate}, #{rechargeAmount}, #{rechargeTimes}, #{fee})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="codeId" useGeneratedKeys="true">
+        insert into zf_code_record(record_date, recharge_amount, recharge_times, fee)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.recordDate}, #{entity.rechargeAmount}, #{entity.rechargeTimes}, #{entity.fee})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="codeId" useGeneratedKeys="true">
+        insert into zf_code_record(record_date, recharge_amount, recharge_times, fee)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.recordDate}, #{entity.rechargeAmount}, #{entity.rechargeTimes}, #{entity.fee})
+        </foreach>
+        on duplicate key update
+        record_date = values(record_date),
+        recharge_amount = values(recharge_amount),
+        recharge_times = values(recharge_times),
+        fee = values(fee)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update zf_code_record
+        <set>
+            <if test="recordDate != null">
+                record_date = #{recordDate},
+            </if>
+            <if test="rechargeAmount != null">
+                recharge_amount = #{rechargeAmount},
+            </if>
+            <if test="rechargeTimes != null">
+                recharge_times = #{rechargeTimes},
+            </if>
+            <if test="fee != null">
+                fee = #{fee},
+            </if>
+        </set>
+        where code_id = #{codeId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from zf_code_record where code_id = #{codeId}
+    </delete>
+
+</mapper>
+

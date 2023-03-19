@@ -1,0 +1,28 @@
+package com.code.baseservice.entity;
+
+import lombok.Data;
+
+import java.io.Serializable;
+
+/**
+ * (ZfMerchant)实体类
+ *
+ * @author makejava
+ * @since 2023-03-19 23:07:57
+ */
+@Data
+public class ZfMerchant implements Serializable {
+    private static final long serialVersionUID = 557293816769063675L;
+    
+    private Integer merchantId;
+    
+    private String balance;
+    
+    private Integer status;
+    
+    private String merchantCode;
+    
+    private String remark;
+
+}
+

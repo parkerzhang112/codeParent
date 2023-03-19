@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.baseservice.dao.ZfCodeDao">
+
+    <resultMap type="com.code.baseservice.entity.ZfCode" id="ZfCodeMap">
+        <result property="codeId" column="code_id" jdbcType=""/>
+        <result property="agentId" column="agent_id" jdbcType=""/>
+        <result property="minAmount" column="min_amount" jdbcType=""/>
+        <result property="maxAmount" column="max_amount" jdbcType=""/>
+        <result property="image" column="image" jdbcType=""/>
+        <result property="status" column="status" jdbcType=""/>
+        <result property="isOpen" column="is_open" jdbcType=""/>
+        <result property="createTime" column="create_time" jdbcType=""/>
+        <result property="updateTime" column="update_time" jdbcType=""/>
+        <result property="dayLimitAmount" column="day_limit_amount" jdbcType=""/>
+        <result property="dayLimitTimes" column="day_limit_times" jdbcType=""/>
+        <result property="name" column="name" jdbcType=""/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ZfCodeMap">
+        select
+          code_id, agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name
+        from zf_code
+        where code_id = #{codeId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ZfCodeMap">
+        select
+          code_id, agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name
+        from zf_code
+        <where>
+            <if test="codeId != null">
+                and code_id = #{codeId}
+            </if>
+            <if test="agentId != null">
+                and agent_id = #{agentId}
+            </if>
+            <if test="minAmount != null">
+                and min_amount = #{minAmount}
+            </if>
+            <if test="maxAmount != null">
+                and max_amount = #{maxAmount}
+            </if>
+            <if test="image != null and image != ''">
+                and image = #{image}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="isOpen != null">
+                and is_open = #{isOpen}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{updateTime}
+            </if>
+            <if test="dayLimitAmount != null">
+                and day_limit_amount = #{dayLimitAmount}
+            </if>
+            <if test="dayLimitTimes != null">
+                and day_limit_times = #{dayLimitTimes}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from zf_code
+        <where>
+            <if test="codeId != null">
+                and code_id = #{codeId}
+            </if>
+            <if test="agentId != null">
+                and agent_id = #{agentId}
+            </if>
+            <if test="minAmount != null">
+                and min_amount = #{minAmount}
+            </if>
+            <if test="maxAmount != null">
+                and max_amount = #{maxAmount}
+            </if>
+            <if test="image != null and image != ''">
+                and image = #{image}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="isOpen != null">
+                and is_open = #{isOpen}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{updateTime}
+            </if>
+            <if test="dayLimitAmount != null">
+                and day_limit_amount = #{dayLimitAmount}
+            </if>
+            <if test="dayLimitTimes != null">
+                and day_limit_times = #{dayLimitTimes}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="codeId" useGeneratedKeys="true">
+        insert into zf_code(agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name)
+        values (#{agentId}, #{minAmount}, #{maxAmount}, #{image}, #{status}, #{isOpen}, #{createTime}, #{updateTime}, #{dayLimitAmount}, #{dayLimitTimes}, #{name})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="codeId" useGeneratedKeys="true">
+        insert into zf_code(agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.agentId}, #{entity.minAmount}, #{entity.maxAmount}, #{entity.image}, #{entity.status}, #{entity.isOpen}, #{entity.createTime}, #{entity.updateTime}, #{entity.dayLimitAmount}, #{entity.dayLimitTimes}, #{entity.name})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="codeId" useGeneratedKeys="true">
+        insert into zf_code(agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.agentId}, #{entity.minAmount}, #{entity.maxAmount}, #{entity.image}, #{entity.status}, #{entity.isOpen}, #{entity.createTime}, #{entity.updateTime}, #{entity.dayLimitAmount}, #{entity.dayLimitTimes}, #{entity.name})
+        </foreach>
+        on duplicate key update
+        agent_id = values(agent_id),
+        min_amount = values(min_amount),
+        max_amount = values(max_amount),
+        image = values(image),
+        status = values(status),
+        is_open = values(is_open),
+        create_time = values(create_time),
+        update_time = values(update_time),
+        day_limit_amount = values(day_limit_amount),
+        day_limit_times = values(day_limit_times),
+        name = values(name)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update zf_code
+        <set>
+            <if test="agentId != null">
+                agent_id = #{agentId},
+            </if>
+            <if test="minAmount != null">
+                min_amount = #{minAmount},
+            </if>
+            <if test="maxAmount != null">
+                max_amount = #{maxAmount},
+            </if>
+            <if test="image != null and image != ''">
+                image = #{image},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="isOpen != null">
+                is_open = #{isOpen},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="dayLimitAmount != null">
+                day_limit_amount = #{dayLimitAmount},
+            </if>
+            <if test="dayLimitTimes != null">
+                day_limit_times = #{dayLimitTimes},
+            </if>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+        </set>
+        where code_id = #{codeId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from zf_code where code_id = #{codeId}
+    </delete>
+
+</mapper>
+

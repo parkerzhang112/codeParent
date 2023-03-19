@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.baseservice.dao.ZfMerchantDao">
+
+    <resultMap type="com.code.baseservice.entity.ZfMerchant" id="ZfMerchantMap">
+        <result property="merchantId" column="merchant_id" jdbcType="INTEGER"/>
+        <result property="balance" column="balance" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="merchantCode" column="merchant_code" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ZfMerchantMap">
+        select
+          merchant_id, balance, status, merchant_code, remark
+        from zf_merchant
+        where merchant_id = #{merchantId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ZfMerchantMap">
+        select
+          merchant_id, balance, status, merchant_code, remark
+        from zf_merchant
+        <where>
+            <if test="merchantId != null">
+                and merchant_id = #{merchantId}
+            </if>
+            <if test="balance != null and balance != ''">
+                and balance = #{balance}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="merchantCode != null and merchantCode != ''">
+                and merchant_code = #{merchantCode}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from zf_merchant
+        <where>
+            <if test="merchantId != null">
+                and merchant_id = #{merchantId}
+            </if>
+            <if test="balance != null and balance != ''">
+                and balance = #{balance}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="merchantCode != null and merchantCode != ''">
+                and merchant_code = #{merchantCode}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="merchantId" useGeneratedKeys="true">
+        insert into zf_merchant(balance, status, merchant_code, remark)
+        values (#{balance}, #{status}, #{merchantCode}, #{remark})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="merchantId" useGeneratedKeys="true">
+        insert into zf_merchant(balance, status, merchant_code, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.balance}, #{entity.status}, #{entity.merchantCode}, #{entity.remark})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="merchantId" useGeneratedKeys="true">
+        insert into zf_merchant(balance, status, merchant_code, remark)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.balance}, #{entity.status}, #{entity.merchantCode}, #{entity.remark})
+        </foreach>
+        on duplicate key update
+        balance = values(balance),
+        status = values(status),
+        merchant_code = values(merchant_code),
+        remark = values(remark)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update zf_merchant
+        <set>
+            <if test="balance != null and balance != ''">
+                balance = #{balance},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="merchantCode != null and merchantCode != ''">
+                merchant_code = #{merchantCode},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+        </set>
+        where merchant_id = #{merchantId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from zf_merchant where merchant_id = #{merchantId}
+    </delete>
+
+</mapper>
+

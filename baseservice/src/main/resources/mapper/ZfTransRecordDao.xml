@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.baseservice.dao.ZfTransRecordDao">
+
+    <resultMap type="com.code.baseservice.entity.ZfTransRecord" id="ZfTransRecordMap">
+        <result property="transId" column="trans_id" jdbcType="INTEGER"/>
+        <result property="codeId" column="code_id" jdbcType="INTEGER"/>
+        <result property="amount" column="amount" jdbcType="VARCHAR"/>
+        <result property="preBalance" column="pre_balance" jdbcType="VARCHAR"/>
+        <result property="balance" column="balance" jdbcType="VARCHAR"/>
+        <result property="transTime" column="trans_time" jdbcType="TIMESTAMP"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="merchantOrderNo" column="merchant_order_no" jdbcType="VARCHAR"/>
+        <result property="md5" column="md5" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ZfTransRecordMap">
+        select
+          trans_id, code_id, amount, pre_balance, balance, trans_time, create_time, merchant_order_no, md5
+        from zf_trans_record
+        where trans_id = #{transId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ZfTransRecordMap">
+        select
+          trans_id, code_id, amount, pre_balance, balance, trans_time, create_time, merchant_order_no, md5
+        from zf_trans_record
+        <where>
+            <if test="transId != null">
+                and trans_id = #{transId}
+            </if>
+            <if test="codeId != null">
+                and code_id = #{codeId}
+            </if>
+            <if test="amount != null">
+                and amount = #{amount}
+            </if>
+            <if test="preBalance != null">
+                and pre_balance = #{preBalance}
+            </if>
+            <if test="balance != null">
+                and balance = #{balance}
+            </if>
+            <if test="transTime != null">
+                and trans_time = #{transTime}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+                and merchant_order_no = #{merchantOrderNo}
+            </if>
+            <if test="md5 != null and md5 != ''">
+                and md5 = #{md5}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from zf_trans_record
+        <where>
+            <if test="transId != null">
+                and trans_id = #{transId}
+            </if>
+            <if test="codeId != null">
+                and code_id = #{codeId}
+            </if>
+            <if test="amount != null">
+                and amount = #{amount}
+            </if>
+            <if test="preBalance != null">
+                and pre_balance = #{preBalance}
+            </if>
+            <if test="balance != null">
+                and balance = #{balance}
+            </if>
+            <if test="transTime != null">
+                and trans_time = #{transTime}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+                and merchant_order_no = #{merchantOrderNo}
+            </if>
+            <if test="md5 != null and md5 != ''">
+                and md5 = #{md5}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="transId" useGeneratedKeys="true">
+        insert into zf_trans_record(code_id, amount, pre_balance, balance, trans_time, create_time, merchant_order_no, md5)
+        values (#{codeId}, #{amount}, #{preBalance}, #{balance}, #{transTime}, #{createTime}, #{merchantOrderNo}, #{md5})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="transId" useGeneratedKeys="true">
+        insert into zf_trans_record(code_id, amount, pre_balance, balance, trans_time, create_time, merchant_order_no, md5)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.codeId}, #{entity.amount}, #{entity.preBalance}, #{entity.balance}, #{entity.transTime}, #{entity.createTime}, #{entity.merchantOrderNo}, #{entity.md5})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="transId" useGeneratedKeys="true">
+        insert into zf_trans_record(code_id, amount, pre_balance, balance, trans_time, create_time, merchant_order_no, md5)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.codeId}, #{entity.amount}, #{entity.preBalance}, #{entity.balance}, #{entity.transTime}, #{entity.createTime}, #{entity.merchantOrderNo}, #{entity.md5})
+        </foreach>
+        on duplicate key update
+        code_id = values(code_id),
+        amount = values(amount),
+        pre_balance = values(pre_balance),
+        balance = values(balance),
+        trans_time = values(trans_time),
+        create_time = values(create_time),
+        merchant_order_no = values(merchant_order_no),
+        md5 = values(md5)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update zf_trans_record
+        <set>
+            <if test="codeId != null">
+                code_id = #{codeId},
+            </if>
+            <if test="amount != null">
+                amount = #{amount},
+            </if>
+            <if test="preBalance != null">
+                pre_balance = #{preBalance},
+            </if>
+            <if test="balance != null">
+                balance = #{balance},
+            </if>
+            <if test="transTime != null">
+                trans_time = #{transTime},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+                merchant_order_no = #{merchantOrderNo},
+            </if>
+            <if test="md5 != null and md5 != ''">
+                md5 = #{md5},
+            </if>
+        </set>
+        where trans_id = #{transId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from zf_trans_record where trans_id = #{transId}
+    </delete>
+
+</mapper>
+

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.baseservice.dao.ZfChannelDao">
+
+    <resultMap type="com.code.baseservice.entity.ZfChannel" id="ZfChannelMap">
+        <result property="channelId" column="channel_id" jdbcType=""/>
+        <result property="channelName" column=" channel_name" jdbcType=""/>
+        <result property="channelType" column="channel_type" jdbcType=""/>
+        <result property="channelRate" column="channel_rate" jdbcType=""/>
+        <result property="channelStatus" column="channel_status" jdbcType=""/>
+        <result property="minAmount" column="min_amount" jdbcType=""/>
+        <result property="maxAmount" column="max_amount" jdbcType=""/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ZfChannelMap">
+        select
+          channel_id,  channel_name, channel_type, channel_rate, channel_status, min_amount, max_amount
+        from zf_channel
+        where channel_id = #{channelId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ZfChannelMap">
+        select
+          channel_id,  channel_name, channel_type, channel_rate, channel_status, min_amount, max_amount
+        from zf_channel
+        <where>
+            <if test="channelId != null">
+                and channel_id = #{channelId}
+            </if>
+            <if test=" channelName != null and  channelName != ''">
+                and  channel_name = #{ channelName}
+            </if>
+            <if test="channelType != null">
+                and channel_type = #{channelType}
+            </if>
+            <if test="channelRate != null and channelRate != ''">
+                and channel_rate = #{channelRate}
+            </if>
+            <if test="channelStatus != null">
+                and channel_status = #{channelStatus}
+            </if>
+            <if test="minAmount != null">
+                and min_amount = #{minAmount}
+            </if>
+            <if test="maxAmount != null">
+                and max_amount = #{maxAmount}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from zf_channel
+        <where>
+            <if test="channelId != null">
+                and channel_id = #{channelId}
+            </if>
+            <if test=" channelName != null and  channelName != ''">
+                and  channel_name = #{ channelName}
+            </if>
+            <if test="channelType != null">
+                and channel_type = #{channelType}
+            </if>
+            <if test="channelRate != null and channelRate != ''">
+                and channel_rate = #{channelRate}
+            </if>
+            <if test="channelStatus != null">
+                and channel_status = #{channelStatus}
+            </if>
+            <if test="minAmount != null">
+                and min_amount = #{minAmount}
+            </if>
+            <if test="maxAmount != null">
+                and max_amount = #{maxAmount}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="channelId" useGeneratedKeys="true">
+        insert into zf_channel( channel_name, channel_type, channel_rate, channel_status, min_amount, max_amount)
+        values (#{ channelName}, #{channelType}, #{channelRate}, #{channelStatus}, #{minAmount}, #{maxAmount})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="channelId" useGeneratedKeys="true">
+        insert into zf_channel( channel_name, channel_type, channel_rate, channel_status, min_amount, max_amount)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity. channelName}, #{entity.channelType}, #{entity.channelRate}, #{entity.channelStatus}, #{entity.minAmount}, #{entity.maxAmount})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="channelId" useGeneratedKeys="true">
+        insert into zf_channel( channel_name, channel_type, channel_rate, channel_status, min_amount, max_amount)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity. channelName}, #{entity.channelType}, #{entity.channelRate}, #{entity.channelStatus}, #{entity.minAmount}, #{entity.maxAmount})
+        </foreach>
+        on duplicate key update
+         channel_name = values( channel_name),
+        channel_type = values(channel_type),
+        channel_rate = values(channel_rate),
+        channel_status = values(channel_status),
+        min_amount = values(min_amount),
+        max_amount = values(max_amount)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update zf_channel
+        <set>
+            <if test=" channelName != null and  channelName != ''">
+                 channel_name = #{ channelName},
+            </if>
+            <if test="channelType != null">
+                channel_type = #{channelType},
+            </if>
+            <if test="channelRate != null and channelRate != ''">
+                channel_rate = #{channelRate},
+            </if>
+            <if test="channelStatus != null">
+                channel_status = #{channelStatus},
+            </if>
+            <if test="minAmount != null">
+                min_amount = #{minAmount},
+            </if>
+            <if test="maxAmount != null">
+                max_amount = #{maxAmount},
+            </if>
+        </set>
+        where channel_id = #{channelId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from zf_channel where channel_id = #{channelId}
+    </delete>
+
+</mapper>
+
