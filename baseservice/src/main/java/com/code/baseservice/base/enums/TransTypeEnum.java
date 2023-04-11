@@ -1,16 +1,15 @@
-package com.code.baseservice.base.constant;
+package com.code.baseservice.base.enums;
 
-public enum WxStatusEnum {
+public enum TransTypeEnum {
 
-
-    LOGIN(1,"登录"),
-    LOGOUT(0,"退出"),
-    OTHER(2,"其他");
+    RRCHARGE(1,"转入"),
+    TRANSFER(0,"转出"),
+            ;
 
     private Integer value;
     private String name;
 
-    WxStatusEnum(Integer value, String name) {
+    TransTypeEnum(Integer value, String name) {
         this.value = value;
         this.name = name;
     }

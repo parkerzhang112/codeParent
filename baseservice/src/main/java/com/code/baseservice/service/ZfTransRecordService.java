@@ -1,8 +1,12 @@
 package com.code.baseservice.service;
 
+import com.code.baseservice.dto.autoapi.TransParams;
 import com.code.baseservice.entity.ZfTransRecord;
+import com.code.baseservice.entity.ZfWithdraw;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
+import java.util.List;
 
 /**
  * (ZfTransRecord)表服务接口
@@ -12,45 +16,14 @@ import org.springframework.data.domain.PageRequest;
  */
 public interface ZfTransRecordService {
 
-    /**
-     * 通过ID查询单条数据
-     *
-     * @param transId 主键
-     * @return 实例对象
-     */
-    ZfTransRecord queryById(Integer transId);
 
     /**
-     * 分页查询
+     * 上传解析服务函数
      *
-     * @param zfTransRecord 筛选条件
-     * @param pageRequest      分页对象
-     * @return 查询结果
+     * @author makejava
+     * @since 2023-03-19 23:08:34
      */
-    Page<ZfTransRecord> queryByPage(ZfTransRecord zfTransRecord, PageRequest pageRequest);
+    void upload(TransParams transParams);
 
-    /**
-     * 新增数据
-     *
-     * @param zfTransRecord 实例对象
-     * @return 实例对象
-     */
-    ZfTransRecord insert(ZfTransRecord zfTransRecord);
-
-    /**
-     * 修改数据
-     *
-     * @param zfTransRecord 实例对象
-     * @return 实例对象
-     */
-    ZfTransRecord update(ZfTransRecord zfTransRecord);
-
-    /**
-     * 通过主键删除数据
-     *
-     * @param transId 主键
-     * @return 是否成功
-     */
-    boolean deleteById(Integer transId);
-
+    List<ZfTransRecord> queryTransByWithdraw(ZfWithdraw zfWithdraw);
 }

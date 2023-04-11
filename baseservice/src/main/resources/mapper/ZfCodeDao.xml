@@ -3,151 +3,66 @@
 <mapper namespace="com.code.baseservice.dao.ZfCodeDao">
 
     <resultMap type="com.code.baseservice.entity.ZfCode" id="ZfCodeMap">
-        <result property="codeId" column="code_id" jdbcType=""/>
-        <result property="agentId" column="agent_id" jdbcType=""/>
-        <result property="minAmount" column="min_amount" jdbcType=""/>
-        <result property="maxAmount" column="max_amount" jdbcType=""/>
-        <result property="image" column="image" jdbcType=""/>
-        <result property="status" column="status" jdbcType=""/>
-        <result property="isOpen" column="is_open" jdbcType=""/>
-        <result property="createTime" column="create_time" jdbcType=""/>
-        <result property="updateTime" column="update_time" jdbcType=""/>
-        <result property="dayLimitAmount" column="day_limit_amount" jdbcType=""/>
-        <result property="dayLimitTimes" column="day_limit_times" jdbcType=""/>
-        <result property="name" column="name" jdbcType=""/>
+        <result property="codeId" column="code_id" />
+        <result property="agentId" column="agent_id" />
+        <result property="minAmount" column="min_amount" />
+        <result property="maxAmount" column="max_amount" />
+        <result property="image" column="image" />
+        <result property="status" column="status" />
+        <result property="isOpen" column="is_open" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+        <result property="dayLimitAmount" column="day_limit_amount" />
+        <result property="dayLimitTimes" column="day_limit_times" />
+        <result property="name" column="name" />
+        <result property="channelId" column="channe_id" />
+        <result property="account" column="account" />
     </resultMap>
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfCodeMap">
         select
-          code_id, agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name
+          code_id, agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name,account
         from zf_code
         where code_id = #{codeId}
     </select>
 
-    <!--查询指定行数据-->
-    <select id="queryAllByLimit" resultMap="ZfCodeMap">
+    <!--查询单个-->
+    <select id="selectCodeByChannelAndParams" resultMap="ZfCodeMap">
         select
-          code_id, agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name
-        from zf_code
-        <where>
-            <if test="codeId != null">
-                and code_id = #{codeId}
-            </if>
-            <if test="agentId != null">
-                and agent_id = #{agentId}
-            </if>
-            <if test="minAmount != null">
-                and min_amount = #{minAmount}
-            </if>
-            <if test="maxAmount != null">
-                and max_amount = #{maxAmount}
-            </if>
-            <if test="image != null and image != ''">
-                and image = #{image}
-            </if>
-            <if test="status != null">
-                and status = #{status}
-            </if>
-            <if test="isOpen != null">
-                and is_open = #{isOpen}
-            </if>
-            <if test="createTime != null">
-                and create_time = #{createTime}
-            </if>
-            <if test="updateTime != null">
-                and update_time = #{updateTime}
-            </if>
-            <if test="dayLimitAmount != null">
-                and day_limit_amount = #{dayLimitAmount}
-            </if>
-            <if test="dayLimitTimes != null">
-                and day_limit_times = #{dayLimitTimes}
-            </if>
-            <if test="name != null and name != ''">
-                and name = #{name}
-            </if>
-        </where>
-        limit #{pageable.offset}, #{pageable.pageSize}
+          zc.*,
+          zf_channel_code.channe_id
+        from zf_code zc
+        left join zf_channel_code on zc.code_id = zf_channel_code.code_id
+        left join zf_code_record zcr on zcr.code_id = zc.code_id and zcr.record_date=current_date
+--      #要求卡在线，开启
+        where zc.is_open=1 and zc.status=100
+        and zc.balance <![CDATA[ < ]]> zc.max_balance
+        and (zc.day_limit_amount <![CDATA[ > ]]> zcr.recharge_amount or zc.day_limit_amount=0 or zcr.recharge_amount is null)
+        and (zc.day_limit_times <![CDATA[ > ]]> zcr.recharge_times or zc.day_limit_times =0 or zcr.recharge_times is null )
+        and zf_channel_code.channe_id in
+        <foreach collection="channel_ids" item="id" open="("  close=")" separator=",">
+            #{id}
+        </foreach>
     </select>
 
-    <!--统计总行数-->
-    <select id="count" resultType="java.lang.Long">
-        select count(1)
+    <select id="selectCardByTrans" resultMap="ZfCodeMap">
+        select
+        zf_code.*
         from zf_code
-        <where>
-            <if test="codeId != null">
-                and code_id = #{codeId}
-            </if>
-            <if test="agentId != null">
-                and agent_id = #{agentId}
-            </if>
-            <if test="minAmount != null">
-                and min_amount = #{minAmount}
-            </if>
-            <if test="maxAmount != null">
-                and max_amount = #{maxAmount}
-            </if>
-            <if test="image != null and image != ''">
-                and image = #{image}
-            </if>
-            <if test="status != null">
-                and status = #{status}
-            </if>
-            <if test="isOpen != null">
-                and is_open = #{isOpen}
-            </if>
-            <if test="createTime != null">
-                and create_time = #{createTime}
-            </if>
-            <if test="updateTime != null">
-                and update_time = #{updateTime}
-            </if>
-            <if test="dayLimitAmount != null">
-                and day_limit_amount = #{dayLimitAmount}
-            </if>
-            <if test="dayLimitTimes != null">
-                and day_limit_times = #{dayLimitTimes}
-            </if>
-            <if test="name != null and name != ''">
-                and name = #{name}
-            </if>
-        </where>
+        where  balance >  #{payAmount}
+        and `status` = 100
+        and trans_status = 0
+        order BY balance DESC limit 1;
     </select>
 
-    <!--新增所有列-->
-    <insert id="insert" keyProperty="codeId" useGeneratedKeys="true">
-        insert into zf_code(agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name)
-        values (#{agentId}, #{minAmount}, #{maxAmount}, #{image}, #{status}, #{isOpen}, #{createTime}, #{updateTime}, #{dayLimitAmount}, #{dayLimitTimes}, #{name})
-    </insert>
+    <select id="queryByAccount" resultMap="ZfCodeMap">
+        select
+        zf_code.*
+        from zf_code
+        where  account =  #{account}
+    </select>
 
-    <insert id="insertBatch" keyProperty="codeId" useGeneratedKeys="true">
-        insert into zf_code(agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name)
-        values
-        <foreach collection="entities" item="entity" separator=",">
-        (#{entity.agentId}, #{entity.minAmount}, #{entity.maxAmount}, #{entity.image}, #{entity.status}, #{entity.isOpen}, #{entity.createTime}, #{entity.updateTime}, #{entity.dayLimitAmount}, #{entity.dayLimitTimes}, #{entity.name})
-        </foreach>
-    </insert>
-
-    <insert id="insertOrUpdateBatch" keyProperty="codeId" useGeneratedKeys="true">
-        insert into zf_code(agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name)
-        values
-        <foreach collection="entities" item="entity" separator=",">
-            (#{entity.agentId}, #{entity.minAmount}, #{entity.maxAmount}, #{entity.image}, #{entity.status}, #{entity.isOpen}, #{entity.createTime}, #{entity.updateTime}, #{entity.dayLimitAmount}, #{entity.dayLimitTimes}, #{entity.name})
-        </foreach>
-        on duplicate key update
-        agent_id = values(agent_id),
-        min_amount = values(min_amount),
-        max_amount = values(max_amount),
-        image = values(image),
-        status = values(status),
-        is_open = values(is_open),
-        create_time = values(create_time),
-        update_time = values(update_time),
-        day_limit_amount = values(day_limit_amount),
-        day_limit_times = values(day_limit_times),
-        name = values(name)
-    </insert>
 
     <!--通过主键修改数据-->
     <update id="update">
@@ -189,11 +104,6 @@
         </set>
         where code_id = #{codeId}
     </update>
-
-    <!--通过主键删除-->
-    <delete id="deleteById">
-        delete from zf_code where code_id = #{codeId}
-    </delete>
 
 </mapper>
 

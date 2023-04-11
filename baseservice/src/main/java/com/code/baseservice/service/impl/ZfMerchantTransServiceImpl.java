@@ -7,10 +7,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
-.service.impl;
-        .entity.ZfMerchantTrans;
-        .dao.ZfMerchantTransDao;
-        .service.ZfMerchantTransService;
+import com.code.baseservice.entity.ZfMerchantTrans;
+import com.code.baseservice.dao.ZfMerchantTransDao;
+import com.code.baseservice .service.ZfMerchantTransService;
 
 /**
  * (ZfMerchantTrans)表服务实现类

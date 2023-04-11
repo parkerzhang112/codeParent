@@ -1,7 +1,6 @@
 package com.code.baseservice.util;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xiagao.baseservice.dto.api.TransParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,37 +23,6 @@ public class TransBaseUtil {
     public static final Pattern ICBC_Balance = Pattern.compile("卡(.*?):");
     public static final Pattern ICBC_TransType = Pattern.compile("卡(.*?):");
     public static final Pattern ICBC_Remark = Pattern.compile("卡(.*?):");
-
-
-
-    /**
-     * @描述:解析银行卡信息 返回数据: {"amount":"3000.01","time":"2019年4月20日19:6分","gmtCreate":1547982360000,"card4EndNo":"6744"}
-     *  暂不可用银行： 兴业银行、邮储银行
-     * @作者:nada
-     * @时间:2019/4/17
-     **/
-    public static JSONObject getTransInfo(TransParams transParams, XCard xCard){
-
-        JSONObject transInfo = new JSONObject(8);
-        try {
-            String amount = "";
-            String parseTransAccount = "";
-            String transTime  = "";
-            String parseRemark = "";
-            String parseName = "";
-            String parseBalance = "";
-            String paraseTransType = "";
-
-            switch(xCard.getCardType()){
-                case  "ICBC":
-                    break;
-            }
-
-        } catch (Exception e) {
-            logger.error ("解析流水信息异常: {}",transParams,e);
-        }
-        return transInfo;
-    }
 
     /**
      * @描述:获取正则内容

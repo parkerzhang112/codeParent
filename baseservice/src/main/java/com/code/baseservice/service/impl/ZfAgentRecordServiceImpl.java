@@ -1,16 +1,15 @@
 package com.code.baseservice.service.impl;
 
+import com.code.baseservice.entity.ZfTransRecord;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
-.service.impl;
-        .entity.ZfAgentRecord;
-        .dao.ZfAgentRecordDao;
-        .service.ZfAgentRecordService;
+import com.code.baseservice.entity.ZfAgentRecord;
+import com.code.baseservice.dao.ZfAgentRecordDao;
+import com.code.baseservice.service.ZfAgentRecordService;
 
 /**
  * (ZfAgentRecord)表服务实现类
@@ -66,9 +65,9 @@ public class ZfAgentRecordServiceImpl implements ZfAgentRecordService {
      * @return 实例对象
      */
     @Override
-    public ZfAgentRecord update(ZfAgentRecord zfAgentRecord) {
-        this.zfAgentRecordDao.update(zfAgentRecord);
-        return this.queryById(zfAgentRecord.getAgentId());
+    public int update(ZfAgentRecord zfAgentRecord) {
+        return this.zfAgentRecordDao.update(zfAgentRecord);
+
     }
 
     /**
@@ -80,5 +79,15 @@ public class ZfAgentRecordServiceImpl implements ZfAgentRecordService {
     @Override
     public boolean deleteById(Integer agentId) {
         return this.zfAgentRecordDao.deleteById(agentId) > 0;
+    }
+
+    @Override
+    public void updateRecord(ZfAgentRecord zfAgentRecord) {
+          long count = zfAgentRecordDao.count(zfAgentRecord);
+        if(count > 0){
+            zfAgentRecordDao.update(zfAgentRecord);
+        }else {
+            zfAgentRecordDao.insert(zfAgentRecord);
+        }
     }
 }

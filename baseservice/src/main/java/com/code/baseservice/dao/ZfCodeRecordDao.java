@@ -80,5 +80,8 @@ public interface ZfCodeRecordDao {
      */
     int deleteById(Integer codeId);
 
+    ZfCodeRecord queryByIdAndDate(ZfCodeRecord zfCodeRecord);
+
+    void updateRecord(ZfCodeRecord zfCodeRecord);
 }
 

@@ -1,8 +1,14 @@
 package com.code.baseservice.service;
 
+import com.code.baseservice.dto.payapi.RechareParams;
+import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfChannel;
+import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 
 /**
@@ -21,37 +27,13 @@ public interface ZfChannelService {
      */
     ZfChannel queryById(Integer channelId);
 
-    /**
-     * 分页查询
-     *
-     * @param zfChannel 筛选条件
-     * @param pageRequest      分页对象
-     * @return 查询结果
-     */
-    Page<ZfChannel> queryByPage(ZfChannel zfChannel, PageRequest pageRequest);
 
-    /**
-     * 新增数据
-     *
-     * @param zfChannel 实例对象
-     * @return 实例对象
-     */
-    ZfChannel insert(ZfChannel zfChannel);
+    List<ZfChannel> queryChannelByParams(RechareParams rechareParams);
 
-    /**
-     * 修改数据
-     *
-     * @param zfChannel 实例对象
-     * @return 实例对象
-     */
-    ZfChannel update(ZfChannel zfChannel);
+    void sumMerchantBalance(Integer merchantId, BigDecimal subtract);
 
-    /**
-     * 通过主键删除数据
-     *
-     * @param channelId 主键
-     * @return 是否成功
-     */
-    boolean deleteById(Integer channelId);
+    List<ZfChannel> selectChannel(TransferParams transParams);
 
+
+    BigDecimal sumChannelFee(@NonNull BigDecimal pay_amount, ZfChannel zfChannel);
 }

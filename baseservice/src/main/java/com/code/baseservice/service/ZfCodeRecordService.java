@@ -1,6 +1,9 @@
 package com.code.baseservice.service;
 
+import com.code.baseservice.dto.payapi.RechareParams;
+import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfCodeRecord;
+import com.code.baseservice.entity.ZfRecharge;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -12,45 +15,14 @@ import org.springframework.data.domain.PageRequest;
  */
 public interface ZfCodeRecordService {
 
-    /**
-     * 通过ID查询单条数据
-     *
-     * @param codeId 主键
-     * @return 实例对象
-     */
-    ZfCodeRecord queryById(Integer codeId);
-
-    /**
-     * 分页查询
-     *
-     * @param zfCodeRecord 筛选条件
-     * @param pageRequest      分页对象
-     * @return 查询结果
-     */
-    Page<ZfCodeRecord> queryByPage(ZfCodeRecord zfCodeRecord, PageRequest pageRequest);
-
-    /**
-     * 新增数据
-     *
-     * @param zfCodeRecord 实例对象
-     * @return 实例对象
-     */
-    ZfCodeRecord insert(ZfCodeRecord zfCodeRecord);
-
-    /**
+    /*
      * 修改数据
      *
      * @param zfCodeRecord 实例对象
      * @return 实例对象
      */
-    ZfCodeRecord update(ZfCodeRecord zfCodeRecord);
+    void update(ZfCodeRecord zfCodeRecord);
 
-    /**
-     * 通过主键删除数据
-     *
-     * @param codeId 主键
-     * @return 是否成功
-     */
-    boolean deleteById(Integer codeId);
 
+    void updateRecord(ZfCodeRecord zfCodeRecord);
 }

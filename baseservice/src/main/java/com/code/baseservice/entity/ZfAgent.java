@@ -1,5 +1,7 @@
 package com.code.baseservice.entity;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -9,6 +11,7 @@ import java.math.BigDecimal;
  * @author makejava
  * @since 2023-03-19 23:11:47
  */
+@Data
 public class ZfAgent implements Serializable {
     private static final long serialVersionUID = 719686779229036010L;
     /**
@@ -26,7 +29,7 @@ public class ZfAgent implements Serializable {
     /**
      * 代理费率
      */
-    private BigDecimal rate;
+    private String  rate;
     /**
      * 上级代理id
      */
@@ -44,70 +47,9 @@ public class ZfAgent implements Serializable {
      */
     private String agentAccount;
 
+    private String config;
 
-    public Integer getAgentId() {
-        return agentId;
-    }
 
-    public void setAgentId(Integer agentId) {
-        this.agentId = agentId;
-    }
-
-    public BigDecimal getBalance() {
-        return balance;
-    }
-
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public BigDecimal getRate() {
-        return rate;
-    }
-
-    public void setRate(BigDecimal rate) {
-        this.rate = rate;
-    }
-
-    public Integer getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(Integer parentId) {
-        this.parentId = parentId;
-    }
-
-    public String getPwd() {
-        return pwd;
-    }
-
-    public void setPwd(String pwd) {
-        this.pwd = pwd;
-    }
-
-    public String getGoogleCode() {
-        return googleCode;
-    }
-
-    public void setGoogleCode(String googleCode) {
-        this.googleCode = googleCode;
-    }
-
-    public String getAgentAccount() {
-        return agentAccount;
-    }
-
-    public void setAgentAccount(String agentAccount) {
-        this.agentAccount = agentAccount;
-    }
 
 }
 

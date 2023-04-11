@@ -1,8 +1,10 @@
 package com.code.baseservice.entity;
 
+import com.code.baseservice.dto.payapi.TransferParams;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -25,11 +27,11 @@ public class ZfWithdraw implements Serializable {
     /**
      * 订单金额
      */
-    private Double payAmount;
+    private BigDecimal payAmount;
     /**
      * 实际订单金额
      */
-    private Double paidAmount;
+    private BigDecimal paidAmount;
     /**
      * 支付银行卡id
      */
@@ -78,6 +80,7 @@ public class ZfWithdraw implements Serializable {
      * 持卡人名
      */
     private String cardName;
+
     /**
      * 银行类型
      */
@@ -89,7 +92,7 @@ public class ZfWithdraw implements Serializable {
     /**
      * 渠道手续费
      */
-    private Double channelFee;
+    private BigDecimal channelFee;
     /**
      * 订单类型 0代付订单 1下发订单
      */
@@ -101,7 +104,7 @@ public class ZfWithdraw implements Serializable {
     /**
      * 会员手续费
      */
-    private Double memberFee;
+    private BigDecimal merchantFee;
     /**
      * 父订单订单号  默认未空
      */
@@ -111,5 +114,17 @@ public class ZfWithdraw implements Serializable {
      */
     private Integer isSplit;
 
+    public ZfWithdraw(TransferParams transParams) {
+
+        setMerchantOrderNo(transParams.getMerchant_order_no());
+        setCardAccount(transParams.getCard_account());
+        setCardAddress(transParams.getCard_address());
+        setCardName(transParams.getCard_name());
+        setCardType(transParams.getCard_type());
+        setOrderType(transParams.getOrder_type());
+        setPayAmount(transParams.getPay_amount());
+        setNotifyUrl(transParams.getNotify_url());
+        setRemark(transParams.getRemark());
+    }
 }
 

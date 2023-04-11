@@ -1,5 +1,12 @@
 package com.code.baseservice.service;
 
+import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.dto.autoapi.TransParams;
+import com.code.baseservice.dto.backapi.OperaOrderParams;
+import com.code.baseservice.dto.payapi.QueryParams;
+import com.code.baseservice.dto.payapi.TransferParams;
+import com.code.baseservice.entity.ZfChannel;
+import com.code.baseservice.entity.ZfMerchant;
 import com.code.baseservice.entity.ZfWithdraw;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,37 +27,44 @@ public interface ZfWithdrawService {
      */
     ZfWithdraw queryById(String orderNo);
 
-    /**
-     * 分页查询
-     *
-     * @param zfWithdraw 筛选条件
-     * @param pageRequest      分页对象
-     * @return 查询结果
-     */
-    Page<ZfWithdraw> queryByPage(ZfWithdraw zfWithdraw, PageRequest pageRequest);
 
     /**
-     * 新增数据
-     *
-     * @param zfWithdraw 实例对象
-     * @return 实例对象
+     * 创建订单
+     * @param transParams
+     * @return
      */
-    ZfWithdraw insert(ZfWithdraw zfWithdraw);
+    JSONObject create(TransferParams transParams);
 
     /**
-     * 修改数据
-     *
-     * @param zfWithdraw 实例对象
-     * @return 实例对象
+     * 查单订单
+     * @param queryParams
+     * @return
      */
-    ZfWithdraw update(ZfWithdraw zfWithdraw);
+    JSONObject query(QueryParams queryParams);
+
+    ZfWithdraw tryFindOrderByTrans(TransParams transParams1);
+
+    void paidOrder(ZfWithdraw zfWithdraw);
+
+    void confirmOrder(OperaOrderParams operaOrderParams);
+
+    void cancelOrder(OperaOrderParams operaOrderParams);
 
     /**
-     * 通过主键删除数据
-     *
-     * @param orderNo 主键
-     * @return 是否成功
+     * 提款订单通知
+     * @param zfWithdraw
      */
-    boolean deleteById(String orderNo);
+    public void notify(ZfWithdraw zfWithdraw);
+
+    /**
+     * 创建提款订单
+     * @param transParams
+     * @param zfChannel
+     * @param xMerchant
+     * @return
+     */
+    public ZfWithdraw createOrder(TransferParams transParams, ZfChannel zfChannel, ZfMerchant xMerchant);
+
+    public ZfWithdraw createIssueOrder(TransferParams transParams, ZfMerchant xMerchant);
 
 }

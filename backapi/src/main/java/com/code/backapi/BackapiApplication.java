@@ -7,8 +7,8 @@ import org.springframework.context.annotation.ComponentScan;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
-@MapperScan("com.xiagao.baseservice.dao")
-@ComponentScan({"com.xiagao.baseservice", "com.xiagao.backapi"})
+@MapperScan("com.code.baseservice.dao")
+@ComponentScan({"com.code.baseservice", "com.code.backapi"})
 @SpringBootApplication
 public class BackapiApplication {
     public static void main(String[] args) {

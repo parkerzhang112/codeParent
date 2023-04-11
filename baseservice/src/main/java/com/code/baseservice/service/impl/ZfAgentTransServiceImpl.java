@@ -6,11 +6,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
-.service.impl;
-        .entity.ZfAgentTrans;
-        .dao.ZfAgentTransDao;
-        .service.ZfAgentTransService;
+import com.code.baseservice.entity.ZfAgentTrans;
+import com.code.baseservice .dao.ZfAgentTransDao;
+import com.code.baseservice.service.ZfAgentTransService;
 
 /**
  * (ZfAgentTrans)表服务实现类

@@ -81,5 +81,6 @@ public interface ZfAgentRecordDao {
      */
     int deleteById(Integer agentId);
 
+    ZfAgentRecord queryByIdAndRecord(ZfAgentRecord zfAgentRecord);
 }
 

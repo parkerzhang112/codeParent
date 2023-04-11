@@ -1,8 +1,11 @@
 package com.code.baseservice.service;
 
 import com.code.baseservice.entity.ZfAgent;
+import com.code.baseservice.entity.ZfRecharge;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
+import java.math.BigDecimal;
 
 /**
  * (ZfAgent)表服务接口
@@ -20,22 +23,6 @@ public interface ZfAgentService {
      */
     ZfAgent queryById(Integer agentId);
 
-    /**
-     * 分页查询
-     *
-     * @param zfAgent 筛选条件
-     * @param pageRequest      分页对象
-     * @return 查询结果
-     */
-    Page<ZfAgent> queryByPage(ZfAgent zfAgent, PageRequest pageRequest);
-
-    /**
-     * 新增数据
-     *
-     * @param zfAgent 实例对象
-     * @return 实例对象
-     */
-    ZfAgent insert(ZfAgent zfAgent);
 
     /**
      * 修改数据
@@ -45,12 +32,7 @@ public interface ZfAgentService {
      */
     ZfAgent update(ZfAgent zfAgent);
 
-    /**
-     * 通过主键删除数据
-     *
-     * @param agentId 主键
-     * @return 是否成功
-     */
-    boolean deleteById(Integer agentId);
+
+    void updateAgentFee(BigDecimal paidAmount, ZfAgent zfAgent, BigDecimal fee);
 
 }

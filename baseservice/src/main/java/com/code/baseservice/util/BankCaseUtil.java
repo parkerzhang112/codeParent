@@ -1,7 +1,7 @@
 package com.code.baseservice.util;
 
 import com.alibaba.fastjson.JSONObject;
-import com.code.baseservice.base.constant.TransTypeEnum;
+import com.code.baseservice.base.enums.TransTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -3,6 +3,7 @@ package com.code.baseservice.entity;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * (ZfMerchant)实体类
@@ -16,13 +17,19 @@ public class ZfMerchant implements Serializable {
     
     private Integer merchantId;
     
-    private String balance;
+    private BigDecimal balance;
     
     private Integer status;
     
     private String merchantCode;
     
     private String remark;
+
+    private String key;
+
+    private String merchantName;
+
+    private BigDecimal creditAmount;
 
 }
 

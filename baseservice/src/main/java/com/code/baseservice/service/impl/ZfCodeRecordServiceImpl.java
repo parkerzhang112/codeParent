@@ -1,16 +1,17 @@
 package com.code.baseservice.service.impl;
 
+import com.code.baseservice.dao.ZfCodeRecordDao;
+import com.code.baseservice.dto.payapi.RechareParams;
+import com.code.baseservice.entity.ZfCode;
+import com.code.baseservice.entity.ZfCodeRecord;
+import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.service.ZfCodeRecordService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
-.service.impl;
-        .entity.ZfCodeRecord;
-        .dao.ZfCodeRecordDao;
-        .service.ZfCodeRecordService;
 
 /**
  * (ZfCodeRecord)表服务实现类
@@ -23,41 +24,6 @@ public class ZfCodeRecordServiceImpl implements ZfCodeRecordService {
     @Resource
     private ZfCodeRecordDao zfCodeRecordDao;
 
-    /**
-     * 通过ID查询单条数据
-     *
-     * @param codeId 主键
-     * @return 实例对象
-     */
-    @Override
-    public ZfCodeRecord queryById(Integer codeId) {
-        return this.zfCodeRecordDao.queryById(codeId);
-    }
-
-    /**
-     * 分页查询
-     *
-     * @param zfCodeRecord 筛选条件
-     * @param pageRequest      分页对象
-     * @return 查询结果
-     */
-    @Override
-    public Page<ZfCodeRecord> queryByPage(ZfCodeRecord zfCodeRecord, PageRequest pageRequest) {
-        long total = this.zfCodeRecordDao.count(zfCodeRecord);
-        return new PageImpl<>(this.zfCodeRecordDao.queryAllByLimit(zfCodeRecord, pageRequest), pageRequest, total);
-    }
-
-    /**
-     * 新增数据
-     *
-     * @param zfCodeRecord 实例对象
-     * @return 实例对象
-     */
-    @Override
-    public ZfCodeRecord insert(ZfCodeRecord zfCodeRecord) {
-        this.zfCodeRecordDao.insert(zfCodeRecord);
-        return zfCodeRecord;
-    }
 
     /**
      * 修改数据
@@ -66,19 +32,19 @@ public class ZfCodeRecordServiceImpl implements ZfCodeRecordService {
      * @return 实例对象
      */
     @Override
-    public ZfCodeRecord update(ZfCodeRecord zfCodeRecord) {
+    public void update(ZfCodeRecord zfCodeRecord) {
         this.zfCodeRecordDao.update(zfCodeRecord);
-        return this.queryById(zfCodeRecord.getCodeId());
+        return;
     }
 
-    /**
-     * 通过主键删除数据
-     *
-     * @param codeId 主键
-     * @return 是否成功
-     */
     @Override
-    public boolean deleteById(Integer codeId) {
-        return this.zfCodeRecordDao.deleteById(codeId) > 0;
+    public void updateRecord(ZfCodeRecord zfCodeRecord) {
+        ZfCodeRecord zfCodeRecord1 =  zfCodeRecordDao.queryByIdAndDate(zfCodeRecord);
+        if(zfCodeRecord1 == null){
+            zfCodeRecordDao.insert(zfCodeRecord);
+        }else {
+            zfCodeRecordDao.updateRecord(zfCodeRecord);
+        }
     }
+
 }

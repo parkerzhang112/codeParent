@@ -62,6 +62,15 @@ public class ZfCode implements Serializable {
     
     private String name;
 
+    private Integer  transStatus;
+
+    private BigDecimal balance;
+
+    private String account;
+
+    private Integer transferStatus;
+
+    private Integer channelId;
 
 }
 

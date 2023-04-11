@@ -6,7 +6,7 @@ public class RedisConstant {
 
     public static String BALANCE_LOCK = "balance_lock";
 
-    public static String CURRENT_CARD = "current_card";
+    public static String CURRENT_CODE = "current_code";
 
     public static String PAID_ORDER = "p_order";
 

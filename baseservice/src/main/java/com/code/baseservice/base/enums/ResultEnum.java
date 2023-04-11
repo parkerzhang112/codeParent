@@ -1,11 +1,11 @@
-package com.code.baseservice.base.constant;
+package com.code.baseservice.base.enums;
 
-public enum  ResultEnum {
+public enum ResultEnum {
     UNKNOWN_ERROR(-1,"系统错误"),
     SUCCESS(0,"成功"),
     ERROR(1,"失败"),
     NO_CHANNEL(700, "无可用渠道"),
-    NO_CARD(701,"无卡可用"),
+    NO_CODE(701,"无码可用"),
     SIGN_ERROR(702,"签名异常"),
 
     ORDER_REPEAT(703, "订单号重复"),

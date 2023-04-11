@@ -1,6 +1,13 @@
 package com.code.baseservice.service;
 
+import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.dto.autoapi.TransParams;
+import com.code.baseservice.dto.backapi.OperaOrderParams;
+import com.code.baseservice.dto.payapi.QueryParams;
+import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.entity.ZfTransRecord;
+import com.code.baseservice.entity.ZfWithdraw;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -20,37 +27,18 @@ public interface ZfRechargeService {
      */
     ZfRecharge queryById(String merchantOrderNo);
 
-    /**
-     * 分页查询
-     *
-     * @param zfRecharge 筛选条件
-     * @param pageRequest      分页对象
-     * @return 查询结果
-     */
-    Page<ZfRecharge> queryByPage(ZfRecharge zfRecharge, PageRequest pageRequest);
+    JSONObject create(RechareParams rechareParams);
 
-    /**
-     * 新增数据
-     *
-     * @param zfRecharge 实例对象
-     * @return 实例对象
-     */
-    ZfRecharge insert(ZfRecharge zfRecharge);
+    JSONObject query(QueryParams queryParams);
 
-    /**
-     * 修改数据
-     *
-     * @param zfRecharge 实例对象
-     * @return 实例对象
-     */
-    ZfRecharge update(ZfRecharge zfRecharge);
+    ZfRecharge tryFindOrderByTrans(ZfTransRecord zfTransRecord);
 
-    /**
-     * 通过主键删除数据
-     *
-     * @param merchantOrderNo 主键
-     * @return 是否成功
-     */
-    boolean deleteById(String merchantOrderNo);
+    void paidOrder(ZfRecharge zfRecharge);
+
+    void confirmOrder(OperaOrderParams operaOrderParams);
+
+    void cancelOrder(OperaOrderParams operaOrderParams);
+
+    public void notify(ZfRecharge zfRecharge);
 
 }

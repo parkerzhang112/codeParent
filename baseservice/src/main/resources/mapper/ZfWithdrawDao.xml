@@ -3,8 +3,8 @@
 <mapper namespace="com.code.baseservice.dao.ZfWithdrawDao">
 
     <resultMap type="com.code.baseservice.entity.ZfWithdraw" id="ZfWithdrawMap">
-        <result property="orderNo" column="order_no" jdbcType="VARCHAR"/>
-        <result property="merchantOrderNo" column="merchant_order_no" jdbcType="VARCHAR"/>
+        <result property="orderNo" column="order_no" />
+        <result property="merchantOrderNo" column="merchant_order_no" />
         <result property="payAmount" column="pay_amount" jdbcType="NUMERIC"/>
         <result property="paidAmount" column="paid_amount" jdbcType="NUMERIC"/>
         <result property="codeId" column="code_id" jdbcType="INTEGER"/>
@@ -12,20 +12,20 @@
         <result property="merchantId" column="merchant_id" jdbcType="INTEGER"/>
         <result property="orderStatus" column="order_status" jdbcType="INTEGER"/>
         <result property="agentId" column="agent_id" jdbcType="INTEGER"/>
-        <result property="notifyUrl" column="notify_url" jdbcType="VARCHAR"/>
+        <result property="notifyUrl" column="notify_url" />
         <result property="notifyStatus" column="notify_status" jdbcType="INTEGER"/>
-        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
-        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
-        <result property="cardAccount" column="card_account" jdbcType="VARCHAR"/>
-        <result property="cardAddress" column="card_address" jdbcType="VARCHAR"/>
-        <result property="cardName" column="card_name" jdbcType="VARCHAR"/>
-        <result property="cardType" column="card_type" jdbcType="VARCHAR"/>
-        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+        <result property="cardAccount" column="card_account" />
+        <result property="cardAddress" column="card_address" />
+        <result property="cardName" column="card_name" />
+        <result property="cardType" column="card_type" />
+        <result property="remark" column="remark" />
         <result property="channelFee" column="channel_fee" jdbcType="NUMERIC"/>
         <result property="orderType" column="order_type" jdbcType="INTEGER"/>
-        <result property="image" column="image" jdbcType="VARCHAR"/>
+        <result property="image" column="image" />
         <result property="memberFee" column="member_fee" jdbcType="NUMERIC"/>
-        <result property="parentOrderNo" column="parent_order_no" jdbcType="VARCHAR"/>
+        <result property="parentOrderNo" column="parent_order_no" />
         <result property="isSplit" column="is_split" jdbcType="INTEGER"/>
     </resultMap>
 
@@ -199,11 +199,62 @@
         </where>
     </select>
 
-    <!--新增所有列-->
+
+
     <insert id="insert" keyProperty="orderNo" useGeneratedKeys="true">
-        insert into zf_withdraw(merchant_order_no, pay_amount, paid_amount, code_id, channel_id, merchant_id, order_status, agent_id, notify_url, notify_status, create_time, update_time, card_account, card_address, card_name, card_type, remark, channel_fee, order_type, image, member_fee, parent_order_no, is_split)
-        values (#{merchantOrderNo}, #{payAmount}, #{paidAmount}, #{codeId}, #{channelId}, #{merchantId}, #{orderStatus}, #{agentId}, #{notifyUrl}, #{notifyStatus}, #{createTime}, #{updateTime}, #{cardAccount}, #{cardAddress}, #{cardName}, #{cardType}, #{remark}, #{channelFee}, #{orderType}, #{image}, #{memberFee}, #{parentOrderNo}, #{isSplit})
+        insert into zf_withdraw
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderNo != null">order_no,</if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">merchant_order_no,</if>
+            <if test="payAmount != null">pay_amount,</if>
+            <if test="paidAmount != null">paid_amount,</if>
+            <if test="codeId != null">code_id,</if>
+            <if test="channelId != null">channel_id,</if>
+            <if test="merchantId != null">merchant_id,</if>
+            <if test="orderStatus != null">order_status,</if>
+            <if test="agentId != null">agent_id,</if>
+            <if test="notifyUrl != null and notifyUrl != ''">notify_url,</if>
+            <if test="notifyStatus != null">notify_status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="cardAccount != null and cardAccount != ''">card_account,</if>
+            <if test="cardAddress != null and cardAddress != ''">card_address,</if>
+            <if test="cardName != null">card_name,</if>
+            <if test="cardType != null and cardType != ''">card_type,</if>
+            <if test="remark != null">remark,</if>
+            <if test="channelFee != null">channel_fee,</if>
+            <if test="orderType != null">order_type,</if>
+            <if test="image != null">image,</if>
+            <if test="parentOrderNo != null and parentOrderNo != ''">parent_order_no,</if>
+            <if test="isSplit != null">is_split,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderNo != null">#{orderNo},</if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">#{merchantOrderNo},</if>
+            <if test="payAmount != null">#{payAmount},</if>
+            <if test="paidAmount != null">#{paidAmount},</if>
+            <if test="codeId != null">#{codeId},</if>
+            <if test="channelId != null">#{channelId},</if>
+            <if test="merchantId != null">#{merchantId},</if>
+            <if test="orderStatus != null">#{orderStatus},</if>
+            <if test="agentId != null">#{agentId},</if>
+            <if test="notifyUrl != null and notifyUrl != ''">#{notifyUrl},</if>
+            <if test="notifyStatus != null">#{notifyStatus},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="cardAccount != null and cardAccount != ''">#{cardAccount},</if>
+            <if test="cardAddress != null and cardAddress != ''">#{cardAddress},</if>
+            <if test="cardName != null">#{cardName},</if>
+            <if test="cardType != null and cardType != ''">#{cardType},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="channelFee != null">#{channelFee},</if>
+            <if test="orderType != null">#{orderType},</if>
+            <if test="image != null">#{image},</if>
+            <if test="parentOrderNo != null and parentOrderNo != ''">#{parentOrderNo},</if>
+            <if test="isSplit != null">#{isSplit},</if>
+        </trim>
     </insert>
+
 
     <insert id="insertBatch" keyProperty="orderNo" useGeneratedKeys="true">
         insert into zf_withdraw(merchant_order_no, pay_amount, paid_amount, code_id, channel_id, merchant_id, order_status, agent_id, notify_url, notify_status, create_time, update_time, card_account, card_address, card_name, card_type, remark, channel_fee, order_type, image, member_fee, parent_order_no, is_split)
@@ -327,5 +378,14 @@
         delete from zf_withdraw where order_no = #{orderNo}
     </delete>
 
+
+    <!--查询单个-->
+    <select id="queryByParams" resultMap="ZfWithdrawMap">
+        select
+          order_no, merchant_order_no, pay_amount, paid_amount, code_id, channel_id, merchant_id, order_status, agent_id, notify_url, notify_status, create_time, update_time, card_account, card_address, card_name, card_type, remark, channel_fee, order_type, image, member_fee, parent_order_no, is_split
+        from zf_withdraw
+        where merchant_order_no = #{merchantOrderNo}
+        and merchant_id = #{merchantId}
+    </select>
 </mapper>
 

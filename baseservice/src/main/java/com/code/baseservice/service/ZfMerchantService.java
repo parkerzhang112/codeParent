@@ -1,8 +1,17 @@
 package com.code.baseservice.service;
 
+import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.dto.backapi.OperaBalanceParams;
+import com.code.baseservice.dto.payapi.MerchantParams;
+import com.code.baseservice.dto.payapi.QueryParams;
+import com.code.baseservice.dto.payapi.TransferParams;
+import com.code.baseservice.entity.ZfAgent;
 import com.code.baseservice.entity.ZfMerchant;
+import com.code.baseservice.entity.ZfRecharge;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
+import java.math.BigDecimal;
 
 /**
  * (ZfMerchant)表服务接口
@@ -20,37 +29,22 @@ public interface ZfMerchantService {
      */
     ZfMerchant queryById(Integer merchantId);
 
-    /**
-     * 分页查询
-     *
-     * @param zfMerchant 筛选条件
-     * @param pageRequest      分页对象
-     * @return 查询结果
-     */
-    Page<ZfMerchant> queryByPage(ZfMerchant zfMerchant, PageRequest pageRequest);
 
-    /**
-     * 新增数据
-     *
-     * @param zfMerchant 实例对象
-     * @return 实例对象
-     */
-    ZfMerchant insert(ZfMerchant zfMerchant);
+    ZfMerchant vaildMerchant(Integer merchant_id);
 
-    /**
-     * 修改数据
-     *
-     * @param zfMerchant 实例对象
-     * @return 实例对象
-     */
-    ZfMerchant update(ZfMerchant zfMerchant);
+    void verifSign(QueryParams queryParams, ZfMerchant zfMerchant);
 
-    /**
-     * 通过主键删除数据
-     *
-     * @param merchantId 主键
-     * @return 是否成功
-     */
-    boolean deleteById(Integer merchantId);
+    void verifSign(TransferParams transferParams, ZfMerchant zfMerchant);
 
+    void verifMerchantBalance(ZfMerchant xMerchant, TransferParams transParams);
+
+    JSONObject query(MerchantParams merchantParams);
+
+    void sumMerchantBalance(Integer merchantId, BigDecimal subtract);
+
+    void warrnBalance(ZfMerchant xMerchant, ZfRecharge zfRecharge, ZfAgent zfAgent);
+
+    void operatBalance(OperaBalanceParams operaBalanceParams);
+
+    void issue(TransferParams transParams);
 }

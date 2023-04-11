@@ -1,5 +1,6 @@
 package com.code.baseservice.entity;
 
+import com.code.baseservice.util.DateUtil;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,7 +19,7 @@ public class ZfCodeRecord implements Serializable {
     
     private Integer codeId;
     
-    private Date recordDate;
+    private String recordDate;
     
     private BigDecimal rechargeAmount;
     
@@ -27,5 +28,15 @@ public class ZfCodeRecord implements Serializable {
     private BigDecimal fee;
 
 
+    public ZfCodeRecord(ZfRecharge zfRecharge) {
+        codeId  = zfRecharge.getCodeId();
+        recordDate = DateUtil.format(new Date(), DateUtil.YYYY_MM_DD);
+        rechargeAmount = zfRecharge.getPaidAmount();
+        rechargeTimes = 1;
+    }
+
+    public  ZfCodeRecord(){
+
+    }
 }
 

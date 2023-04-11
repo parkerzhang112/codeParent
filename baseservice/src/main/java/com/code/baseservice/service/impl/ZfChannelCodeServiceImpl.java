@@ -6,11 +6,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
-.service.impl;
-        .entity.ZfChannelCode;
-        .dao.ZfChannelCodeDao;
-        .service.ZfChannelCodeService;
+import com.code.baseservice .entity.ZfChannelCode;
+import com.code.baseservice.dao.ZfChannelCodeDao;
+import com.code.baseservice.service.ZfChannelCodeService;
 
 /**
  * (ZfChannelCode)表服务实现类

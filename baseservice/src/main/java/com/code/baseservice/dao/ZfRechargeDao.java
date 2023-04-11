@@ -1,6 +1,8 @@
 package com.code.baseservice.dao;
 
+import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.entity.ZfTransRecord;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.domain.Pageable;
 
@@ -21,7 +23,7 @@ public interface ZfRechargeDao {
      * @param merchantOrderNo 主键
      * @return 实例对象
      */
-    ZfRecharge queryById(String merchantOrderNo);
+    ZfRecharge queryById(@Param("orderNo") String merchantOrderNo);
 
     /**
      * 查询指定行数据
@@ -73,13 +75,13 @@ public interface ZfRechargeDao {
      */
     int update(ZfRecharge zfRecharge);
 
-    /**
-     * 通过主键删除数据
-     *
-     * @param merchantOrderNo 主键
-     * @return 影响行数
-     */
-    int deleteById(String merchantOrderNo);
 
+    ZfRecharge queryByParam(QueryParams queryParams);
+
+    List<ZfRecharge> tryFindOrderByTrans(ZfTransRecord zfTransRecord);
+
+    void toNotifySuccess(ZfRecharge zfRecharge);
+
+    void toNotifyException(ZfRecharge zfRecharge);
 }
 

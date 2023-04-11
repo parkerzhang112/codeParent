@@ -1,16 +1,26 @@
 package com.code.baseservice.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.base.enums.ResultEnum;
+import com.code.baseservice.base.exception.BaseException;
+import com.code.baseservice.dao.ZfChannelDao;
+import com.code.baseservice.dto.XChannelRate;
+import com.code.baseservice.dto.payapi.RechareParams;
+import com.code.baseservice.dto.payapi.TransferParams;
+import com.code.baseservice.entity.ZfChannel;
+
+import com.code.baseservice.service.ZfChannelService;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
-.service.impl;
-        .entity.ZfChannel;
-        .dao.ZfChannelDao;
-        .service.ZfChannelService;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * (ZfChannel)表服务实现类
@@ -19,6 +29,7 @@ import javax.annotation.Resource;
  * @since 2023-03-19 23:06:53
  */
 @Service("zfChannelService")
+@Slf4j
 public class ZfChannelServiceImpl implements ZfChannelService {
     @Resource
     private ZfChannelDao zfChannelDao;
@@ -34,51 +45,54 @@ public class ZfChannelServiceImpl implements ZfChannelService {
         return this.zfChannelDao.queryById(channelId);
     }
 
-    /**
-     * 分页查询
-     *
-     * @param zfChannel 筛选条件
-     * @param pageRequest      分页对象
-     * @return 查询结果
-     */
     @Override
-    public Page<ZfChannel> queryByPage(ZfChannel zfChannel, PageRequest pageRequest) {
-        long total = this.zfChannelDao.count(zfChannel);
-        return new PageImpl<>(this.zfChannelDao.queryAllByLimit(zfChannel, pageRequest), pageRequest, total);
+    public List<ZfChannel> queryChannelByParams(RechareParams rechareParams) {
+        log.info("开始查询渠道 订单号 {}", rechareParams.getMerchant_order_no());
+        List<ZfChannel> channels = zfChannelDao.selectChannel(rechareParams);
+        if (channels.size() == 0) {
+            log.info("无可用渠道 订单号 {}", rechareParams.getMerchant_order_no());
+            throw new BaseException(ResultEnum.NO_CHANNEL);
+        }
+        log.info("渠道查询结果 订单号 {}", rechareParams.getMerchant_order_no(), channels);
+
+        return channels;
     }
 
-    /**
-     * 新增数据
-     *
-     * @param zfChannel 实例对象
-     * @return 实例对象
-     */
     @Override
-    public ZfChannel insert(ZfChannel zfChannel) {
-        this.zfChannelDao.insert(zfChannel);
-        return zfChannel;
+    public void sumMerchantBalance(Integer merchantId, BigDecimal subtract) {
+
     }
 
-    /**
-     * 修改数据
-     *
-     * @param zfChannel 实例对象
-     * @return 实例对象
-     */
     @Override
-    public ZfChannel update(ZfChannel zfChannel) {
-        this.zfChannelDao.update(zfChannel);
-        return this.queryById(zfChannel.getChannelId());
+    public List<ZfChannel> selectChannel(TransferParams transParams) {
+        log.info("开始查询渠道 订单号 {}", transParams.getMerchant_order_no());
+        List<ZfChannel> channels = zfChannelDao.selectChannelByTrans(transParams);
+        if (channels.size() == 0) {
+            log.info("无可用渠道 订单号 {}", transParams.getMerchant_order_no());
+            throw new BaseException(ResultEnum.NO_CHANNEL);
+        }
+        return channels;
     }
 
-    /**
-     * 通过主键删除数据
-     *
-     * @param channelId 主键
-     * @return 是否成功
-     */
     @Override
-    public boolean deleteById(Integer channelId) {
-        return this.zfChannelDao.deleteById(channelId) > 0;
+    public BigDecimal sumChannelFee(@NonNull BigDecimal PaidAmount, ZfChannel zfChannel) {
+        try {
+            if (Strings.isEmpty(zfChannel.getChannelRate())) {
+                return BigDecimal.ZERO;
+            }
+            XChannelRate xChannelRate = JSONObject.parseObject(zfChannel.getChannelRate(), XChannelRate.class);
+            if (xChannelRate.getRate_type() == 0) {
+                return BigDecimal.valueOf(xChannelRate.getRate_value());
+            } else {
+                BigDecimal rate = BigDecimal.valueOf(xChannelRate.getRate_value()).divide(new BigDecimal("100"));
+                return PaidAmount.multiply(rate);
+            }
+
+        } catch (Exception e) {
+            log.error("手续费计算异常", e);
+        }
+        return BigDecimal.ZERO;
     }
+
+
 }

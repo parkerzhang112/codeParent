@@ -1,6 +1,6 @@
 package com.code.baseservice.base.exception;
 
-import com.code.baseservice.base.constant.ResultEnum;
+import com.code.baseservice.base.enums.ResultEnum;
 import lombok.Data;
 
 @Data

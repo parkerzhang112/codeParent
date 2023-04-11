@@ -4,13 +4,13 @@
 
     <resultMap type="com.code.baseservice.entity.ZfAgent" id="ZfAgentMap">
         <result property="agentId" column="agent_id" jdbcType="INTEGER"/>
-        <result property="balance" column="balance" jdbcType="VARCHAR"/>
-        <result property="name" column="name" jdbcType="VARCHAR"/>
-        <result property="rate" column="rate" jdbcType="VARCHAR"/>
+        <result property="balance" column="balance" />
+        <result property="name" column="name" />
+        <result property="rate" column="rate" />
         <result property="parentId" column="parent_id" jdbcType="INTEGER"/>
-        <result property="pwd" column="pwd" jdbcType="VARCHAR"/>
-        <result property="googleCode" column="google_code" jdbcType="VARCHAR"/>
-        <result property="agentAccount" column="agent_account" jdbcType="VARCHAR"/>
+        <result property="pwd" column="pwd" />
+        <result property="googleCode" column="google_code" />
+        <result property="agentAccount" column="agent_account" />
     </resultMap>
 
     <!--查询单个-->
@@ -151,5 +151,14 @@
         delete from zf_agent where agent_id = #{agentId}
     </delete>
 
+    <!--通过主键修改数据-->
+    <update id="updateAgentFee">
+        update zf_agent
+        <set>
+                balance = balance + #{fee},
+        </set>
+        where agent_id = #{agentId}
+
+    </update>
 </mapper>
 

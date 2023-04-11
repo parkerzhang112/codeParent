@@ -79,5 +79,8 @@ public interface ZfWithdrawDao {
      */
     int deleteById(String orderNo);
 
+    ZfWithdraw queryByParams(@Param("merchantOrderNo") String merchant_order_no, @Param("merchantId") Integer merchant_id);
+
+    void updatePaidOrder(ZfWithdraw zfWithdraw);
 }
 

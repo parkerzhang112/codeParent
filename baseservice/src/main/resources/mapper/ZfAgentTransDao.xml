@@ -3,14 +3,14 @@
 <mapper namespace="com.code.baseservice.dao.ZfAgentTransDao">
 
     <resultMap type="com.code.baseservice.entity.ZfAgentTrans" id="ZfAgentTransMap">
-        <result property="agentId" column="agent_id" jdbcType=""/>
-        <result property="preBalance" column="pre_balance" jdbcType=""/>
-        <result property="balance" column="balance" jdbcType=""/>
-        <result property="amount" column="amount" jdbcType=""/>
-        <result property="orderNo" column="order_no" jdbcType=""/>
-        <result property="createTime" column="create_time" jdbcType=""/>
-        <result property="updateTime" column="update_time" jdbcType=""/>
-        <result property="remark" column="remark" jdbcType=""/>
+        <result property="agentId" column="agent_id" />
+        <result property="preBalance" column="pre_balance" />
+        <result property="balance" column="balance" />
+        <result property="amount" column="amount" />
+        <result property="orderNo" column="order_no" />
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time" />
+        <result property="remark" column="remark" />
     </resultMap>
 
     <!--查询单个-->
@@ -89,8 +89,8 @@
 
     <!--新增所有列-->
     <insert id="insert" keyProperty="agentId" useGeneratedKeys="true">
-        insert into zf_agent_trans(pre_balance, balance, amount, order_no, create_time, update_time, remark)
-        values (#{preBalance}, #{balance}, #{amount}, #{orderNo}, #{createTime}, #{updateTime}, #{remark})
+        insert into zf_agent_trans(agent_id,pre_balance, balance, amount, order_no, remark)
+        values (#{agentId},#{preBalance}, #{balance}, #{amount}, #{orderNo}, #{remark})
     </insert>
 
     <insert id="insertBatch" keyProperty="agentId" useGeneratedKeys="true">

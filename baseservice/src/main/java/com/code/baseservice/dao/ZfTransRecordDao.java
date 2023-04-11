@@ -1,6 +1,7 @@
 package com.code.baseservice.dao;
 
 import com.code.baseservice.entity.ZfTransRecord;
+import com.code.baseservice.entity.ZfWithdraw;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.domain.Pageable;
 
@@ -81,5 +82,6 @@ public interface ZfTransRecordDao {
      */
     int deleteById(Integer transId);
 
+    List<ZfTransRecord> queryTransByWithdraw(ZfWithdraw zfWithdraw);
 }
 

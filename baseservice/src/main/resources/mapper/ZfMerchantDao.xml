@@ -4,16 +4,18 @@
 
     <resultMap type="com.code.baseservice.entity.ZfMerchant" id="ZfMerchantMap">
         <result property="merchantId" column="merchant_id" jdbcType="INTEGER"/>
-        <result property="balance" column="balance" jdbcType="VARCHAR"/>
+        <result property="balance" column="balance" />
         <result property="status" column="status" jdbcType="INTEGER"/>
-        <result property="merchantCode" column="merchant_code" jdbcType="VARCHAR"/>
-        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="merchantCode" column="merchant_code" />
+        <result property="remark" column="remark" />
+        <result property="key" column="md5_key" />
+        <result property="creditAmount" column="credit_amount" />
     </resultMap>
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfMerchantMap">
         select
-          merchant_id, balance, status, merchant_code, remark
+          merchant_id, balance, status, merchant_code, remark, md5_key, credit_amount
         from zf_merchant
         where merchant_id = #{merchantId}
     </select>
@@ -117,6 +119,15 @@
     <delete id="deleteById">
         delete from zf_merchant where merchant_id = #{merchantId}
     </delete>
+
+    <!--通过主键修改数据-->
+    <update id="sumMerchantBalance">
+        update zf_merchant
+        <set>
+                balance = balance + #{balance}
+        </set>
+        where merchant_id = #{merchantId}
+    </update>
 
 </mapper>
 

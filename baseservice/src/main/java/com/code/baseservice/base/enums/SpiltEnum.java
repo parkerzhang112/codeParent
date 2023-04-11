@@ -1,4 +1,4 @@
-package com.code.baseservice.base.constant;
+package com.code.baseservice.base.enums;
 
 public enum SpiltEnum {
 

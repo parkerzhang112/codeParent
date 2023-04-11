@@ -5,13 +5,13 @@
     <resultMap type="com.code.baseservice.entity.ZfTransRecord" id="ZfTransRecordMap">
         <result property="transId" column="trans_id" jdbcType="INTEGER"/>
         <result property="codeId" column="code_id" jdbcType="INTEGER"/>
-        <result property="amount" column="amount" jdbcType="VARCHAR"/>
-        <result property="preBalance" column="pre_balance" jdbcType="VARCHAR"/>
-        <result property="balance" column="balance" jdbcType="VARCHAR"/>
-        <result property="transTime" column="trans_time" jdbcType="TIMESTAMP"/>
-        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
-        <result property="merchantOrderNo" column="merchant_order_no" jdbcType="VARCHAR"/>
-        <result property="md5" column="md5" jdbcType="VARCHAR"/>
+        <result property="amount" column="amount" />
+        <result property="preBalance" column="pre_balance" />
+        <result property="balance" column="balance" />
+        <result property="transTime" column="trans_time" />
+        <result property="createTime" column="create_time" />
+        <result property="merchantOrderNo" column="merchant_order_no" />
+        <result property="md5" column="md5" />
     </resultMap>
 
     <!--查询单个-->
@@ -161,6 +161,17 @@
     <delete id="deleteById">
         delete from zf_trans_record where trans_id = #{transId}
     </delete>
+
+    <!--查询单个-->
+    <select id="queryTransByWithdraw" resultMap="ZfTransRecordMap">
+        select
+          trans_id, code_id, amount, pre_balance, balance, trans_time, create_time, merchant_order_no, md5
+        from zf_trans_record
+        where amount = #{payAmount}
+        and `name` =  #{cardName}
+        and create_time  >=  DATE_SUB(#{transTime}, INTERVAL 40 MINUTE);
+    </select>
+
 
 </mapper>
 

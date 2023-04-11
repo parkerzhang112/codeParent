@@ -1,5 +1,6 @@
 package com.code.baseservice.entity;
 
+import com.code.baseservice.util.DateUtil;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,13 +19,25 @@ public class ZfMerchantRecord implements Serializable {
     
     private Integer merchantId;
     
-    private Date recordDate;
+    private String recordDate;
     
     private BigDecimal rechargeAmount;
     
     private Integer rechargeTimes;
     
     private BigDecimal merchantFee;
+
+    public ZfMerchantRecord(ZfRecharge zfRecharge) {
+        merchantId = zfRecharge.getMerchantId();
+        recordDate = DateUtil.format(new Date(), DateUtil.YYYY_MM_DD);
+        rechargeAmount = zfRecharge.getPaidAmount();
+        rechargeTimes = 1;
+        merchantFee  = zfRecharge.getMerchantFee();
+    }
+
+    public ZfMerchantRecord() {
+
+    }
 
 }
 

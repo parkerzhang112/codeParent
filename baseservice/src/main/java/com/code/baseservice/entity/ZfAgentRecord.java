@@ -1,5 +1,8 @@
 package com.code.baseservice.entity;
 
+import com.code.baseservice.util.DateUtil;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -10,6 +13,7 @@ import java.util.Date;
  * @author makejava
  * @since 2023-03-19 23:06:11
  */
+@Data
 public class ZfAgentRecord implements Serializable {
     private static final long serialVersionUID = 675114679783180957L;
     /**
@@ -19,7 +23,7 @@ public class ZfAgentRecord implements Serializable {
     /**
      * 记录日期
      */
-    private Date recordDate;
+    private String recordDate;
     /**
      * 充值笔数
      */
@@ -41,62 +45,22 @@ public class ZfAgentRecord implements Serializable {
      */
     private BigDecimal income;
 
-
-    public Integer getAgentId() {
-        return agentId;
+    public ZfAgentRecord(ZfAgent zfAgent, BigDecimal fee, BigDecimal paidAmount) {
+        if(paidAmount.compareTo(BigDecimal.ZERO) > 0){
+            rechargeTimes =1;
+            rechargeAmount = paidAmount;
+            income  = fee;
+        }else {
+            withdrawAmount = paidAmount;
+            withdrawTimes  = 1;
+            income = BigDecimal.ZERO;
+        }
+        agentId = zfAgent.getAgentId();
+        recordDate  = DateUtil.format(new Date(), DateUtil.YYYY_MM_DD);
     }
 
-    public void setAgentId(Integer agentId) {
-        this.agentId = agentId;
-    }
 
-    public Date getRecordDate() {
-        return recordDate;
-    }
 
-    public void setRecordDate(Date recordDate) {
-        this.recordDate = recordDate;
-    }
-
-    public Integer getRechargeTimes() {
-        return rechargeTimes;
-    }
-
-    public void setRechargeTimes(Integer rechargeTimes) {
-        this.rechargeTimes = rechargeTimes;
-    }
-
-    public BigDecimal getRechargeAmount() {
-        return rechargeAmount;
-    }
-
-    public void setRechargeAmount(BigDecimal rechargeAmount) {
-        this.rechargeAmount = rechargeAmount;
-    }
-
-    public Integer getWithdrawTimes() {
-        return withdrawTimes;
-    }
-
-    public void setWithdrawTimes(Integer withdrawTimes) {
-        this.withdrawTimes = withdrawTimes;
-    }
-
-    public BigDecimal getWithdrawAmount() {
-        return withdrawAmount;
-    }
-
-    public void setWithdrawAmount(BigDecimal withdrawAmount) {
-        this.withdrawAmount = withdrawAmount;
-    }
-
-    public BigDecimal getIncome() {
-        return income;
-    }
-
-    public void setIncome(BigDecimal income) {
-        this.income = income;
-    }
 
 }
 

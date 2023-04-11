@@ -1,5 +1,6 @@
 package com.code.baseservice.entity;
 
+import com.code.baseservice.dto.payapi.RechareParams;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -42,8 +43,22 @@ public class ZfRecharge implements Serializable {
     
     private Integer notifyStatus;
     
-    private Integer merchantFee;
+    private BigDecimal merchantFee;
 
+    private String remark;
+
+    public  ZfRecharge(RechareParams rechareParams){
+        setCreateTime(new Date());
+        setUpdateTime(new Date());
+        setMerchantId(rechareParams.getMerchant_id());
+        setMerchantOrderNo(rechareParams.getMerchant_order_no());
+        setNotifyUrl(rechareParams.getNotify_url());
+        setPayAmount(rechareParams.getPay_amount());
+    }
+
+    public ZfRecharge(){
+
+    }
 
 }
 

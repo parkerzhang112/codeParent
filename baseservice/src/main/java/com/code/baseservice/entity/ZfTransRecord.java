@@ -1,5 +1,6 @@
 package com.code.baseservice.entity;
 
+import com.code.baseservice.dto.autoapi.TransParams;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -34,5 +35,13 @@ public class ZfTransRecord implements Serializable {
     
     private String md5;
 
+    private String account;
+
+    private Integer transType;
+
+    public ZfTransRecord(TransParams transParams1) {
+        transTime  =  new Date(transParams1.getTransTime());
+        amount = transParams1.getAmout();
+    }
 }
 

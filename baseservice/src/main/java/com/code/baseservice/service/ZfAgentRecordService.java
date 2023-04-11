@@ -43,7 +43,7 @@ public interface ZfAgentRecordService {
      * @param zfAgentRecord 实例对象
      * @return 实例对象
      */
-    ZfAgentRecord update(ZfAgentRecord zfAgentRecord);
+    int update(ZfAgentRecord zfAgentRecord);
 
     /**
      * 通过主键删除数据
@@ -53,4 +53,5 @@ public interface ZfAgentRecordService {
      */
     boolean deleteById(Integer agentId);
 
+    void updateRecord(ZfAgentRecord zfAgentRecord);
 }

@@ -1,6 +1,9 @@
 package com.code.baseservice.entity;
 
+import lombok.Data;
+
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -9,18 +12,19 @@ import java.util.Date;
  * @author makejava
  * @since 2023-03-19 23:06:24
  */
+@Data
 public class ZfAgentTrans implements Serializable {
     private static final long serialVersionUID = 540178769990295068L;
     
     private Integer agentId;
     
-    private String preBalance;
+    private BigDecimal preBalance;
     
-    private String balance;
+    private BigDecimal balance;
     
-    private String amount;
+    private BigDecimal amount;
     
-    private Integer orderNo;
+    private String orderNo;
     
     private Date createTime;
     
@@ -28,70 +32,16 @@ public class ZfAgentTrans implements Serializable {
     
     private String remark;
 
-
-    public Integer getAgentId() {
-        return agentId;
+    public ZfAgentTrans(ZfAgent zfAgent, BigDecimal fee) {
+        agentId = zfAgent.getAgentId();
+        preBalance = zfAgent.getBalance();
+        balance = preBalance.add(fee);
+        amount = fee;
+        remark = "跑分手续费";
     }
 
-    public void setAgentId(Integer agentId) {
-        this.agentId = agentId;
-    }
 
-    public String getPreBalance() {
-        return preBalance;
-    }
 
-    public void setPreBalance(String preBalance) {
-        this.preBalance = preBalance;
-    }
-
-    public String getBalance() {
-        return balance;
-    }
-
-    public void setBalance(String balance) {
-        this.balance = balance;
-    }
-
-    public String getAmount() {
-        return amount;
-    }
-
-    public void setAmount(String amount) {
-        this.amount = amount;
-    }
-
-    public Integer getOrderNo() {
-        return orderNo;
-    }
-
-    public void setOrderNo(Integer orderNo) {
-        this.orderNo = orderNo;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Date getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
 
 }
 

@@ -4,10 +4,10 @@
 
     <resultMap type="com.code.baseservice.entity.ZfCodeRecord" id="ZfCodeRecordMap">
         <result property="codeId" column="code_id" jdbcType="INTEGER"/>
-        <result property="recordDate" column="record_date" jdbcType="TIMESTAMP"/>
-        <result property="rechargeAmount" column="recharge_amount" jdbcType="VARCHAR"/>
+        <result property="recordDate" column="record_date" />
+        <result property="rechargeAmount" column="recharge_amount" />
         <result property="rechargeTimes" column="recharge_times" jdbcType="INTEGER"/>
-        <result property="fee" column="fee" jdbcType="VARCHAR"/>
+        <result property="fee" column="fee" />
     </resultMap>
 
     <!--查询单个-->
@@ -17,6 +17,17 @@
         from zf_code_record
         where code_id = #{codeId}
     </select>
+
+    <!--查询单个-->
+    <select id="queryByIdAndDate" resultMap="ZfCodeRecordMap">
+        select
+          code_id, record_date, recharge_amount, recharge_times, fee
+        from zf_code_record
+        where code_id = #{codeId}
+        and record_date = #{recordDate}
+    </select>
+
+
 
     <!--查询指定行数据-->
     <select id="queryAllByLimit" resultMap="ZfCodeRecordMap">
@@ -68,8 +79,8 @@
 
     <!--新增所有列-->
     <insert id="insert" keyProperty="codeId" useGeneratedKeys="true">
-        insert into zf_code_record(record_date, recharge_amount, recharge_times, fee)
-        values (#{recordDate}, #{rechargeAmount}, #{rechargeTimes}, #{fee})
+        insert into zf_code_record(code_id,record_date, recharge_amount, recharge_times, fee)
+        values (#{codeId},#{recordDate}, #{rechargeAmount}, #{rechargeTimes}, #{fee})
     </insert>
 
     <insert id="insertBatch" keyProperty="codeId" useGeneratedKeys="true">
@@ -112,6 +123,25 @@
         </set>
         where code_id = #{codeId}
     </update>
+
+    <!--通过主键修改数据-->
+    <update id="updateRecord">
+        update zf_code_record
+        <set>
+            <if test="rechargeAmount != null">
+                recharge_amount = recharge_amount + #{rechargeAmount},
+            </if>
+            <if test="rechargeTimes != null">
+                recharge_times = recharge_times + 1,
+            </if>
+            <if test="fee != null">
+                fee = #{fee},
+            </if>
+        </set>
+        where code_id = #{codeId}
+        and record_date= #{recordDate}
+    </update>
+
 
     <!--通过主键删除-->
     <delete id="deleteById">

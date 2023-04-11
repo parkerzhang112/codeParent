@@ -1,15 +1,14 @@
-package com.code.baseservice.base.constant;
+package com.code.baseservice.base.enums;
 
-public enum TransTypeEnum {
+public enum  CommonStatusEnum {
 
-    RRCHARGE(1,"转入"),
-    TRANSFER(0,"转出"),
-            ;
+    STATR(1,"启用"),
+    STOP(0,"停用");
 
     private Integer value;
     private String name;
 
-    TransTypeEnum(Integer value, String name) {
+    CommonStatusEnum(Integer value, String name) {
         this.value = value;
         this.name = name;
     }

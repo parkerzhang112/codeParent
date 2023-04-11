@@ -3,14 +3,14 @@
 <mapper namespace="com.code.baseservice.dao.ZfMerchantTransDao">
 
     <resultMap type="com.code.baseservice.entity.ZfMerchantTrans" id="ZfMerchantTransMap">
-        <result property="merchantId" column="merchant_id" jdbcType="INTEGER"/>
-        <result property="preBalance" column="pre_balance" jdbcType="VARCHAR"/>
-        <result property="balance" column="balance" jdbcType="VARCHAR"/>
-        <result property="amount" column="amount" jdbcType="VARCHAR"/>
-        <result property="merchantFee" column="merchant_fee" jdbcType="VARCHAR"/>
-        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
-        <result property="remark" column="remark" jdbcType="VARCHAR"/>
-        <result property="merchantOrderNo" column="merchant_order_no" jdbcType="VARCHAR"/>
+        <result property="merchantId" column="merchant_id" />
+        <result property="preBalance" column="pre_balance" />
+        <result property="balance" column="balance" />
+        <result property="amount" column="amount" />
+        <result property="merchantFee" column="merchant_fee" />
+        <result property="createTime" column="create_time" />
+        <result property="remark" column="remark" />
+        <result property="merchantOrderNo" column="merchant_order_no" />
     </resultMap>
 
     <!--查询单个-->
@@ -89,8 +89,8 @@
 
     <!--新增所有列-->
     <insert id="insert" keyProperty="merchantId" useGeneratedKeys="true">
-        insert into zf_merchant_trans(pre_balance, balance, amount, merchant_fee, create_time, remark, merchant_order_no)
-        values (#{preBalance}, #{balance}, #{amount}, #{merchantFee}, #{createTime}, #{remark}, #{merchantOrderNo})
+        insert into zf_merchant_trans(merchant_id,pre_balance, balance, amount, merchant_fee, remark, merchant_order_no, trans_type)
+        values (#{merchantId},#{preBalance}, #{balance}, #{amount}, #{merchantFee}, #{remark}, #{merchantOrderNo}, #{transType})
     </insert>
 
     <insert id="insertBatch" keyProperty="merchantId" useGeneratedKeys="true">

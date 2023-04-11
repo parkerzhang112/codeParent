@@ -3,11 +3,11 @@
 <mapper namespace="com.code.baseservice.dao.ZfMerchantRecordDao">
 
     <resultMap type="com.code.baseservice.entity.ZfMerchantRecord" id="ZfMerchantRecordMap">
-        <result property="merchantId" column="merchant_id" jdbcType="INTEGER"/>
-        <result property="recordDate" column="record_date" jdbcType="TIMESTAMP"/>
-        <result property="rechargeAmount" column="recharge_amount" jdbcType="VARCHAR"/>
-        <result property="rechargeTimes" column="recharge_times" jdbcType="INTEGER"/>
-        <result property="merchantFee" column="merchant_fee" jdbcType="VARCHAR"/>
+        <result property="merchantId" column="merchant_id"/>
+        <result property="recordDate" column="record_date" />
+        <result property="rechargeAmount" column="recharge_amount" />
+        <result property="rechargeTimes" column="recharge_times" />
+        <result property="merchantFee" column="merchant_fee"/>
     </resultMap>
 
     <!--查询单个-->
@@ -15,8 +15,11 @@
         select
           merchant_id, record_date, recharge_amount, recharge_times, merchant_fee
         from zf_merchant_record
-        where  = #{}
+        where  merchant_id= #{merchantId}
+        and record_date = #{recordDate}
     </select>
+
+
 
     <!--查询指定行数据-->
     <select id="queryAllByLimit" resultMap="ZfMerchantRecordMap">
@@ -67,32 +70,11 @@
     </select>
 
     <!--新增所有列-->
-    <insert id="insert" keyProperty="" useGeneratedKeys="true">
+    <insert id="insert" useGeneratedKeys="true">
         insert into zf_merchant_record(merchant_id, record_date, recharge_amount, recharge_times, merchant_fee)
         values (#{merchantId}, #{recordDate}, #{rechargeAmount}, #{rechargeTimes}, #{merchantFee})
     </insert>
 
-    <insert id="insertBatch" keyProperty="" useGeneratedKeys="true">
-        insert into zf_merchant_record(merchant_id, record_date, recharge_amount, recharge_times, merchant_fee)
-        values
-        <foreach collection="entities" item="entity" separator=",">
-        (#{entity.merchantId}, #{entity.recordDate}, #{entity.rechargeAmount}, #{entity.rechargeTimes}, #{entity.merchantFee})
-        </foreach>
-    </insert>
-
-    <insert id="insertOrUpdateBatch" keyProperty="" useGeneratedKeys="true">
-        insert into zf_merchant_record(merchant_id, record_date, recharge_amount, recharge_times, merchant_fee)
-        values
-        <foreach collection="entities" item="entity" separator=",">
-            (#{entity.merchantId}, #{entity.recordDate}, #{entity.rechargeAmount}, #{entity.rechargeTimes}, #{entity.merchantFee})
-        </foreach>
-        on duplicate key update
-        merchant_id = values(merchant_id),
-        record_date = values(record_date),
-        recharge_amount = values(recharge_amount),
-        recharge_times = values(recharge_times),
-        merchant_fee = values(merchant_fee)
-    </insert>
 
     <!--通过主键修改数据-->
     <update id="update">
@@ -117,10 +99,24 @@
         where  = #{}
     </update>
 
-    <!--通过主键删除-->
-    <delete id="deleteById">
-        delete from zf_merchant_record where  = #{}
-    </delete>
+    <!--通过主键修改数据-->
+    <update id="updateByRecord">
+        update zf_merchant_record
+        <set>
+            <if test="rechargeAmount != null">
+                recharge_amount = recharge_amount+#{rechargeAmount},
+            </if>
+            <if test="rechargeTimes != null">
+                recharge_times = recharge_times+1,
+            </if>
+            <if test="merchantFee != null">
+                merchant_fee = merchant_fee+#{merchantFee},
+            </if>
+        </set>
+        where  merchant_id= #{merchantId}
+        and recordDate = #{recordDate}
+    </update>
+
 
 </mapper>
 

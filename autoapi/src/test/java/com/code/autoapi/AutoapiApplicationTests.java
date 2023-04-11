@@ -13,8 +13,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest()
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
-@MapperScan("com.xiagao.baseservice.dao")
-@ComponentScan({"com.xiagao.baseservice", "com.xiagao.autoapi"})
+@MapperScan("com.code.baseservice.dao")
+@ComponentScan({"com.code.baseservice", "com.codes.autoapi"})
 public class AutoapiApplicationTests {
 
 

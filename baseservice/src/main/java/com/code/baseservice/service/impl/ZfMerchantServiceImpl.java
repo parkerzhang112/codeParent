@@ -1,16 +1,31 @@
 package com.code.baseservice.service.impl;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.base.constant.RedisConstant;
+import com.code.baseservice.base.enums.CommonStatusEnum;
+import com.code.baseservice.base.enums.ResultEnum;
+import com.code.baseservice.base.exception.BaseException;
+import com.code.baseservice.dao.ZfMerchantDao;
+import com.code.baseservice.dto.backapi.OperaBalanceParams;
+import com.code.baseservice.dto.payapi.MerchantParams;
+import com.code.baseservice.dto.payapi.QueryParams;
+import com.code.baseservice.dto.payapi.TransferParams;
+import com.code.baseservice.entity.*;
+import com.code.baseservice.service.RedisUtilService;
+import com.code.baseservice.service.ZfMerchantService;
+import com.code.baseservice.service.ZfMerchantTransService;
+import com.code.baseservice.service.ZfWithdrawService;
+import com.code.baseservice.util.CommonUtil;
+import com.code.baseservice.util.MD5Util;
+import com.code.baseservice.util.Telegram;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
-.service.impl;
-        .entity.ZfMerchant;
-        .dao.ZfMerchantDao;
-        .service.ZfMerchantService;
+import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.TreeMap;
 
 /**
  * (ZfMerchant)表服务实现类
@@ -19,9 +34,19 @@ import javax.annotation.Resource;
  * @since 2023-03-19 23:07:58
  */
 @Service("zfMerchantService")
+@Slf4j
 public class ZfMerchantServiceImpl implements ZfMerchantService {
     @Resource
     private ZfMerchantDao zfMerchantDao;
+
+    @Autowired
+    RedisUtilService redisUtilService;
+
+    @Autowired
+    private ZfMerchantTransService zfMerchantTransService;
+
+    @Autowired
+    private ZfWithdrawService zfWithdrawService;
 
     /**
      * 通过ID查询单条数据
@@ -34,51 +59,133 @@ public class ZfMerchantServiceImpl implements ZfMerchantService {
         return this.zfMerchantDao.queryById(merchantId);
     }
 
-    /**
-     * 分页查询
-     *
-     * @param zfMerchant 筛选条件
-     * @param pageRequest      分页对象
-     * @return 查询结果
-     */
     @Override
-    public Page<ZfMerchant> queryByPage(ZfMerchant zfMerchant, PageRequest pageRequest) {
-        long total = this.zfMerchantDao.count(zfMerchant);
-        return new PageImpl<>(this.zfMerchantDao.queryAllByLimit(zfMerchant, pageRequest), pageRequest, total);
+    public ZfMerchant vaildMerchant(Integer merchant_id) {
+        log.info("验证商户合法性开始", merchant_id);
+        ZfMerchant xMerchant =  zfMerchantDao.queryById(merchant_id);
+        if(Objects.isNull(xMerchant) && xMerchant.getStatus().equals(CommonStatusEnum.STATR.getValue())){
+            log.info("无效商户 {}", merchant_id);
+            throw new BaseException(ResultEnum.NO_VAILD_MERCHANT);
+        }
+        return xMerchant;
     }
 
-    /**
-     * 新增数据
-     *
-     * @param zfMerchant 实例对象
-     * @return 实例对象
-     */
     @Override
-    public ZfMerchant insert(ZfMerchant zfMerchant) {
-        this.zfMerchantDao.insert(zfMerchant);
-        return zfMerchant;
+    public void verifSign(QueryParams queryParams, ZfMerchant zfMerchant) {
+        TreeMap<String, Object> map = new TreeMap<>();
+        map.put("merchant_id", queryParams.getMerchant_Id());
+        map.put("merchant_order_no", queryParams.getMerchant_order_no());
+        String sign_str = new CommonUtil().getSign(map);
+        sign_str = sign_str.concat("key=".concat(zfMerchant.getKey()));
+        String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
+        log.info("订单号 {} 当前我方签名 {} 签名字符串  对方签名 {}", queryParams.getMerchant_order_no(), sign, sign_str, queryParams.getSign());
+        if (!sign.equals(queryParams.getSign())) {
+            throw new BaseException(ResultEnum.SIGN_ERROR);
+        }
     }
 
-    /**
-     * 修改数据
-     *
-     * @param zfMerchant 实例对象
-     * @return 实例对象
-     */
     @Override
-    public ZfMerchant update(ZfMerchant zfMerchant) {
-        this.zfMerchantDao.update(zfMerchant);
-        return this.queryById(zfMerchant.getMerchantId());
+    public void verifSign(TransferParams transParams, ZfMerchant zfMerchant) {
+        TreeMap<String, Object>  map = new TreeMap<>();
+        map.put("card_address", transParams.getCard_address());
+        map.put("card_name", transParams.getCard_name());
+        map.put("card_account", transParams.getCard_account());
+        map.put("card_type", transParams.getCard_type());
+        map.put("merchant_id", transParams.getMerchant_id());
+        map.put("notify_url", transParams.getNotify_url());
+        map.put("merchant_order_no", transParams.getMerchant_order_no());
+        map.put("pay_amount", transParams.getPay_amount());
+        String sign_str = new CommonUtil().getSign(map);
+        sign_str = sign_str.concat("key=".concat(zfMerchant.getKey()));
+        String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
+        if (!sign.equals(transParams.getSign())) {
+            log.info("订单号 {} 当前我方签名 {} 签名字符串  对方签名 {}", transParams.getMerchant_order_no(), sign, sign_str, transParams.getSign());
+            throw new BaseException(ResultEnum.SIGN_ERROR);
+        }
     }
 
-    /**
-     * 通过主键删除数据
-     *
-     * @param merchantId 主键
-     * @return 是否成功
-     */
     @Override
-    public boolean deleteById(Integer merchantId) {
-        return this.zfMerchantDao.deleteById(merchantId) > 0;
+    public void verifMerchantBalance(ZfMerchant zfMerchant, TransferParams transParams) {
+        if(zfMerchant.getBalance().compareTo(transParams.getPay_amount())< 0){
+            //如果是yb的，则不验证余额
+            if(!zfMerchant.getMerchantCode().equals("YB")){
+                log.info("订单号 {} 当前有效余额 {} 交易基恩 {}", transParams.getMerchant_order_no(), zfMerchant.getBalance(), transParams.getPay_amount());
+                throw new BaseException(ResultEnum.MERCHANT_BALANCE_NO_ENOUGH) ;
+            }
+        }
+    }
+
+    @Override
+    public JSONObject query(MerchantParams merchantParams) {
+        //验证商户
+        ZfMerchant xMerchant = vaildMerchant(merchantParams.getMerchant_id());
+        //校对签名
+        verifSign(merchantParams, xMerchant);
+        //构建返回参数
+        JSONObject jsonObject =  buildReuslt(xMerchant);
+        return jsonObject;
+    }
+
+    @Override
+    public void sumMerchantBalance(Integer merchantId, BigDecimal subtract) {
+        zfMerchantDao.sumMerchantBalance(merchantId, subtract);
+    }
+
+    @Override
+    public void warrnBalance(ZfMerchant xMerchant, ZfRecharge zfRecharge, ZfAgent zfAgent) {
+        if(xMerchant.getBalance().add(zfRecharge.getPaidAmount()).compareTo(xMerchant.getCreditAmount())>0){
+            String key = "merchant_warn".concat(xMerchant.getMerchantId().toString());
+            if(!redisUtilService.hasKey(key)){
+                Telegram telegram = new Telegram();
+                telegram.sendMerchantBalanceMessage(xMerchant,zfRecharge, zfAgent.getConfig());
+                redisUtilService.set(key, "1", 60);
+            }
+        }
+    }
+
+    @Override
+    public void operatBalance(OperaBalanceParams operaBalanceParams) {
+
+    }
+
+    @Override
+    public void issue(TransferParams transParams) {
+        redisUtilService.mlock(RedisConstant.ISSUE_LOCK,2000);
+        ZfMerchant zfMerchant = zfMerchantDao.queryById(transParams.getMerchant_id());
+        //支持银行
+        verifMerchantBalance(zfMerchant, transParams);
+        //校验商户余额
+        ZfWithdraw xTransfer = zfWithdrawService.createIssueOrder(transParams, zfMerchant);
+        //结束商户余额
+        sumMerchantBalance(zfMerchant.getMerchantId(), BigDecimal.ZERO.subtract(transParams.getPay_amount()).subtract(xTransfer.getChannelFee()));
+        zfMerchantTransService.insert(new ZfMerchantTrans(xTransfer, zfMerchant, 0));
+        redisUtilService.leftPushAll("trans_size", transParams.getMerchant_order_no());
+    }
+
+    private JSONObject buildReuslt(ZfMerchant zfMerchant) {
+        log.info("构建返回结果 商户数据 {} ");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("balance", zfMerchant.getBalance());
+        jsonObject.put("merchant_id", zfMerchant.getMerchantId());
+        String encode_str = "";
+        for (String key : jsonObject.keySet()){
+            encode_str += key +"="+jsonObject.get(key) + "&";
+        }
+        encode_str += "key=" + zfMerchant.getKey();
+        log.info("签名字符串 {}", encode_str);
+        String sign  = MD5Util.getMD5Str(encode_str).toUpperCase();
+        jsonObject.put("sign", sign);
+        return jsonObject;
+    }
+
+    public void  verifSign( MerchantParams merchantParams, ZfMerchant zfMerchant){
+        log.info("开始校验签名", merchantParams);
+        String encod_str = "merchant_id="+merchantParams.getMerchant_id()
+                +"&key="+zfMerchant.getKey();
+        String sign =  MD5Util.getMD5Str(encod_str).toUpperCase();
+        if(!sign.equals(merchantParams.getSign())){
+            log.info("订单号 {} 当前我方签名 {} 签名字符串  对方签名 {}", merchantParams.getMerchant_id(),sign, encod_str, merchantParams.getSign());
+            throw new BaseException(ResultEnum.SIGN_ERROR) ;
+        }
     }
 }

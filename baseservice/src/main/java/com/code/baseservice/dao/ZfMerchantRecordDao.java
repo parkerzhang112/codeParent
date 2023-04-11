@@ -19,9 +19,10 @@ public interface ZfMerchantRecordDao {
      * 通过ID查询单条数据
      *
      * @param  主键
+     * @param zfMerchantRecord
      * @return 实例对象
      */
-    ZfMerchantRecord queryById();
+    ZfMerchantRecord queryById(ZfMerchantRecord zfMerchantRecord);
 
     /**
      * 查询指定行数据
@@ -73,13 +74,7 @@ public interface ZfMerchantRecordDao {
      */
     int update(ZfMerchantRecord zfMerchantRecord);
 
-    /**
-     * 通过主键删除数据
-     *
-     * @param  主键
-     * @return 影响行数
-     */
-    int deleteById();
 
+    void updateByRecord(ZfMerchantRecord zfMerchantRecord);
 }
 

@@ -1,6 +1,6 @@
-package com.code.baseservice.base.constant;
+package com.code.baseservice.base.enums;
 
-public enum  TransOrderTypeEnum {
+public enum TransOrderTypeEnum {
 
     TRANS_ORDER(1,"代付订单"),
     ISSUE_ORDER(2,"下发订单"),
