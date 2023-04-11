@@ -158,9 +158,9 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
             zfCode.setTransferStatus(0);
             zfCodeService.update(zfCode);
         }
-        ZfCode zfCode = zfCodeService.queryById(operaOrderParams.getCardId());
+        ZfCode zfCode = zfCodeService.queryById(operaOrderParams.getCodeId());
         zfWithdraw.setAgentId(zfCode.getAgentId());
-        zfWithdraw.setCodeId(operaOrderParams.getCardId());
+        zfWithdraw.setCodeId(operaOrderParams.getCodeId());
         zfWithdraw.setOrderStatus(2);
         zfWithdraw.setImage(operaOrderParams.getImage());
         zfWithdraw.setRemark(operaOrderParams.getCloseReason());
@@ -176,10 +176,10 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
             log.info("订单已处理 订单号 {}", zfWithdraw.getMerchantOrderNo());
             throw new BaseException(ResultEnum.ERROR);
         }
-        List<ZfTransRecord> zfTransRecords = zfTransRecordService.queryTransByWithdraw(zfWithdraw);
-        if(zfTransRecords.size() == 1 && zfTransRecords.get(0).getTransType().equals(TransTypeEnum.TRANSFER.getValue())){
-            throw new BaseException(ResultEnum.TRANS_EXIST_TRANSFER);
-        }
+//        List<ZfTransRecord> zfTransRecords = zfTransRecordService.queryTransByWithdraw(zfWithdraw);
+//        if(zfTransRecords.size() == 1 && zfTransRecords.get(0).getTransType().equals(TransTypeEnum.TRANSFER.getValue())){
+//            throw new BaseException(ResultEnum.TRANS_EXIST_TRANSFER);
+//        }
         //如果已经有银行卡接单，清空
         if(zfWithdraw.getCodeId() != null && zfWithdraw.getCodeId() != 0){
             ZfCode zfCode = zfCodeService.queryById(zfWithdraw.getCodeId());
@@ -331,6 +331,33 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         xTransfer.setMerchantId(xMerchant.getMerchantId());
         zfWithdrawDao.insert(xTransfer);
         return xTransfer;
+    }
+
+    @Override
+    public void lock(OperaOrderParams operaOrderParams) {
+        ZfWithdraw zfWithdraw = zfWithdrawDao.queryById(operaOrderParams.getOrderNo());
+        if(zfWithdraw == null){
+            log.info("暂无可出款订单");
+            throw new BaseException(ResultEnum.ORDER_NO_EXIST);
+        }
+        if(zfWithdraw.getCodeId() != null && zfWithdraw.getCodeId() != 0){
+            throw new BaseException(ResultEnum.REFUSE_ORRDER);
+        }
+        ZfCode zfCode = zfCodeService.queryById(operaOrderParams.getCodeId());
+        if(zfCode == null ){
+            log.info("异常银行卡");
+        }
+        zfCode.setTransferStatus(1);
+        zfWithdraw.setAgentId(zfCode.getAgentId());
+        zfWithdraw.setCodeId(zfCode.getCodeId());
+        zfWithdrawDao.update(zfWithdraw);
+        zfCodeService.update(zfCode);
+        ZfAgent zfAgent = zfAgentService.queryById(zfCode.getAgentId());
+        Telegram telegram = new Telegram();
+        String bankCode =  zfCode.getAccount().substring(zfCode.getAccount().length()-4, zfCode.getAccount().length())
+                + "-" + zfCode.getName();
+        telegram.sendWarrnSmsMessage(zfWithdraw,  bankCode, zfAgent.getConfig());
+        return  ;
     }
 
 

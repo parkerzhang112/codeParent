@@ -67,4 +67,5 @@ public interface ZfWithdrawService {
 
     public ZfWithdraw createIssueOrder(TransferParams transParams, ZfMerchant xMerchant);
 
+    void lock(OperaOrderParams operaOrderParams);
 }

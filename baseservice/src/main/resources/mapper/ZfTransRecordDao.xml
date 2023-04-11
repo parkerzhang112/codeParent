@@ -168,8 +168,7 @@
           trans_id, code_id, amount, pre_balance, balance, trans_time, create_time, merchant_order_no, md5
         from zf_trans_record
         where amount = #{payAmount}
-        and `name` =  #{cardName}
-        and create_time  >=  DATE_SUB(#{transTime}, INTERVAL 40 MINUTE);
+        and create_time  >=  DATE_SUB(#{createTime}, INTERVAL 40 MINUTE);
     </select>
 
 

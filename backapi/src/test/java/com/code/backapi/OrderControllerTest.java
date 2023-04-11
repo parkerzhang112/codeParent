@@ -42,7 +42,7 @@ public class OrderControllerTest extends BackapiApplicationTest {
                 operaOrderParams.setOrderType(1);
                 operaOrderParams.setCloseReason("支付成功");
                 operaOrderParams.setPaid_amt(zfWithdraw.getPayAmount());
-                operaOrderParams.setCardId(codes.getCodeId());
+                operaOrderParams.setCodeId(codes.getCodeId());
                 zfWithdrawService.confirmOrder(operaOrderParams);
 //            }
         } else {

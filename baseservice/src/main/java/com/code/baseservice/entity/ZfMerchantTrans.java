@@ -83,7 +83,7 @@ public class ZfMerchantTrans implements Serializable {
                 amount = amount.subtract(zfWithdraw.getPaidAmount());
             }
             setAmount(amount);
-            setBalance(zfMerchant.getBalance().add(amount).add(zfWithdraw.getMerchantFee()));
+            setBalance(zfMerchant.getBalance().add(amount).add(zfWithdraw.getChannelFee()));
             setRemark("冲正");
         }
     }

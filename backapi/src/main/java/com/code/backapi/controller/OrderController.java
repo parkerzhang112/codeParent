@@ -55,15 +55,15 @@ public class OrderController {
         return responseResult.toJsonString();
     }
 
-    @RequestMapping("cancel")
+    @RequestMapping("/cancel")
     @ResponseBody
     public String cancelOrder(@RequestBody OperaOrderParams operaOrderParams) {
         ResponseResult responseResult = new ResponseResult();
         try {
             if (new Integer(1).equals(operaOrderParams.getOrderType())) {
-                zfWithdrawService.cancelOrder(operaOrderParams);
-            } else {
                 zfRechargeService.cancelOrder(operaOrderParams);
+            } else {
+                zfWithdrawService.cancelOrder(operaOrderParams);
             }
             return responseResult.toJsonString();
         } catch (BaseException e) {
@@ -92,6 +92,23 @@ public class OrderController {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
         } catch (Exception e) {
             log.error("系统异常", e);
+            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }
+        return responseResult.toJsonString();
+    }
+
+    //派单
+    @RequestMapping("lock")
+    @ResponseBody
+    public String lock(@RequestBody OperaOrderParams operaOrderParams) {
+        ResponseResult responseResult = new ResponseResult();
+        try {
+            zfWithdrawService.lock(operaOrderParams);
+
+        } catch (BaseException e) {
+            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+        } catch (Exception e) {
+            log.error("手动补分 系统异常", e);
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
         }
         return responseResult.toJsonString();

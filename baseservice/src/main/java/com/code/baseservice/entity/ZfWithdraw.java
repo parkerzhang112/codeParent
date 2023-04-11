@@ -113,6 +113,9 @@ public class ZfWithdraw implements Serializable {
      * 是否拆单 0未 1是 默认未0
      */
     private Integer isSplit;
+    public  ZfWithdraw(){
+
+    }
 
     public ZfWithdraw(TransferParams transParams) {
 

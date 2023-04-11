@@ -21,18 +21,17 @@
         <result property="cardName" column="card_name" />
         <result property="cardType" column="card_type" />
         <result property="remark" column="remark" />
-        <result property="channelFee" column="channel_fee" jdbcType="NUMERIC"/>
-        <result property="orderType" column="order_type" jdbcType="INTEGER"/>
+        <result property="channelFee" column="channel_fee" />
+        <result property="orderType" column="order_type"/>
         <result property="image" column="image" />
-        <result property="memberFee" column="member_fee" jdbcType="NUMERIC"/>
         <result property="parentOrderNo" column="parent_order_no" />
-        <result property="isSplit" column="is_split" jdbcType="INTEGER"/>
+        <result property="isSplit" column="is_split"/>
     </resultMap>
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfWithdrawMap">
         select
-          order_no, merchant_order_no, pay_amount, paid_amount, code_id, channel_id, merchant_id, order_status, agent_id, notify_url, notify_status, create_time, update_time, card_account, card_address, card_name, card_type, remark, channel_fee, order_type, image, member_fee, parent_order_no, is_split
+          order_no, merchant_order_no, pay_amount, paid_amount, code_id, channel_id, merchant_id, order_status, agent_id, notify_url, notify_status, create_time, update_time, card_account, card_address, card_name, card_type, remark, channel_fee, order_type, image, parent_order_no, is_split
         from zf_withdraw
         where order_no = #{orderNo}
     </select>
@@ -360,8 +359,77 @@
             <if test="image != null and image != ''">
                 image = #{image},
             </if>
-            <if test="memberFee != null">
-                member_fee = #{memberFee},
+            <if test="parentOrderNo != null and parentOrderNo != ''">
+                parent_order_no = #{parentOrderNo},
+            </if>
+            <if test="isSplit != null">
+                is_split = #{isSplit},
+            </if>
+        </set>
+        where order_no = #{orderNo}
+    </update>
+    <update id="updatePaidOrder">
+        update zf_withdraw
+        <set>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+                merchant_order_no = #{merchantOrderNo},
+            </if>
+            <if test="payAmount != null">
+                pay_amount = #{payAmount},
+            </if>
+            <if test="paidAmount != null">
+                paid_amount = #{paidAmount},
+            </if>
+            <if test="codeId != null">
+                code_id = #{codeId},
+            </if>
+            <if test="channelId != null">
+                channel_id = #{channelId},
+            </if>
+            <if test="merchantId != null">
+                merchant_id = #{merchantId},
+            </if>
+            <if test="orderStatus != null">
+                order_status = #{orderStatus},
+            </if>
+            <if test="agentId != null">
+                agent_id = #{agentId},
+            </if>
+            <if test="notifyUrl != null and notifyUrl != ''">
+                notify_url = #{notifyUrl},
+            </if>
+            <if test="notifyStatus != null">
+                notify_status = #{notifyStatus},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="cardAccount != null and cardAccount != ''">
+                card_account = #{cardAccount},
+            </if>
+            <if test="cardAddress != null and cardAddress != ''">
+                card_address = #{cardAddress},
+            </if>
+            <if test="cardName != null and cardName != ''">
+                card_name = #{cardName},
+            </if>
+            <if test="cardType != null and cardType != ''">
+                card_type = #{cardType},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+            <if test="channelFee != null">
+                channel_fee = #{channelFee},
+            </if>
+            <if test="orderType != null">
+                order_type = #{orderType},
+            </if>
+            <if test="image != null and image != ''">
+                image = #{image},
             </if>
             <if test="parentOrderNo != null and parentOrderNo != ''">
                 parent_order_no = #{parentOrderNo},

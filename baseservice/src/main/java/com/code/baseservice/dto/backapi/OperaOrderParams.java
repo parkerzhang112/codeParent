@@ -38,8 +38,8 @@ public class OperaOrderParams {
     private int orderType;
 
     @ApiModelProperty(value = "银行卡id, 出款的时候用", dataType = "int", required = false, allowEmptyValue = true)
-    @JsonProperty("card_id")
-    private Integer cardId;
+    @JsonProperty("code_id")
+    private Integer codeId;
 
     @JsonProperty("memberId")
     private int memberId;
