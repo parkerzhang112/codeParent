@@ -87,10 +87,30 @@
         </where>
     </select>
 
-    <!--新增所有列-->
     <insert id="insert" keyProperty="agentId" useGeneratedKeys="true">
-        insert into zf_agent_trans(agent_id,pre_balance, balance, amount, order_no, remark)
-        values (#{agentId},#{preBalance}, #{balance}, #{amount}, #{orderNo}, #{remark})
+        insert into zf_agent_trans
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="agentId != null">agent_id,</if>
+            <if test="preBalance != null">pre_balance,</if>
+            <if test="balance != null">balance,</if>
+            <if test="amount != null">amount,</if>
+            <if test="orderNo != null">order_no,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="merchantOrderNo != null">merchant_order_no,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="agentId != null">#{agentId},</if>
+            <if test="preBalance != null">#{preBalance},</if>
+            <if test="balance != null">#{balance},</if>
+            <if test="amount != null">#{amount},</if>
+--             <if test="orderNo != null">#{orderNo},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="merchantOrderNo != null">#{merchantOrderNo},</if>
+        </trim>
     </insert>
 
     <insert id="insertBatch" keyProperty="agentId" useGeneratedKeys="true">

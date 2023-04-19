@@ -48,8 +48,6 @@ public class ZfRecharge implements Serializable {
     private String remark;
 
     public  ZfRecharge(RechareParams rechareParams){
-        setCreateTime(new Date());
-        setUpdateTime(new Date());
         setMerchantId(rechareParams.getMerchant_id());
         setMerchantOrderNo(rechareParams.getMerchant_order_no());
         setNotifyUrl(rechareParams.getNotify_url());

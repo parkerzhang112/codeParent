@@ -1,9 +1,7 @@
 package com.code.baseservice.service;
 
 import com.code.baseservice.dto.payapi.RechareParams;
-import com.code.baseservice.entity.ZfChannel;
-import com.code.baseservice.entity.ZfCode;
-import com.code.baseservice.entity.ZfWithdraw;
+import com.code.baseservice.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -28,7 +26,7 @@ public interface ZfCodeService {
     int update(ZfCode code);
 
 
-    List<ZfCode> queryCodeByParamAndChannel(List<ZfChannel> zfChannels, RechareParams rechareParams);
+    List<ZfCode> queryCodeByParamAndChannel(ZfRecharge zfRecharge);
 
     ZfCode selectCardByTrans(ZfWithdraw zfWithdraw);
 

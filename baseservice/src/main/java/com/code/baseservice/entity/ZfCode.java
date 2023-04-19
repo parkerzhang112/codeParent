@@ -72,5 +72,8 @@ public class ZfCode implements Serializable {
 
     private Integer channelId;
 
+    private String ip;
+
+
 }
 

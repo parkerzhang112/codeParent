@@ -1,6 +1,7 @@
 package com.code.baseservice.entity;
 
 import com.code.baseservice.base.enums.TransTypeEnum;
+import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -86,6 +87,20 @@ public class ZfMerchantTrans implements Serializable {
             setBalance(zfMerchant.getBalance().add(amount).add(zfWithdraw.getChannelFee()));
             setRemark("冲正");
         }
+    }
+
+    public ZfMerchantTrans(ZfMerchant zfMerchant, OperaBalanceParams operaBalanceParams) {
+        setMerchantId(zfMerchant.getMerchantId());
+        setTransType(operaBalanceParams.getTransType());
+        setAmount(operaBalanceParams.getAmount());
+        setPreBalance(zfMerchant.getBalance());
+        if(operaBalanceParams.getTransType() == 0){
+            setBalance(zfMerchant.getBalance().subtract(operaBalanceParams.getAmount()));
+        }else {
+            setBalance(zfMerchant.getBalance().add(operaBalanceParams.getAmount()));
+        }
+        setRemark(operaBalanceParams.getRemark());
+        setMerchantFee(BigDecimal.ZERO);
     }
 }
 

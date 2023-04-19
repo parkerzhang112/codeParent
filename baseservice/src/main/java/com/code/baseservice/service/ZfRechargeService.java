@@ -41,4 +41,5 @@ public interface ZfRechargeService {
 
     public void notify(ZfRecharge zfRecharge);
 
+    JSONObject getOrderStatus(String  orderno);
 }

@@ -35,6 +35,7 @@
         from zf_code zc
         left join zf_channel_code on zc.code_id = zf_channel_code.code_id
         left join zf_code_record zcr on zcr.code_id = zc.code_id and zcr.record_date=current_date
+        left join zf_agent za on za.agent_id =   zc.agent_id
 --      #要求卡在线，开启
         where zc.is_open=1 and zc.status=100
         and zc.balance <![CDATA[ < ]]> zc.max_balance
@@ -44,6 +45,10 @@
         <foreach collection="channel_ids" item="id" open="("  close=")" separator=",">
             #{id}
         </foreach>
+        and za.accept_amount + #{pay_amount}  <![CDATA[ <= ]]> za.total_accept_amount
+        and zc.max_amount >= #{pay_amount}
+        and zc.min_amount  <![CDATA[ <= ]]> #{pay_amount}
+
     </select>
 
     <select id="selectCardByTrans" resultMap="ZfCodeMap">
@@ -100,6 +105,9 @@
             </if>
             <if test="name != null and name != ''">
                 name = #{name},
+            </if>
+            <if test="ip != null and ip != ''">
+                name = #{ip},
             </if>
         </set>
         where code_id = #{codeId}

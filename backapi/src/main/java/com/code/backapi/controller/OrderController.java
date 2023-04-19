@@ -2,6 +2,7 @@ package com.code.backapi.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.enums.ResultEnum;
+import com.code.baseservice.base.enums.TransTypeEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.backapi.OperaOrderParams;
@@ -75,12 +76,12 @@ public class OrderController {
         return responseResult.toJsonString();
     }
 
-    @RequestMapping("notify")
+    @RequestMapping("/notify")
     @ResponseBody
     public String notifyOrder(@RequestBody OperaOrderParams operaOrderParams) {
         ResponseResult responseResult = new ResponseResult();
         try {
-            if (new Integer(1).equals(operaOrderParams.getOrderType())) {
+            if (TransTypeEnum.TRANSFER.getValue().equals(operaOrderParams.getOrderType())) {
                 ZfWithdraw zfWithdraw = zfWithdrawService.queryById(operaOrderParams.getOrderNo());
                 zfWithdrawService.notify(zfWithdraw);
             } else {
@@ -96,7 +97,6 @@ public class OrderController {
         }
         return responseResult.toJsonString();
     }
-
 
 
     //派单

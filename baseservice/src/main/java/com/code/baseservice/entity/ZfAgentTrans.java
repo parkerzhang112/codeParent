@@ -32,10 +32,13 @@ public class ZfAgentTrans implements Serializable {
     
     private String remark;
 
-    public ZfAgentTrans(ZfAgent zfAgent, BigDecimal fee) {
+    private String merchantOrderNo;
+
+    public ZfAgentTrans(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee) {
         agentId = zfAgent.getAgentId();
         preBalance = zfAgent.getBalance();
         balance = preBalance.add(fee);
+        merchantOrderNo = zfRecharge.getMerchantOrderNo();
         amount = fee;
         remark = "跑分手续费";
     }

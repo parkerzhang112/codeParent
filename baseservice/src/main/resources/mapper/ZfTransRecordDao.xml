@@ -94,11 +94,43 @@
         </where>
     </select>
 
-    <!--新增所有列-->
+<!--    &lt;!&ndash;新增所有列&ndash;&gt;-->
+<!--    <insert id="insert" keyProperty="transId" useGeneratedKeys="true">-->
+<!--        insert into zf_trans_record(code_id, amount, pre_balance, balance, trans_time, create_time, merchant_order_no, md5)-->
+<!--        values (#{codeId}, #{amount}, #{preBalance}, #{balance}, #{transTime}, #{createTime}, #{merchantOrderNo}, #{md5})-->
+<!--    </insert>-->
     <insert id="insert" keyProperty="transId" useGeneratedKeys="true">
-        insert into zf_trans_record(code_id, amount, pre_balance, balance, trans_time, create_time, merchant_order_no, md5)
-        values (#{codeId}, #{amount}, #{preBalance}, #{balance}, #{transTime}, #{createTime}, #{merchantOrderNo}, #{md5})
+        insert into zf_trans_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="codeId != null">code_id,</if>
+            <if test="amount != null">amount,</if>
+            <if test="preBalance != null">pre_balance,</if>
+            <if test="balance != null">balance,</if>
+            <if test="transTime != null">trans_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">merchant_order_no,</if>
+            <if test="md5 != null">md5,</if>
+            <if test="account != null">account,</if>
+            <if test="transType != null">trans_type,</if>
+            <if test="agentId != null">agent_id,</if>
+            <if test="name != null">name,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="codeId != null">#{codeId},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="preBalance != null">#{preBalance},</if>
+            <if test="balance != null">#{balance},</if>
+            <if test="transTime != null">#{transTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">#{merchantOrderNo},</if>
+            <if test="md5 != null">#{md5},</if>
+            <if test="account != null">#{account},</if>
+            <if test="transType != null">#{transType},</if>
+            <if test="agentId != null">#{agentId},</if>
+            <if test="name != null">#{name},</if>
+        </trim>
     </insert>
+
 
     <insert id="insertBatch" keyProperty="transId" useGeneratedKeys="true">
         insert into zf_trans_record(code_id, amount, pre_balance, balance, trans_time, create_time, merchant_order_no, md5)

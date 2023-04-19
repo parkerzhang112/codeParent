@@ -142,6 +142,10 @@
             <if test="agentAccount != null and agentAccount != ''">
                 agent_account = #{agentAccount},
             </if>
+            <if test="acceptAmount != null and acceptAmount != ''">
+                accept_amount = accept_amount+ #{acceptAmount},
+            </if>
+
         </set>
         where agent_id = #{agentId}
     </update>

@@ -4,11 +4,11 @@ import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfCodeDao;
 import com.code.baseservice.dto.payapi.RechareParams;
-import com.code.baseservice.entity.ZfChannel;
-import com.code.baseservice.entity.ZfCode;
-import com.code.baseservice.entity.ZfWithdraw;
+import com.code.baseservice.entity.*;
 import com.code.baseservice.service.RedisUtilService;
 import com.code.baseservice.service.ZfCodeService;
+import com.code.baseservice.util.Telegram;
+import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -51,20 +51,24 @@ public class ZfCodeServiceImpl implements ZfCodeService {
     }
 
     @Override
-    public List<ZfCode> queryCodeByParamAndChannel(List<ZfChannel> zfChannels, RechareParams rechareParams) {
+    public List<ZfCode> queryCodeByParamAndChannel(ZfRecharge zfRecharge) {
 
-        List<Integer> ids = zfChannels.stream().map(ZfChannel::getChannelId).collect(Collectors.toList());
-        List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, rechareParams.getPay_amount());
+        List<Integer> ids = new ArrayList<Integer>();
+        ids.add(zfRecharge.getChannelId());
+        List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount());
         List<ZfCode> filterCard = new ArrayList<>();
         for (int i =0 ; i < zfCodes.size(); i ++){
-            String codeAmount = "onlyAmount"+rechareParams.getPay_amount().toBigInteger()+zfCodes.get(i).getName();
+            String codeAmount = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(i).getName();
             if(redisUtilService.hasKey(codeAmount)){
                 continue;
             }
             filterCard.add(zfCodes.get(i));
         }
         if(filterCard.size() == 0){
-            throw  new BaseException(ResultEnum.NO_CODE);
+            Telegram telegram = new Telegram();
+            telegram.sendWarrnSmsMessage(zfRecharge, "提单不出码");
+//            throw  new BaseException(ResultEnum.NO_CODE);
+            return  filterCard;
         }
         return filterCard;
     }

@@ -23,7 +23,15 @@ public interface ZfRechargeDao {
      * @param merchantOrderNo 主键
      * @return 实例对象
      */
-    ZfRecharge queryById(@Param("orderNo") String merchantOrderNo);
+    ZfRecharge queryById(@Param("orderNo") String orderNo);
+
+    /**
+     * 通过ID查询单条数据
+     *
+     * @param merchantOrderNo 主键
+     * @return 实例对象
+     */
+    ZfRecharge queryByMerchantOrderNo(@Param("merchantOrderNo") String merchantOrderNo);
 
     /**
      * 查询指定行数据

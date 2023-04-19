@@ -15,7 +15,7 @@ public class QueryParams {
     @NonNull
     private String merchant_order_no;
 
-    @JsonProperty("merchant_Id")
+    @JsonProperty("merchant_id")
     @NonNull
     private Integer merchant_Id;
 

@@ -28,7 +28,7 @@ public interface ZfChannelService {
     ZfChannel queryById(Integer channelId);
 
 
-    List<ZfChannel> queryChannelByParams(RechareParams rechareParams);
+    ZfChannel queryChannelByParams(RechareParams rechareParams);
 
     void sumMerchantBalance(Integer merchantId, BigDecimal subtract);
 

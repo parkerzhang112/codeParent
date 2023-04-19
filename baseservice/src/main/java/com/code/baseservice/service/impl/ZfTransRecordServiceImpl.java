@@ -49,40 +49,47 @@ public class ZfTransRecordServiceImpl implements ZfTransRecordService {
     public void upload(TransParams transParams) {
         //查询码
         ZfCode zfCode = zfCodeService.queryByAccount(transParams.getAccount());
+        if(zfCode == null){
+            log.error("非系统二维码 {}", transParams.getAccount());
+            return;
+        }
         //更新码余额
         zfCode.setBalance(transParams.getBalance());
         zfCode.setUpdateTime(new Date());
+        zfCode.setIp(transParams.getIp());
+        zfCodeService.update(zfCode);
+        log.info("开始遍历 {}", transParams.getTransParams());
         for (TransParams transParams1 : transParams.getTransParams()) {
-            //排重
-            String md5 = (DigestUtils.md5DigestAsHex(
-                    transParams.getAccount()
-                            .concat( transParams.getAmout().toString())
-                            .concat(transParams.getTransTime().toString())
-                            .getBytes()));
-            if(redisUtilService.hasKey(md5)){
-                log.info("流水已存在");
-                return;
-            }
-            ZfTransRecord transRecord = new ZfTransRecord(transParams1);
-            transRecord.setCodeId(zfCode.getCodeId());
-            transRecord.setAccount(transParams.getAccount());
-            //匹配订单
-            if(transParams.getTransType().equals(TransTypeEnum.RRCHARGE.getValue())){
-                ZfRecharge zfRecharge =  zfRechargeService.tryFindOrderByTrans(transRecord);
-                if(zfRecharge != null){
-                    transRecord.setMerchantOrderNo(zfRecharge.getMerchantOrderNo());
-                    zfRechargeService.paidOrder(zfRecharge);
+            try{
+                int  expire =  24 * 3600;
+                //排重
+                String md5 = (DigestUtils.md5DigestAsHex(
+                        transParams.getAccount()
+                                .concat(transParams1.getName().toString())
+                                .concat(transParams1.getAmout().toString())
+                                .concat(transParams1.getTransTime().toString())
+                                .getBytes()));
+                if(redisUtilService.hasKey(md5)){
+                    log.info("流水已存在");
+                    return;
                 }
-            }else {
-                ZfWithdraw zfWithdraw =  zfWithdrawService.tryFindOrderByTrans(transParams1);
-                if(zfWithdraw != null){
-                    transRecord.setMerchantOrderNo(zfWithdraw.getMerchantOrderNo());
-                    zfWithdrawService.paidOrder(zfWithdraw);
+                redisUtilService.set(md5, 1, expire);
+                ZfTransRecord transRecord = new ZfTransRecord(transParams1);
+                transRecord.setCodeId(zfCode.getCodeId());
+                transRecord.setAgentId(zfCode.getAgentId());
+                //匹配订单
+                if(transParams1.getTransType().equals(TransTypeEnum.RRCHARGE.getValue())) {
+                    ZfRecharge zfRecharge = zfRechargeService.tryFindOrderByTrans(transRecord);
+                    if (zfRecharge != null) {
+                        transRecord.setMerchantOrderNo(zfRecharge.getMerchantOrderNo());
+                    }
                 }
+                //写入流水
+                zfTransRecordDao.insert(transRecord);
+            }catch (Exception e){
+                log.info("执行异常 {}", e);
             }
-            //写入流水
-            zfTransRecordDao.insert(transRecord);
-            //完成订单
+
         }
     }
 

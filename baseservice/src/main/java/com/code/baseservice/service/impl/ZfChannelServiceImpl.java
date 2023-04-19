@@ -46,7 +46,7 @@ public class ZfChannelServiceImpl implements ZfChannelService {
     }
 
     @Override
-    public List<ZfChannel> queryChannelByParams(RechareParams rechareParams) {
+    public ZfChannel queryChannelByParams(RechareParams rechareParams) {
         log.info("开始查询渠道 订单号 {}", rechareParams.getMerchant_order_no());
         List<ZfChannel> channels = zfChannelDao.selectChannel(rechareParams);
         if (channels.size() == 0) {
@@ -55,7 +55,7 @@ public class ZfChannelServiceImpl implements ZfChannelService {
         }
         log.info("渠道查询结果 订单号 {}", rechareParams.getMerchant_order_no(), channels);
 
-        return channels;
+        return channels.get(0);
     }
 
     @Override

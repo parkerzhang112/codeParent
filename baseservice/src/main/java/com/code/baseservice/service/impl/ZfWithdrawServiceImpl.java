@@ -214,6 +214,7 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
             if(redisUtilService.tryLock(redisKey, 2)){
                 //订单信息的写入
                 zfWithdrawDao.updatePaidOrder(zfWithdraw);
+                zfAgentService.updateAgentCreditAmount(zfWithdraw, zfWithdraw.getAgentId());
                 if(zfWithdraw.getOrderType().equals(TransOrderTypeEnum.INI_ORDER.getValue())){
                     return;
                 }
@@ -303,8 +304,10 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
             ZfAgent zfAgent = zfAgentService.queryById(zfCode.getAgentId());
             zfWithdraw.setCodeId(zfCode.getCodeId());
             zfWithdraw.setAgentId(zfAgent.getAgentId());
-//            Telegram telegram = new Telegram();
-//            telegram.sendWarrnSmsMessage(xTransfer,  bankCode,xMember.getConfig());
+            Telegram telegram = new Telegram();
+            telegram.sendWarrnWithdraw(zfWithdraw,
+                    zfCode.getAccount().substring(zfCode.getAccount().length()-4, zfCode.getAccount().length()),
+                    zfAgent.getConfig());
             zfCode.setTransStatus(1);
             //更新银行卡出款状态
             zfCodeService.update(zfCode);
@@ -356,7 +359,7 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         Telegram telegram = new Telegram();
         String bankCode =  zfCode.getAccount().substring(zfCode.getAccount().length()-4, zfCode.getAccount().length())
                 + "-" + zfCode.getName();
-        telegram.sendWarrnSmsMessage(zfWithdraw,  bankCode, zfAgent.getConfig());
+        telegram.sendWarrnWithdraw(zfWithdraw,  bankCode, zfAgent.getConfig());
         return  ;
     }
 

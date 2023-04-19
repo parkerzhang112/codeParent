@@ -7,12 +7,16 @@ import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.dto.ResponseResult;
+import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.service.ZfRechargeService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 @Controller
 @Slf4j
@@ -42,6 +46,31 @@ public class RechargeController {
         return responseResult.toJsonString();
     }
 
+    @GetMapping("/order/{orderno}")
+    public String detail(@PathVariable("orderno") String orderno, ModelMap modelMap) {
+        ZfRecharge xRecharge = zfRechargeService.queryById(orderno);
+        modelMap.put("timeout", 10);
+        modelMap.put("xrecharge", xRecharge);
+        return prefix+"/index";
+    }
+
+    @ApiOperation("查询订单")
+    @CrossOrigin(origins = "*", maxAge = 3600)
+    @GetMapping("/order/getOrder/{orderno}")
+    @ResponseBody
+    public String getOrderStatus(@PathVariable("orderno") String orderno){
+        ResponseResult responseResult = new ResponseResult();
+        try {
+           JSONObject jsonObject =  zfRechargeService.getOrderStatus(orderno);
+            responseResult.setData(jsonObject);
+        }catch (BaseException e){
+            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+        }catch (Exception e){
+            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }
+        return responseResult.toJsonString();
+    }
+
     @ApiOperation("查询订单")
     @PostMapping("/view")
     @ResponseBody
@@ -53,6 +82,7 @@ public class RechargeController {
         }catch (BaseException e){
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
         }catch (Exception e){
+            log.error("系统异常 {}", e);
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
         }
         return responseResult.toJsonString();

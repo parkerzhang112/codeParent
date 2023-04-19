@@ -9,6 +9,7 @@ public class DateUtil {
     public static String YYYY_MM_DD = "yyyy-MM-dd";
 
     public static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+    public static String YYYY_MM_DD_HH_MM_SS1 = "yyyy/MM/dd HH:mm:ss";
 
 
     public static String format(Date date, String format) {

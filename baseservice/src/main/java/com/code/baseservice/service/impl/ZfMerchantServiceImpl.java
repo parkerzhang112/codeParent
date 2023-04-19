@@ -11,10 +11,7 @@ import com.code.baseservice.dto.payapi.MerchantParams;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.*;
-import com.code.baseservice.service.RedisUtilService;
-import com.code.baseservice.service.ZfMerchantService;
-import com.code.baseservice.service.ZfMerchantTransService;
-import com.code.baseservice.service.ZfWithdrawService;
+import com.code.baseservice.service.*;
 import com.code.baseservice.util.CommonUtil;
 import com.code.baseservice.util.MD5Util;
 import com.code.baseservice.util.Telegram;
@@ -61,7 +58,7 @@ public class ZfMerchantServiceImpl implements ZfMerchantService {
 
     @Override
     public ZfMerchant vaildMerchant(Integer merchant_id) {
-        log.info("验证商户合法性开始", merchant_id);
+        log.info("验证商户合法性开始 {}", merchant_id);
         ZfMerchant xMerchant =  zfMerchantDao.queryById(merchant_id);
         if(Objects.isNull(xMerchant) && xMerchant.getStatus().equals(CommonStatusEnum.STATR.getValue())){
             log.info("无效商户 {}", merchant_id);
@@ -145,7 +142,16 @@ public class ZfMerchantServiceImpl implements ZfMerchantService {
 
     @Override
     public void operatBalance(OperaBalanceParams operaBalanceParams) {
-
+        log.info("商户余额操作开始 {}", operaBalanceParams);
+        ZfMerchant zfMerchant = queryById(operaBalanceParams.getMerchantId());
+        ZfMerchantTrans zfMerchantTrans = new ZfMerchantTrans(zfMerchant, operaBalanceParams);
+        BigDecimal amount = operaBalanceParams.getTransType() == 0 ? BigDecimal.ZERO.subtract(operaBalanceParams.getAmount()):operaBalanceParams.getAmount();
+        //商户余额上分
+        log.info("实际上分 {}", amount);
+        sumMerchantBalance(operaBalanceParams.getMerchantId(), amount);
+        //资金日志写入
+        log.info("上分记录 {}", zfMerchantTrans);
+        zfMerchantTransService.insert(zfMerchantTrans);
     }
 
     @Override

@@ -108,8 +108,7 @@
                 <filtering>true</filtering>
                 <excludes>
                     <exclude>dev/*</exclude>
-                    <exclude>uat/*</exclude>
-                    <exclude>run/*</exclude>
+                    <exclude>pro/*</exclude>
                 </excludes>
             </resource>
             <resource>

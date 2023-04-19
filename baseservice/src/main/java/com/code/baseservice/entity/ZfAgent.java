@@ -48,8 +48,15 @@ public class ZfAgent implements Serializable {
     private String agentAccount;
 
     private String config;
+    /**
+     * 可收额度
+     */
+    private BigDecimal acceptAmount;
 
-
+    /**
+     * 押金
+     */
+    private BigDecimal totalAcceptAmount;
 
 }
 

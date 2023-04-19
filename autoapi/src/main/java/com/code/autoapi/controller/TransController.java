@@ -6,6 +6,7 @@ import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.AutoResponseResult;
 import com.code.baseservice.dto.autoapi.TransParams;
 import com.code.baseservice.service.ZfTransRecordService;
+import com.code.baseservice.util.IpUtil;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Api(tags = "流水", description = "流水api")
@@ -29,7 +31,30 @@ public class TransController {
 
     @PostMapping(value ={"/zdjrecords"})
     @ResponseBody
-    public String txtrecords(@RequestBody TransParams transParams){
+    public String txtrecords(@RequestBody TransParams transParams, HttpServletRequest request){
+        AutoResponseResult responseResult = new AutoResponseResult();
+        try {
+            log.info("流水上报 {}", transParams);
+            String ip  = IpUtil.getIpAddr(request);
+            transParams.setIp(ip);
+            transParams.parseTxt();
+            zfTransRecordService.upload(transParams);
+            responseResult.setStatus(1);
+        }catch (BaseException e){
+            responseResult.setStatus(1);
+            //其他非法异常，重新上传;
+        }catch (Exception e){
+            log.error("异常流水流水内容 {}", e.getStackTrace());
+            responseResult.setStatus(1);
+        }
+        responseResult.setMsg("操作成功");
+        return responseResult.toJsonString();
+    }
+
+
+    @PostMapping(value ={"/api/index/sms"})
+    @ResponseBody
+    public String sms(@RequestBody TransParams transParams){
         AutoResponseResult responseResult = new AutoResponseResult();
         try {
             transParams.parseTxt();
@@ -45,7 +70,6 @@ public class TransController {
         responseResult.setMsg("操作成功");
         return responseResult.toJsonString();
     }
-
 
     /**
      * 固定成功

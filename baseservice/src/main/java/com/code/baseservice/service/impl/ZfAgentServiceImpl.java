@@ -1,10 +1,8 @@
 package com.code.baseservice.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.code.baseservice.entity.ZfAgent;
+import com.code.baseservice.entity.*;
 import com.code.baseservice.dao.ZfAgentDao;
-import com.code.baseservice.entity.ZfAgentRecord;
-import com.code.baseservice.entity.ZfAgentTrans;
 import com.code.baseservice.service.ZfAgentRecordService;
 import com.code.baseservice.service.ZfAgentService;
 import com.code.baseservice.service.ZfAgentTransService;
@@ -62,25 +60,64 @@ public class ZfAgentServiceImpl implements ZfAgentService {
     }
 
     /**
+     * 修改数据
+     *
+     * @param zfAgent 实例对象
+     * @return 实例对象
+     */
+    @Override
+    public void updateAgentCreditAmount(ZfRecharge zfRecharge, Integer agentId) {
+        log.info("计算代理可收 订单号 {}", zfRecharge.getMerchantOrderNo());
+        ZfAgent zfAgent = new ZfAgent();
+        zfAgent.setAgentId(agentId);
+        if(zfRecharge.getOrderStatus() == 1){
+            zfAgent.setAcceptAmount(zfRecharge.getPayAmount());
+        }else if(zfRecharge.getOrderStatus()==4){
+            zfAgent.setAcceptAmount(zfRecharge.getPaidAmount().subtract(zfRecharge.getPayAmount()));
+        }else if(zfRecharge.getOrderStatus() == 3){
+            zfAgent.setAcceptAmount(BigDecimal.ZERO.subtract(zfRecharge.getPayAmount()));
+        }
+        update(zfAgent);
+    }
+
+    /**
+     * 更新代理可收额度
+     *
+     * @param zfAgent 实例对象
+     * @return 实例对象
+     */
+    @Override
+    public void updateAgentCreditAmount(ZfWithdraw zfWithdraw, Integer agentId) {
+        ZfAgent zfAgent = new ZfAgent();
+        zfAgent.setAgentId(agentId);
+        if(zfWithdraw.getOrderStatus() == 2){
+            zfAgent.setAcceptAmount(BigDecimal.ZERO.subtract(zfWithdraw.getPayAmount()));
+        }
+        update(zfAgent);
+    }
+
+
+
+    /**
      * 计算代理费用
      * @param paidAmount
      * @param zfAgent
      */
     @Override
-    public void updateAgentFee(BigDecimal paidAmount, ZfAgent zfAgent, BigDecimal fee) {
-        BigDecimal agentFee =  sumAgentFee(paidAmount, zfAgent.getRate());
+    public void updateAgentFee(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee) {
+        BigDecimal agentFee =  sumAgentFee(zfRecharge.getPaidAmount(), zfAgent.getRate());
         if(agentFee.compareTo(BigDecimal.ZERO) == 0){
             return;
         }
         //更新代理余额
         zfAgentDao.updateAgentFee(zfAgent.getAgentId(), agentFee.subtract(fee));
         //新增代理流水
-        zfAgentTransService.insert(new ZfAgentTrans(zfAgent,  agentFee.subtract(fee)));
+        zfAgentTransService.insert(new ZfAgentTrans(zfRecharge, zfAgent,  agentFee.subtract(fee)));
         //新增代理报表
-        zfAgentRecordService.updateRecord(new ZfAgentRecord(zfAgent,  agentFee.subtract(fee), paidAmount));
+        zfAgentRecordService.updateRecord(new ZfAgentRecord(zfAgent,  agentFee.subtract(fee), zfRecharge.getPaidAmount()));
         if(zfAgent.getParentId() != null){
-            zfAgentDao.queryById(zfAgent.getParentId());
-            updateAgentFee(paidAmount, zfAgent, agentFee);
+            ZfAgent parentAgent = zfAgentDao.queryById(zfAgent.getParentId());
+            updateAgentFee(zfRecharge, parentAgent, agentFee);
         }
     }
 

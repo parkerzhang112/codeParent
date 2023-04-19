@@ -12,6 +12,7 @@ import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.*;
 import com.code.baseservice.service.*;
 import com.code.baseservice.util.CommonUtil;
+import com.code.baseservice.util.DateUtil;
 import com.code.baseservice.util.HttpClientUtil;
 import com.code.baseservice.util.MD5Util;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ import java.util.*;
  */
 @Service("zfRechargeService")
 @Slf4j
-        public class ZfRechargeServiceImpl implements ZfRechargeService {
+public class ZfRechargeServiceImpl implements ZfRechargeService {
     @Resource
     private ZfRechargeDao zfRechargeDao;
 
@@ -87,20 +88,21 @@ import java.util.*;
         //去重
         vaildRepeat(rechareParams);
         //查渠道
-        List<ZfChannel> zfChannels =  zfChannelService.queryChannelByParams(rechareParams);
+        ZfChannel zfChannel =  zfChannelService.queryChannelByParams(rechareParams);
         //查码
-        List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfChannels, rechareParams);
+//        List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfChannels, rechareParams, zfMerchant);
         //轮码
-        ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfMerchant, rechareParams);
+//        ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfMerchant, rechareParams);
         //入单
-        ZfRecharge zfRecharge = createOrder(zfCode, rechareParams, zfMerchant);
+        ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
         //返回
         return buildReuslt(zfMerchant,zfRecharge);
     }
 
     private JSONObject buildReuslt( ZfMerchant zfMerchant,ZfRecharge zfRecharge) {
         TreeMap<String, Object>  map = new TreeMap<>();
-        map.put("order_no", zfRecharge.getMerchantOrderNo());
+        map.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
+        map.put("order_no", zfRecharge.getOrderNo());
         map.put("pay_amount", zfRecharge.getPayAmount());
         map.put("payurl", viewUrl+"/recharge/order/"+zfRecharge.getOrderNo());
         String sign_str = new CommonUtil().getSign(map);
@@ -112,14 +114,29 @@ import java.util.*;
 
     }
 
-    private ZfRecharge createOrder(ZfCode zfCode, RechareParams rechareParams, ZfMerchant zfMerchant) {
+    private JSONObject buildViewReuslt( ZfMerchant zfMerchant,ZfRecharge zfRecharge) {
+       Integer orderStatus =  zfRecharge.getOrderStatus() == 4 ? 2: zfRecharge.getOrderStatus();
+        TreeMap<String, Object>  map = new TreeMap<>();
+        map.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
+        map.put("pay_amount", zfRecharge.getPayAmount());
+        map.put("order_status",orderStatus);
+        String sign_str = new CommonUtil().getSign(map);
+        sign_str = sign_str.concat("key=".concat(zfMerchant.getKey()));
+        String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
+        log.info("订单号 {}  签名字符串 {} ", zfRecharge.getOrderNo(), sign_str);
+        map.put("sign", sign);
+        return new JSONObject(map);
+
+    }
+
+    private ZfRecharge createOrder(ZfChannel zfChannel, RechareParams rechareParams, ZfMerchant zfMerchant) {
         try {
             String orderNo= CommonUtil.getOrderNo(zfMerchant.getMerchantCode(), "D");
             ZfRecharge xRecharge = new ZfRecharge(rechareParams);
             xRecharge.setOrderNo(orderNo);
-            xRecharge.setChannelId(zfCode.getChannelId());
-            xRecharge.setCodeId(zfCode.getCodeId());
-            xRecharge.setAgentId(zfCode.getAgentId());
+            xRecharge.setChannelId(zfChannel.getChannelId());
+//            xRecharge.setCodeId(zfCode.getCodeId());
+//            xRecharge.setAgentId(zfCode.getAgentId());
             zfRechargeDao.insert(xRecharge);
             return  xRecharge;
         }catch (Exception e){
@@ -128,17 +145,19 @@ import java.util.*;
         }
     }
 
-    private ZfCode selectOneCardByRobin(List<ZfCode> zfCodes, ZfMerchant zfMerchant, RechareParams rechareParams) {
-        String key = zfMerchant.getMerchantId()+RedisConstant.CURRENT_CODE;
+    private ZfCode selectOneCardByRobin(List<ZfCode> zfCodes, ZfRecharge zfRecharge) {
+        String key = zfRecharge.getMerchantId()+RedisConstant.CURRENT_CODE;
         Object currentCard  =  redisUtilService.get(key);
         log.info("当前轮训的码 {}", currentCard);
         if(Objects.isNull(currentCard)){
+            String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(0).getName();
+
             log.info("轮训码信息为空");
             redisUtilService.set(key, zfCodes.get(0).getCodeId().intValue());
             return  zfCodes.get(0);
         }
         for (int i= 0;i < zfCodes.size(); i++){
-            String amountKey = "onlyAmount"+rechareParams.getPay_amount().toBigInteger()+zfCodes.get(i).getName();
+            String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(i).getName();
             if(zfCodes.get(i).getCodeId().equals (currentCard) ){
                 if(i+1 == zfCodes.size()){
                     log.info("码轮训最后一位 {}", zfCodes.get(i));
@@ -193,18 +212,22 @@ import java.util.*;
         if(Objects.isNull(zfRecharge)){
             throw  new BaseException(ResultEnum.ORDER_NO_EXIST);
         }
-        JSONObject jsonObject = buildReuslt(zfMerchant, zfRecharge);
+        JSONObject jsonObject = buildViewReuslt(zfMerchant, zfRecharge);
         return jsonObject;
     }
 
     @Override
     public ZfRecharge tryFindOrderByTrans(ZfTransRecord zfTransRecord) {
+        log.info("开始匹配流水 {}", zfTransRecord);
         List<ZfRecharge> zfRecharges =  zfRechargeDao.tryFindOrderByTrans(zfTransRecord);
         if(zfRecharges.size() == 1){
             ZfRecharge zfRecharge = zfRecharges.get(0);
             //修改订单状态
-            zfRecharge.setPaidAmount(zfRecharge.getPayAmount());
+            zfRecharge.setPaidAmount(zfTransRecord.getAmount());
             zfRecharge.setOrderStatus(2);
+            zfRecharge.setAgentId(zfTransRecord.getAgentId());
+            zfRecharge.setPaidAmount(zfTransRecord.getAmount());
+            zfTransRecord.setMerchantOrderNo(zfRecharge.getMerchantOrderNo());
             paidOrder(zfRecharge);
             return zfRecharge;
         }
@@ -220,7 +243,7 @@ import java.util.*;
         BigDecimal fee = zfChannelService.sumChannelFee(zfRecharge.getPaidAmount(), xChannel);
         zfRecharge.setMerchantFee(fee);
         zfRechargeDao.update(zfRecharge);
-        zfAgentService.updateAgentFee(zfRecharge.getPaidAmount(), zfAgent, BigDecimal.ZERO);
+        zfAgentService.updateAgentFee(zfRecharge, zfAgent, BigDecimal.ZERO);
         //更新码日报
         zfCodeRecordService.updateRecord(new ZfCodeRecord(zfRecharge));
         //计算商户渠道余额
@@ -240,7 +263,7 @@ import java.util.*;
     public void confirmOrder(OperaOrderParams operaOrderParams) {
         try {
             ZfRecharge zfRecharge = zfRechargeDao.queryById(operaOrderParams.getOrderNo());
-            if (zfRecharge.getOrderStatus() != 0) {
+            if (zfRecharge.getOrderStatus() != 1) {
                 log.info("订单已处理 订单号 {}", zfRecharge.getMerchantOrderNo());
                 throw new BaseException(ResultEnum.ERROR);
             }
@@ -257,7 +280,8 @@ import java.util.*;
     @Override
     public void cancelOrder(OperaOrderParams operaOrderParams) {
         ZfRecharge zfRecharge = zfRechargeDao.queryById(operaOrderParams.getOrderNo());
-        if (zfRecharge.getOrderStatus() != 0) {
+        log.info("取消订单 订单号{}", zfRecharge.getMerchantOrderNo());
+        if (zfRecharge.getOrderStatus() > 1) {
             log.info("订单已处理 订单号 {}", zfRecharge.getMerchantOrderNo());
             throw new BaseException(ResultEnum.ERROR);
         }
@@ -268,6 +292,7 @@ import java.util.*;
         //删除唯一金额的rediskey
         String amountKey = zfRecharge.getCodeId() + RedisConstant.UNQUINE+ zfRecharge.getPayAmount().toString();
         redisUtilService.del(amountKey);
+        zfAgentService.updateAgentCreditAmount(zfRecharge, zfRecharge.getAgentId());
         notify(zfRecharge);
     }
 
@@ -290,10 +315,9 @@ import java.util.*;
         String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
         log.info("订单号 {}  签名字符串 {} ", map.get("order_no"), sign_str);
         map.put("sign", sign);
-        jsonObject.put("order_status", OrderStatus);
         try {
-            String reponse = HttpClientUtil.doPostJson(zfRecharge.getNotifyUrl(),jsonObject.toJSONString());
-            log.info("订单号 {}   推送数据{}  结果 {}", zfRecharge.getOrderNo(), jsonObject, reponse);
+            String reponse = HttpClientUtil.doPostJson(zfRecharge.getNotifyUrl(),JSONObject.toJSONString(map));
+            log.info("订单号 {}   推送数据{}  结果 {}", zfRecharge.getOrderNo(), map, reponse);
             if("success".equals(reponse) || "回调成功".equals(reponse)){
                 zfRechargeDao.toNotifySuccess(zfRecharge);
             }else {
@@ -306,5 +330,50 @@ import java.util.*;
             log.error("通知异常 订单号 {}", zfRecharge.getMerchantOrderNo(), e);
             zfRechargeDao.toNotifyException(zfRecharge);
         }
+    }
+
+    @Override
+    public JSONObject getOrderStatus(String orderno) {
+
+        //查单码
+        ZfRecharge zfRecharge = queryById(orderno);
+        TreeMap<String, Object>  map = new TreeMap<>();
+        map.put("order_no", zfRecharge.getMerchantOrderNo());
+        map.put("pay_amount", zfRecharge.getPayAmount());
+        map.put("time",DateUtil.format1(new Date(zfRecharge.getCreateTime().getTime() + 300000), DateUtil.YYYY_MM_DD_HH_MM_SS1) );
+        //检查订单状态 超时，
+        if(new Date().getTime() - zfRecharge.getCreateTime().getTime()  > 300000){
+            map.put("order_status", 3);
+            return new JSONObject(map);
+        }
+        if(!zfRecharge.getOrderStatus().equals(0)){
+            if(zfRecharge.getOrderStatus().equals(1)){
+                ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
+                map.put("payurl", zfCode.getImage());
+            }
+            map.put("order_status", zfRecharge.getOrderStatus());
+            return new JSONObject(map);
+        }
+
+        //没有分配码，则尝试分配
+        List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfRecharge);
+        //没有找到二维码，则继续等待
+        if(zfCodes.size() == 0){
+            map.put("order_status", 0);
+            return new JSONObject(map);
+        }
+        ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfRecharge);
+        zfRecharge.setAgentId(zfCode.getAgentId());
+        zfRecharge.setCodeId(zfCode.getCodeId());
+        zfRecharge.setCreateTime(new Date());
+        zfRecharge.setOrderStatus(1);
+        zfRechargeDao.update(zfRecharge);
+        //增加已收额度
+        zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
+        //更新订单信息
+        map.put("order_status", 1);
+        map.put("payurl", zfCode.getImage());
+        return new JSONObject(map);
+        //返回订单信息
     }
 }

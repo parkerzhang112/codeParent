@@ -77,10 +77,25 @@
         </where>
     </select>
 
-    <!--新增所有列-->
+
     <insert id="insert" keyProperty="codeId" useGeneratedKeys="true">
-        insert into zf_code_record(code_id,record_date, recharge_amount, recharge_times, fee)
-        values (#{codeId},#{recordDate}, #{rechargeAmount}, #{rechargeTimes}, #{fee})
+        insert into zf_code_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="agentId != null">agent_id,</if>
+            <if test="codeId != null">code_id,</if>
+            <if test="recordDate != null">record_date,</if>
+            <if test="rechargeAmount != null">recharge_amount,</if>
+            <if test="rechargeTimes != null">recharge_times,</if>
+            <if test="fee != null">fee,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="agentId != null">#{agentId},</if>
+            <if test="codeId != null">#{codeId},</if>
+            <if test="recordDate != null">#{recordDate},</if>
+            <if test="rechargeAmount != null">#{rechargeAmount},</if>
+            <if test="rechargeTimes != null">#{rechargeTimes},</if>
+            <if test="fee != null">#{fee},</if>
+        </trim>
     </insert>
 
     <insert id="insertBatch" keyProperty="codeId" useGeneratedKeys="true">

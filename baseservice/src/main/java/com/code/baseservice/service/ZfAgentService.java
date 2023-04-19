@@ -2,6 +2,7 @@ package com.code.baseservice.service;
 
 import com.code.baseservice.entity.ZfAgent;
 import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.entity.ZfWithdraw;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -32,7 +33,10 @@ public interface ZfAgentService {
      */
     ZfAgent update(ZfAgent zfAgent);
 
+   void updateAgentCreditAmount(ZfRecharge zfRecharge, Integer agentId);
 
-    void updateAgentFee(BigDecimal paidAmount, ZfAgent zfAgent, BigDecimal fee);
+    void updateAgentCreditAmount(ZfWithdraw zfWithdraw, Integer agentId);
+
+    void updateAgentFee(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee);
 
 }

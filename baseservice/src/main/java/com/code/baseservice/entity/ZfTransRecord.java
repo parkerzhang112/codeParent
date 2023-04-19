@@ -18,6 +18,8 @@ public class ZfTransRecord implements Serializable {
     private static final long serialVersionUID = 874048920690000119L;
     
     private Integer transId;
+
+    private Integer agentId;
     
     private Integer codeId;
     
@@ -27,9 +29,9 @@ public class ZfTransRecord implements Serializable {
     
     private BigDecimal balance;
     
-    private Date transTime;
+    private String transTime;
     
-    private Date createTime;
+    private String createTime;
     
     private String merchantOrderNo;
     
@@ -38,10 +40,14 @@ public class ZfTransRecord implements Serializable {
     private String account;
 
     private Integer transType;
+    private String name;
 
     public ZfTransRecord(TransParams transParams1) {
-        transTime  =  new Date(transParams1.getTransTime());
+        transTime  =  transParams1.getTransTime();
         amount = transParams1.getAmout();
+        balance = transParams1.getBalance();
+        name = transParams1.getName();
+        transType =transParams1.getTransType();
     }
 }
 

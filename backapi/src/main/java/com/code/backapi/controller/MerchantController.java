@@ -2,10 +2,13 @@ package com.code.backapi.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.enums.ResultEnum;
+import com.code.baseservice.base.enums.TransTypeEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.backapi.OperaBalanceParams;
+import com.code.baseservice.dto.backapi.OperaOrderParams;
 import com.code.baseservice.dto.payapi.TransferParams;
+import com.code.baseservice.entity.ZfWithdraw;
 import com.code.baseservice.service.ZfMerchantService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +36,7 @@ public class MerchantController {
     public String operatBalance(@RequestBody OperaBalanceParams operaBalanceParams) {
         ResponseResult responseResult = new ResponseResult();
         try {
-            if(Strings.isEmpty(operaBalanceParams.getOrderNo())){
-                zfMerchantService .operatBalance(operaBalanceParams);
-            }
+            zfMerchantService .operatBalance(operaBalanceParams);
             return responseResult.toJsonString();
         } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
@@ -45,6 +46,8 @@ public class MerchantController {
         }
         return responseResult.toJsonString();
     }
+
+
 
 
     /**

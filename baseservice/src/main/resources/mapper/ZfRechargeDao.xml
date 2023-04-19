@@ -27,14 +27,22 @@
         where order_no = #{orderNo}
     </select>
 
+    <!--查询单个-->
+    <select id="queryByMerchantOrderNo" resultMap="ZfRechargeMap">
+        select
+          merchant_order_no, pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee
+        from zf_recharge
+        where merchant_order_no = #{merchantOrderNo}
+    </select>
+
 
     <!--查询单个-->
     <select id="queryByParam" resultMap="ZfRechargeMap">
         select
           merchant_order_no, pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee
         from zf_recharge
-        where merchant_order_no = #{merchantOrderNo}
-        and merchant_id = #{queryByParamId}
+        where merchant_order_no = #{merchant_order_no}
+        and merchant_id = #{merchant_Id}
     </select>
 
     <!--查询单个-->
@@ -42,9 +50,9 @@
         select
           merchant_order_no, pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee
         from zf_recharge
-        where pay_amount = #{aount}
+        where pay_amount = #{amount}
         and code_id = #{codeId}
-        and order_status = 0
+        and order_status = 1
         and create_time  >=  DATE_SUB(#{transTime}, INTERVAL 10 MINUTE);
     </select>
 
