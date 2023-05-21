@@ -99,6 +99,9 @@
             <if test="updateTime != null">update_time,</if>
             <if test="remark != null">remark,</if>
             <if test="merchantOrderNo != null">merchant_order_no,</if>
+            <if test="transType != null">trans_type,</if>
+            <if test="acceptAmount != null">accept_amount,</if>
+
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="agentId != null">#{agentId},</if>
@@ -110,6 +113,9 @@
             <if test="updateTime != null">#{updateTime},</if>
             <if test="remark != null">#{remark},</if>
             <if test="merchantOrderNo != null">#{merchantOrderNo},</if>
+            <if test="transType != null">#{transType},</if>
+            <if test="acceptAmount != null">#{acceptAmount},</if>
+
         </trim>
     </insert>
 

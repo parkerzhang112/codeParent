@@ -42,6 +42,8 @@ public class ZfTransRecord implements Serializable {
     private Integer transType;
     private String name;
 
+    private Integer status;
+
     public ZfTransRecord(TransParams transParams1) {
         transTime  =  transParams1.getTransTime();
         amount = transParams1.getAmout();
@@ -49,5 +51,8 @@ public class ZfTransRecord implements Serializable {
         name = transParams1.getName();
         transType =transParams1.getTransType();
     }
+
+    public ZfTransRecord()
+    {}
 }
 

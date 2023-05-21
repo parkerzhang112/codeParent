@@ -11,12 +11,15 @@
         <result property="pwd" column="pwd" />
         <result property="googleCode" column="google_code" />
         <result property="agentAccount" column="agent_account" />
+        <result property="acceptAmount" column="accept_amount" />
+
+
     </resultMap>
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfAgentMap">
         select
-          agent_id, balance, name, rate, parent_id, pwd, google_code, agent_account
+          agent_id, balance, name, rate, parent_id, pwd, google_code, agent_account,accept_amount
         from zf_agent
         where agent_id = #{agentId}
     </select>
@@ -122,7 +125,7 @@
         update zf_agent
         <set>
             <if test="balance != null">
-                balance = #{balance},
+                balance = balance + #{balance},
             </if>
             <if test="name != null and name != ''">
                 name = #{name},
@@ -160,6 +163,7 @@
         update zf_agent
         <set>
                 balance = balance + #{fee},
+
         </set>
         where agent_id = #{agentId}
 

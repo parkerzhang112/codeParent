@@ -1,5 +1,6 @@
 package com.code.baseservice.service;
 
+import com.code.baseservice.dto.autoapi.TransParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.*;
 import org.springframework.data.domain.Page;
@@ -31,4 +32,12 @@ public interface ZfCodeService {
     ZfCode selectCardByTrans(ZfWithdraw zfWithdraw);
 
     ZfCode queryByAccount(String account);
+
+    void heart(TransParams transParams);
+
+    ZfCode queryByProudctId(String productId);
+
+    ZfCode queryByName(String name);
+
+    ZfCode queryByAccountByLike(String account);
 }

@@ -147,11 +147,34 @@ public class TransControllerTest extends  AutoapiApplicationTests{
     }
 
     @Test
+    public void testAliPayCompany(){
+        String content = "小程序\\n\\nmessage3\\nlogo\\n支付宝\\n商家平台\\n首页\\n资金管理\\n对账中心\\n产品中心\\n运营中心\\n数据中心\\n账号中心\\n对账总览\\n实时账单(业务查询)\\n交易订单\\n资金流水(账务明细)\\n资金操作记录(资金业务)\\n账单管理\\n账单下载\\n费用账单\\n发票管理\\n给我的发票\\n我开的发票\\n发票资料及收票地址\\n财务凭证\\n凭证申请\\n资金账户\\n支付宝账户\\n账务明细\\n账户\\n收支类型\\n\\n全部\\n\\n收入\\n\\n支出\\n查询时间\\n2023-04-20 00:00:00\\n至\\n2023-04-20 23:59:59\\n今日昨日7日30日\\n收入（元）\\n+200.001笔\\n支出（元）\\n0.000笔\\n数据明细\\n已选\\n0\\n项\\n\\n入账时间\\n支付宝交易号\\t商户订单号\\t对方信息\\t账务类型\\t收支金额（元）\\t账户余额（元）\\t付款备注\\t备注\\t操作\\n\\n2023-04-20 15:22:41\\t20230420...1957\\t46819753...7764\\t\\n150******06\\n**中\\n在线支付\\t200.00\\t200.00\\t\\t\\t\\n共有 1 条\\n经营许可证编号：合字B2-20190046 网站备案：沪ICP备 15027489号";
+        TransParams transParams = new TransParams();
+        transParams.setBankCode("AlipayComany");
+        transParams.setTxt(content);
+        transParams.setAccount("13123123");
+        transParams.parseTxt();
+        zfTransRecordService.upload(transParams);
+    }
+
+    @Test
     public void testAliPayApp(){
-        String content = "余额宝-收益发放|0.01|投资理财|今天|05:29; 余额宝-收益发放|0.01|投资理财|昨天|04:01; 余额宝-自动转入|0.01|投资理财|04-12|11:27; 淘宝签到提现-淘宝（中国）软件有限公司|+0.01|转账红包|04-12|11:27; 余额宝-自动转入|0.08|投资理财|04-12|11:26; ";
+        String content = "收款-诗泽|+100.00|转账红包|04-21|18:48; 收款-弥彦y|+100.00|转账红包|04-21|16:05; 收款-Paul|+100.00|转账红包|04-21|15:59; 收款-志轩|+100.00|转账红包|04-21|15:53; 余额宝-收益发放|0.01|投资理财|04-20|03:38; ";
 //        String content = "您的借记卡账户长城电子借记卡，于09月17日收入(网银跨行)人民币100.00元,交易后余额1250.10【中国银行】";
         TransParams transParams = new TransParams();
-        transParams.setBankCode("appalipay");
+        transParams.setBankCode("alipayapp");
+        transParams.setTxt(content);
+        transParams.setAccount("13123123");
+        transParams.parseTxt();
+        zfTransRecordService.upload(transParams);
+    }
+
+    @Test
+    public void testAliPayAppC(){
+        String content = "收钱码收款-来自**中|+100.00|收入|昨天|23:09;";
+//        String content = "您的借记卡账户长城电子借记卡，于09月17日收入(网银跨行)人民币100.00元,交易后余额1250.10【中国银行】";
+        TransParams transParams = new TransParams();
+        transParams.setBankCode("alipayapp");
         transParams.setTxt(content);
         transParams.setAccount("13123123");
         transParams.parseTxt();

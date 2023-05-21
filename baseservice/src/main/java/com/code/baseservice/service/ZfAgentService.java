@@ -1,5 +1,7 @@
 package com.code.baseservice.service;
 
+import com.code.baseservice.dto.backapi.OperaAgentParams;
+import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import com.code.baseservice.entity.ZfAgent;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfWithdraw;
@@ -39,4 +41,5 @@ public interface ZfAgentService {
 
     void updateAgentFee(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee);
 
+    void operatBalance(OperaAgentParams operaAgentParams);
 }

@@ -3,8 +3,6 @@ package com.code.baseservice.service;
 import com.code.baseservice.dto.autoapi.TransParams;
 import com.code.baseservice.entity.ZfTransRecord;
 import com.code.baseservice.entity.ZfWithdraw;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -26,4 +24,10 @@ public interface ZfTransRecordService {
     void upload(TransParams transParams);
 
     List<ZfTransRecord> queryTransByWithdraw(ZfWithdraw zfWithdraw);
+
+    void checkTxt(TransParams transParams, String ip);
+
+    int update(ZfTransRecord zfTransRecord);
+
+    ZfTransRecord queryId(int trandId);
 }

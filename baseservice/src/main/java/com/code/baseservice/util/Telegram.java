@@ -2,13 +2,8 @@ package com.code.baseservice.util;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.dto.AgentConfig;
-import com.code.baseservice.dto.payapi.RechareParams;
-import com.code.baseservice.entity.ZfCode;
-import com.code.baseservice.entity.ZfMerchant;
-import com.code.baseservice.entity.ZfRecharge;
-import com.code.baseservice.entity.ZfWithdraw;
+import com.code.baseservice.entity.*;
 import lombok.extern.slf4j.Slf4j;
-import sun.management.Agent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +16,7 @@ public class Telegram {
 
     public void sendWarrnSmsMessage(ZfRecharge zfRecharge, String notice) {
         try {
-            String chatId= "-629074970";
+            String chatId= "-921812639";
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("【短信消息预警】\n");
             stringBuilder.append("预警原因："+notice + " \n");
@@ -30,7 +25,7 @@ public class Telegram {
             String url = "https://api.telegram.org/bot5569136092:AAGhxaVuxYlKmy2uqZP9RBbCh0PlBCmDJsI/sendMessage";
             Map<String, Object> map = new HashMap<>();
             map.put("chat_id", chatId);
-            map.put("text", stringBuilder.toString());
+            map.put("c", stringBuilder.toString());
             sendMesaage(map, url);
         }catch (Exception e){
             log.error("纸飞机发送消息异常 {}", e.getStackTrace());
@@ -39,29 +34,34 @@ public class Telegram {
     }
 
     public void sendMerchantBalanceMessage(ZfMerchant xMerchant, ZfRecharge zfRecharge, String config) {
-        String chatId= "-810520302";
-        if(StringUtils.isNotEmpty(config)){
-            AgentConfig agentConfig = JSONObject.parseObject(config,AgentConfig.class);
-            if(StringUtils.isNotEmpty(agentConfig.getExceptionTrans())){
-                chatId = agentConfig.getExceptionTrans();
+        try {
+            String chatId= "-921812639";
+            if(StringUtils.isNotEmpty(config)){
+                AgentConfig agentConfig = JSONObject.parseObject(config,AgentConfig.class);
+                if(StringUtils.isNotEmpty(agentConfig.getExceptionTrans())){
+                    chatId = agentConfig.getExceptionTrans();
+                }
             }
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("【短信消息预警】\n");
+            stringBuilder.append( "商户余额预警 \n");
+            stringBuilder.append("当前余额" + xMerchant.getBalance().add(zfRecharge.getPaidAmount())+"\n");
+            String url = "https://api.telegram.org/bot5569136092:AAGhxaVuxYlKmy2uqZP9RBbCh0PlBCmDJsI/sendMessage";
+            Map<String, Object> map = new HashMap<>();
+            map.put("chat_id",chatId);
+            map.put("text", stringBuilder.toString());
+            sendMesaage(map, url);
+        }catch (Exception e){
+            log.error("消息发送异常");
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("【短信消息预警】\n");
-        stringBuilder.append( "商户余额预警 \n");
-        stringBuilder.append("当前余额" + xMerchant.getBalance().add(zfRecharge.getPaidAmount())+"\n");
-        String url = "https://api.telegram.org/bot5569136092:AAGhxaVuxYlKmy2uqZP9RBbCh0PlBCmDJsI/sendMessage";
-        Map<String, Object> map = new HashMap<>();
-        map.put("chat_id",chatId);
-        map.put("text", stringBuilder.toString());
-        sendMesaage(map, url);
+
     }
 
     /**
      * 入款调单通知
      */
     public void sendWarrnSmsMessage(ZfCode zfCode, String notice, String config){
-        String chatId= "-629074970";
+        String chatId= "-921812639";
         if(StringUtils.isNotEmpty(config)){
             AgentConfig agentConfig = JSONObject.parseObject(config,AgentConfig.class);
             if(StringUtils.isNotEmpty(agentConfig.getCommonNotice())){
@@ -83,7 +83,7 @@ public class Telegram {
      * 入款调单通知
      */
     public void sendWarrnWithdraw( ZfWithdraw zfWithdraw, String notice, String config){
-        String chatId= "-1001858921015";
+        String chatId= "-921812639";
         if(StringUtils.isNotEmpty(config)){
             AgentConfig memberConfig = JSONObject.parseObject(config,AgentConfig.class);
             if(StringUtils.isNotEmpty(memberConfig.getDispacthOrderGroup())){
@@ -97,6 +97,38 @@ public class Telegram {
         stringBuilder.append("" + zfWithdraw.getCardAccount()+"  ");
         stringBuilder.append("" + zfWithdraw.getCardAddress()+"  ");
         stringBuilder.append("" + notice);
+        String url = "https://api.telegram.org/bot5569136092:AAGhxaVuxYlKmy2uqZP9RBbCh0PlBCmDJsI/sendMessage";
+        Map<String, Object> map = new HashMap<>();
+        map.put("chat_id",chatId);
+        map.put("text", stringBuilder.toString());
+        sendMesaage(map, url);
+    }
+
+    public void sendWarrnCodeClient(String notice, ZfCode zfCode, String config) {
+        String chatId= "-921812639";
+        if(StringUtils.isNotEmpty(config)){
+            AgentConfig memberConfig = JSONObject.parseObject(config,AgentConfig.class);
+            if(StringUtils.isNotEmpty(memberConfig.getDispacthOrderGroup())){
+                chatId = memberConfig.getDispacthOrderGroup();
+            }
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("预警原因：" + notice);
+        stringBuilder.append("支付宝账号：" + zfCode.getAccount()+"  ");
+        stringBuilder.append("ip:" + zfCode.getIp());
+        String url = "https://api.telegram.org/bot5569136092:AAGhxaVuxYlKmy2uqZP9RBbCh0PlBCmDJsI/sendMessage";
+        Map<String, Object> map = new HashMap<>();
+        map.put("chat_id",chatId);
+        map.put("text", stringBuilder.toString());
+        sendMesaage(map, url);
+    }
+
+    public void sendWarrnMessageByNoMatch(ZfTransRecord zfTransRecord, ZfCode zfCode) {
+        String chatId= "-921812639";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("预警原因：未上分流水" );
+        stringBuilder.append("支付宝账号：" + zfCode.getName()+" \n");
+        stringBuilder.append("金额:" + zfTransRecord.getAmount());
         String url = "https://api.telegram.org/bot5569136092:AAGhxaVuxYlKmy2uqZP9RBbCh0PlBCmDJsI/sendMessage";
         Map<String, Object> map = new HashMap<>();
         map.put("chat_id",chatId);

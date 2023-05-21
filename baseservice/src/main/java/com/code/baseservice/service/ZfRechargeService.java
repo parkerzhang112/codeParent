@@ -2,9 +2,11 @@ package com.code.baseservice.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.dto.autoapi.TransParams;
+import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import com.code.baseservice.dto.backapi.OperaOrderParams;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
+import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfTransRecord;
 import com.code.baseservice.entity.ZfWithdraw;
@@ -27,11 +29,14 @@ public interface ZfRechargeService {
      */
     ZfRecharge queryById(String merchantOrderNo);
 
+    ZfRecharge queryByMerchantOrderNo(String merchantOrderNo);
+
+
     JSONObject create(RechareParams rechareParams);
 
     JSONObject query(QueryParams queryParams);
 
-    ZfRecharge tryFindOrderByTrans(ZfTransRecord zfTransRecord);
+    ZfRecharge tryFindOrderByTrans(ZfTransRecord zfTransRecord, ZfCode zfCode);
 
     void paidOrder(ZfRecharge zfRecharge);
 
@@ -42,4 +47,7 @@ public interface ZfRechargeService {
     public void notify(ZfRecharge zfRecharge);
 
     JSONObject getOrderStatus(String  orderno);
+
+    void operatOrder(OperaBalanceParams operaBalanceParams);
+
 }

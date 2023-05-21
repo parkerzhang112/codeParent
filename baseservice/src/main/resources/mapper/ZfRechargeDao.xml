@@ -21,8 +21,7 @@
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfRechargeMap">
-        select
-          merchant_order_no, pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee
+        select merchant_order_no, pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee
         from zf_recharge
         where order_no = #{orderNo}
     </select>
@@ -267,9 +266,6 @@
             </if>
             <if test="paidAmount != null">
                 paid_amount = #{paidAmount},
-            </if>
-            <if test="orderNo != null and orderNo != ''">
-                order_no = #{orderNo},
             </if>
             <if test="notifyUrl != null and notifyUrl != ''">
                 notify_url = #{notifyUrl},

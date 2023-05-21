@@ -17,6 +17,10 @@ public class OperaBalanceParams {
     @JsonProperty("order_no")
     private String orderNo;
 
+    @ApiModelProperty(value = "商户订单号", dataType = "String", required = true, allowEmptyValue = false)
+    @JsonProperty("merchant_order_no")
+    private String merchantOrderNo;
+
     @ApiModelProperty(value = "交易类型", dataType = "Integer", required = true, allowEmptyValue = true)
     @JsonProperty("trans_type")
     private Integer transType;

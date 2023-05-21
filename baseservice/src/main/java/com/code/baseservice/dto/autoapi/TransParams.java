@@ -3,9 +3,11 @@ package com.code.baseservice.dto.autoapi;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.enums.TransTypeEnum;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.type.Alias;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -52,6 +54,19 @@ public class TransParams {
     @JsonProperty("transAccout")
     private String transAccout;
 
+    /**
+     * 交易账户
+     */
+    @JsonProperty("loginName")
+    private String loginName;
+
+
+    /**
+     * 商户id
+     */
+    @JsonProperty("productId")
+    private String productId;
+
     /*
      * 交易时间
      */
@@ -66,6 +81,7 @@ public class TransParams {
      * 卡描述 当前余额和银行卡尾号之类的
      */
     @JsonProperty("BankCode")
+    @JsonAlias(value = {"bankCode"})
     private String bankCode;
 
 
@@ -164,28 +180,58 @@ public class TransParams {
 
             }
         }
+        if("AlipayComany".equals(bankCode) ){
+            List<String> infos  =  Arrays.asList(txt.split("\n2023"));
+            for (String info: infos) {
+                try{
+                    if(info.contains("商家平台")){
+                        continue;
+                    }
+                    TransParams transParams1 = new TransParams();
+                    info = info.replace("\t", "nn");
+                    List<String> transinfo =  Arrays.asList(info.split("nn"));
+                    String time = calendar.get(Calendar.YEAR)+transinfo.get(0);
+                    time = time.replaceAll("\\.", "-");
+                    transParams1.setTransTime(time);
+                    transParams1.setName(transinfo.get(3));
+                    transParams1.setTransType(TransTypeEnum.RRCHARGE.getValue());
+                    BigDecimal amout = new BigDecimal(getContent(transinfo.get(4), Pattern.compile("([1-9]\\d*\\.?\\d+)|(0\\.\\d*[1-9])|(\\d+)")));
+                    transParams1.setAmout(amout);
+                    transParams1.setRemark(transinfo.get(6));
+                    transParams.add(transParams1);
+                }catch (Exception e){
+                    log.error("解析异常失败 内容{} 异常原因 {}", info, e);
+                }
 
-        if("appalipay".equals(bankCode)){
+            }
+        }
+
+        if("alipayapp".equals(bankCode)){
             //余额宝-收益发放|0.01|投资理财|今天|05:29; 余额宝-收益发放|0.01|投资理财|昨天|04:01; 余额宝-自动转入|0.01|投资理财|04-12|11:27; 淘宝签到提现-淘宝（中国）软件有限公司|+0.01|转账红包|04-12|11:27; 余额宝-自动转入|0.08|投资理财|04-12|11:26
             List<String> infos  =  Arrays.asList(txt.split("; "));
             for (String info: infos) {
 
                 TransParams transParams1 = new TransParams();
                 List<String> transinfo =  Arrays.asList(info.split("\\|"));
-                name = transinfo.get(2);
-                amout = new BigDecimal(transinfo.get(1).replace(",", ""));
+                if(transinfo.get(1).contains("+")){
+                    transType = TransTypeEnum.RRCHARGE.getValue();
+                    name = transinfo.get(0);
+                    amout = new BigDecimal(transinfo.get(1).replace("+", "").replace(",", ""));
+
+                }else if(transinfo.get(1).contains("-")){
+                    transType = TransTypeEnum.TRANSFER.getValue();
+                    name = transinfo.get(0);
+                    amout = new BigDecimal(transinfo.get(1).replace("+", "").replace(",", ""));
+
+                }
                 if(transinfo.get(3).equals("今天")){
                    transTime =  new SimpleDateFormat("yyyy-MM-dd ").format(new Date()).concat(transinfo.get(4));
-                }else  if(transinfo.get(4).equals("明天")){
-                    transTime = new SimpleDateFormat("yyyy-MM-dd ").format(new Date(System.currentTimeMillis() + 24*3600)).concat(transinfo.get(4));
+                }else  if(transinfo.get(3).equals("昨天")){
+                    transTime = new SimpleDateFormat("yyyy-MM-dd ").format(new Date(System.currentTimeMillis() - 24*3600000)).concat(transinfo.get(4).replace(";", ""));
                 }else {
-                    transTime = new Integer(calendar.get(Calendar.YEAR)).toString().concat("-").concat(transinfo.get(4)).concat(" ").concat(transinfo.get(4));
+                    transTime = new Integer(calendar.get(Calendar.YEAR)).toString().concat("-").concat(transinfo.get(3)).concat(" ").concat(transinfo.get(4).replace(";", ""));
                 }
-                if(transinfo.get(0).contains("入")){
-                    transType = TransTypeEnum.RRCHARGE.getValue();
-                }else {
-                    transType = TransTypeEnum.TRANSFER.getValue();
-                }
+
                 transParams1.setName(name);
                 transParams1.setAmout(amout);
                 transParams1.setTransType(transType);

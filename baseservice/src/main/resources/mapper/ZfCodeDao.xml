@@ -67,6 +67,24 @@
         from zf_code
         where  account =  #{account}
     </select>
+    <select id="queryByProudctId" resultMap="ZfCodeMap">
+        select
+        zf_code.*
+        from zf_code
+        where  product_id =  #{productId}
+    </select>
+    <select id="queryByName" resultMap="ZfCodeMap">
+        select
+        zf_code.*
+        from zf_code
+        where  `name` =  #{name}
+    </select>
+    <select id="queryByAccountByLike" resultMap="ZfCodeMap">
+        select
+        zf_code.*
+        from zf_code
+        where  `account` like "${account}"
+    </select>
 
 
     <!--通过主键修改数据-->
@@ -107,10 +125,13 @@
                 name = #{name},
             </if>
             <if test="ip != null and ip != ''">
-                name = #{ip},
+                ip = #{ip},
             </if>
         </set>
         where code_id = #{codeId}
+    </update>
+    <update id="updateByHeart">
+        update zf_code set update_time = now() where  account = #{account}
     </update>
 
 </mapper>

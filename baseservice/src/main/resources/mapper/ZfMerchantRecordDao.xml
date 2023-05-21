@@ -114,7 +114,7 @@
             </if>
         </set>
         where  merchant_id= #{merchantId}
-        and recordDate = #{recordDate}
+        and record_date = #{recordDate}
     </update>
 
 

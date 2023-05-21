@@ -3,6 +3,7 @@ package com.code.baseservice.service.impl;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfCodeDao;
+import com.code.baseservice.dto.autoapi.TransParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.*;
 import com.code.baseservice.service.RedisUtilService;
@@ -81,6 +82,29 @@ public class ZfCodeServiceImpl implements ZfCodeService {
     @Override
     public ZfCode queryByAccount(String account) {
         return  zfCodeDao.queryByAccount(account);
+    }
+
+    @Override
+    public void heart(TransParams transParams) {
+        zfCodeDao.updateByHeart(transParams.getAccount());
+    }
+
+    @Override
+    public ZfCode queryByProudctId(String productId) {
+        return  zfCodeDao.queryByProudctId(productId);
+
+    }
+
+    @Override
+    public ZfCode queryByName(String name) {
+        return  zfCodeDao.queryByName(name);
+    }
+
+    @Override
+    public ZfCode queryByAccountByLike(String account) {
+        account = account.replaceAll("\\*+", "%");
+        return  zfCodeDao.queryByAccountByLike(account);
+
     }
 
 }

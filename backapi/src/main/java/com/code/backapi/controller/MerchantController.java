@@ -10,6 +10,7 @@ import com.code.baseservice.dto.backapi.OperaOrderParams;
 import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfWithdraw;
 import com.code.baseservice.service.ZfMerchantService;
+import com.code.baseservice.service.ZfRechargeService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -25,6 +26,9 @@ public class MerchantController {
     @Autowired
     ZfMerchantService zfMerchantService;
 
+    @Autowired
+    ZfRechargeService zfRechargeService;
+
 
     /***
      * 商户补分上分操作
@@ -37,6 +41,7 @@ public class MerchantController {
         ResponseResult responseResult = new ResponseResult();
         try {
             zfMerchantService .operatBalance(operaBalanceParams);
+            zfRechargeService.operatOrder(operaBalanceParams);
             return responseResult.toJsonString();
         } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());

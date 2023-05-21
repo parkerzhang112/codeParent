@@ -12,6 +12,9 @@ public class AutoResponseResult {
 
     private int status = 200;
 
+
+    private String retCode = "SUCCESS";
+
     private int code = 1;
 
     private Object data = "";
