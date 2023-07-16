@@ -71,14 +71,12 @@ public class ZfAgentServiceImpl implements ZfAgentService {
     @Override
     public void updateAgentCreditAmount(ZfRecharge zfRecharge, Integer agentId) {
         log.info("计算代理可收 订单号 {}", zfRecharge.getMerchantOrderNo());
-        ZfAgent zfAgent = new ZfAgent();
+        ZfAgent zfAgent = zfAgentDao.queryById(agentId);
         zfAgent.setAgentId(agentId);
         if(zfRecharge.getOrderStatus() == 1){
-            zfAgent.setAcceptAmount(zfRecharge.getPayAmount());
-        }else if(zfRecharge.getOrderStatus()==4){
-            zfAgent.setAcceptAmount(zfRecharge.getPaidAmount().subtract(zfRecharge.getPayAmount()));
+            zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().subtract(zfRecharge.getPayAmount()));
         }else if(zfRecharge.getOrderStatus() == 3){
-            zfAgent.setAcceptAmount(BigDecimal.ZERO.subtract(zfRecharge.getPayAmount()));
+            zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().add(zfRecharge.getPayAmount()));
         }
         zfAgentTransService.insert(new ZfAgentTrans(zfRecharge, zfAgent,  BigDecimal.ZERO));
         update(zfAgent);
@@ -145,11 +143,11 @@ public class ZfAgentServiceImpl implements ZfAgentService {
             if(null != operaAgentParams.getBalance()){
                 zfAgentTrans.setBalance(operaAgentParams.getBalance().add(zfAgent1.getBalance()));
                 zfAgentTrans.setAmount(operaAgentParams.getBalance());
-                zfAgent.setBalance(operaAgentParams.getBalance());
+                zfAgent.setBalance(operaAgentParams.getBalance().add(zfAgent1.getBalance()));
             }else {
                 zfAgentTrans.setAcceptAmount(operaAgentParams.getAcceptAmount().add(zfAgent1.getAcceptAmount()));
                 zfAgentTrans.setAmount(operaAgentParams.getAcceptAmount());
-                zfAgent.setAcceptAmount(operaAgentParams.getAcceptAmount());
+                zfAgent.setAcceptAmount(operaAgentParams.getAcceptAmount().add(zfAgent1.getAcceptAmount()));
             }
         }else {
             if(null != operaAgentParams.getBalance()){
@@ -159,7 +157,7 @@ public class ZfAgentServiceImpl implements ZfAgentService {
             }else {
                 zfAgent.setAcceptAmount(zfAgent1.getAcceptAmount().subtract(operaAgentParams.getAcceptAmount()));
                 zfAgentTrans.setAmount(operaAgentParams.getAcceptAmount());
-                zfAgentTrans.setAcceptAmount(BigDecimal.ZERO.subtract(operaAgentParams.getAcceptAmount()));
+                zfAgentTrans.setAcceptAmount(zfAgent1.getAcceptAmount().subtract(operaAgentParams.getAcceptAmount()));
             }
         }
         zfAgentTrans.setTransType(operaAgentParams.getTransType());

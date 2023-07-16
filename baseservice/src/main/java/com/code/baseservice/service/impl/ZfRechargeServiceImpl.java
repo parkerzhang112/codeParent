@@ -326,8 +326,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             redisUtilService.del(amountKey);
         }
 
-        zfAgentService.updateAgentCreditAmount(zfRecharge, zfRecharge.getAgentId());
         notify(zfRecharge);
+        zfAgentService.updateAgentCreditAmount(zfRecharge, zfRecharge.getAgentId());
     }
 
     @Override

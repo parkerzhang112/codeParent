@@ -18,10 +18,10 @@ public class OperaAgentParams {
     private BigDecimal balance;
 
     @ApiModelProperty(value = "已收额度", dataType = "String", required = true, allowEmptyValue = false)
-    @JsonProperty("acccept_amount")
+    @JsonProperty("accept_amount")
     private BigDecimal acceptAmount;
-    @ApiModelProperty(value = "交易金额", dataType = "String", required = true, allowEmptyValue = false)
 
+    @ApiModelProperty(value = "交易金额", dataType = "String", required = true, allowEmptyValue = false)
     @JsonProperty("amount")
     private BigDecimal amount;
 

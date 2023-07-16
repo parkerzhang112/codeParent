@@ -45,7 +45,7 @@
         <foreach collection="channel_ids" item="id" open="("  close=")" separator=",">
             #{id}
         </foreach>
-        and za.accept_amount + #{pay_amount}  <![CDATA[ <= ]]> za.total_accept_amount
+        and za.accept_amount > #{pay_amount}
         and zc.max_amount >= #{pay_amount}
         and zc.min_amount  <![CDATA[ <= ]]> #{pay_amount}
 

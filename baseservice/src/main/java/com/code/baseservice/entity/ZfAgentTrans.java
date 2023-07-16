@@ -42,18 +42,23 @@ public class ZfAgentTrans implements Serializable {
 
     public ZfAgentTrans(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee) {
         agentId = zfAgent.getAgentId();
-        preBalance = zfAgent.getBalance();
-        balance = preBalance.add(fee);
         transType = TransTypeEnum.RRCHARGE.getValue();
         merchantOrderNo = zfRecharge.getMerchantOrderNo();
-        amount = fee;
-        acceptAmount = zfRecharge.getPayAmount();
-        if(BigDecimal.ZERO.compareTo(fee) == 0){
-            remark = "押金额度操作";
+        amount = zfRecharge.getPayAmount();
+        if (zfRecharge.getOrderStatus().equals(1)) {
+            acceptAmount = zfAgent.getAcceptAmount();
+            transType = TransTypeEnum.TRANSFER.getValue();
+            remark = "订单充值减分";
+        } else if (zfRecharge.getOrderStatus().equals(3)) {
+            acceptAmount = zfAgent.getAcceptAmount();
+            transType = TransTypeEnum.RRCHARGE.getValue();
+            remark = "订单失败上分";
+        } else if(zfRecharge.getOrderStatus() == 2 || zfRecharge.getOrderStatus()== 4) {
+            preBalance = zfAgent.getBalance();
+            balance = preBalance.subtract(fee);
         }else {
-            remark = "跑分手续费";
+            remark = "系统操作";
         }
-
     }
 
     public ZfAgentTrans(){

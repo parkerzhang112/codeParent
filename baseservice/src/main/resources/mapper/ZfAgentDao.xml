@@ -125,7 +125,7 @@
         update zf_agent
         <set>
             <if test="balance != null">
-                balance = balance + #{balance},
+                balance =  #{balance},
             </if>
             <if test="name != null and name != ''">
                 name = #{name},
@@ -145,8 +145,8 @@
             <if test="agentAccount != null and agentAccount != ''">
                 agent_account = #{agentAccount},
             </if>
-            <if test="acceptAmount != null and acceptAmount != ''">
-                accept_amount = accept_amount+ #{acceptAmount},
+            <if test="acceptAmount != null">
+                accept_amount =  #{acceptAmount},
             </if>
 
         </set>
