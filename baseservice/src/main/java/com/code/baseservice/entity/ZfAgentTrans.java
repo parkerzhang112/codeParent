@@ -45,6 +45,7 @@ public class ZfAgentTrans implements Serializable {
         transType = TransTypeEnum.RRCHARGE.getValue();
         merchantOrderNo = zfRecharge.getMerchantOrderNo();
         amount = zfRecharge.getPayAmount();
+        balance = zfAgent.getBalance();;
         if (zfRecharge.getOrderStatus().equals(1)) {
             acceptAmount = zfAgent.getAcceptAmount();
             transType = TransTypeEnum.TRANSFER.getValue();
@@ -54,8 +55,12 @@ public class ZfAgentTrans implements Serializable {
             transType = TransTypeEnum.RRCHARGE.getValue();
             remark = "订单失败上分";
         } else if(zfRecharge.getOrderStatus() == 2 || zfRecharge.getOrderStatus()== 4) {
+            //成功写入积分，前面有计算。重新扣回
+            acceptAmount = zfAgent.getAcceptAmount();
             preBalance = zfAgent.getBalance();
-            balance = preBalance.subtract(fee);
+            amount = fee;
+            balance = preBalance.add(fee);
+            remark = "订单成功返佣";
         }else {
             remark = "系统操作";
         }

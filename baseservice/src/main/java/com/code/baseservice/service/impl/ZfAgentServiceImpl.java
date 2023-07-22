@@ -1,7 +1,9 @@
 package com.code.baseservice.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.enums.TransTypeEnum;
+import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.backapi.OperaAgentParams;
 import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import com.code.baseservice.entity.*;
@@ -109,7 +111,8 @@ public class ZfAgentServiceImpl implements ZfAgentService {
     @Override
     public void updateAgentFee(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee) {
         BigDecimal agentFee =  sumAgentFee(zfRecharge.getPaidAmount(), zfAgent.getRate());
-        if(agentFee.compareTo(BigDecimal.ZERO) == 0){
+        if(agentFee.compareTo(BigDecimal.ZERO) < 0 || agentFee.compareTo(fee) > 0){
+            log.info("代理费率设置错误 {}", zfAgent);
             return;
         }
         //更新代理余额
@@ -135,33 +138,62 @@ public class ZfAgentServiceImpl implements ZfAgentService {
         zfAgent.setAgentId(operaAgentParams.getAgentId());
         zfAgentTrans.setAgentId(operaAgentParams.getAgentId());
         ZfAgent zfAgent1 = zfAgentDao.queryById(operaAgentParams.getAgentId());
+        if(null  != zfAgent1.getParentId() && zfAgent1.getParentId() != 0){
+            //给下级加积分扣上级，计算上级积分
+            if(operaAgentParams.getTransType().equals(TransTypeEnum.RRCHARGE.getValue())) {
+                ZfAgent zfAgentParent = zfAgentDao.queryById(zfAgent1.getParentId());
+                if(zfAgentParent.getAcceptAmount().compareTo(operaAgentParams.getAcceptAmount()) < 0){
+                    throw new BaseException(ResultEnum.NO_ENOUGH_AMOUNT);
+                }
+            }
+
+        }
         zfAgentTrans.setPreBalance(zfAgent1.getBalance());
         zfAgentTrans.setBalance(zfAgent1.getBalance());
         zfAgentTrans.setTransType(operaAgentParams.getTransType());
         zfAgentTrans.setAcceptAmount(zfAgent1.getAcceptAmount());
         if(operaAgentParams.getTransType().equals(TransTypeEnum.RRCHARGE.getValue())){
-            if(null != operaAgentParams.getBalance()){
-                zfAgentTrans.setBalance(operaAgentParams.getBalance().add(zfAgent1.getBalance()));
-                zfAgentTrans.setAmount(operaAgentParams.getBalance());
-                zfAgent.setBalance(operaAgentParams.getBalance().add(zfAgent1.getBalance()));
-            }else {
-                zfAgentTrans.setAcceptAmount(operaAgentParams.getAcceptAmount().add(zfAgent1.getAcceptAmount()));
-                zfAgentTrans.setAmount(operaAgentParams.getAcceptAmount());
-                zfAgent.setAcceptAmount(operaAgentParams.getAcceptAmount().add(zfAgent1.getAcceptAmount()));
-            }
+            zfAgentTrans.setAcceptAmount(operaAgentParams.getAcceptAmount().add(zfAgent1.getAcceptAmount()));
+            zfAgentTrans.setAmount(operaAgentParams.getAcceptAmount());
+            zfAgent.setAcceptAmount(operaAgentParams.getAcceptAmount().add(zfAgent1.getAcceptAmount()));
         }else {
-            if(null != operaAgentParams.getBalance()){
-                zfAgentTrans.setBalance(zfAgent1.getBalance().subtract(operaAgentParams.getBalance()));
-                zfAgentTrans.setAmount(operaAgentParams.getBalance());
-                zfAgent.setBalance(BigDecimal.ZERO.subtract(operaAgentParams.getBalance()));
-            }else {
-                zfAgent.setAcceptAmount(zfAgent1.getAcceptAmount().subtract(operaAgentParams.getAcceptAmount()));
-                zfAgentTrans.setAmount(operaAgentParams.getAcceptAmount());
-                zfAgentTrans.setAcceptAmount(zfAgent1.getAcceptAmount().subtract(operaAgentParams.getAcceptAmount()));
-            }
+            zfAgent.setAcceptAmount(zfAgent1.getAcceptAmount().subtract(operaAgentParams.getAcceptAmount()));
+            zfAgentTrans.setAmount(operaAgentParams.getAcceptAmount());
+            zfAgentTrans.setAcceptAmount(zfAgent1.getAcceptAmount().subtract(operaAgentParams.getAcceptAmount()));
         }
         zfAgentTrans.setTransType(operaAgentParams.getTransType());
         zfAgentTrans.setRemark(operaAgentParams.getRemark());
+        zfAgentTransService.insert(zfAgentTrans);
+        zfAgentDao.update(zfAgent);
+        //如果有上级代理，则返回上级代理增加积分,不能无限制递归增分，只限制一次
+        if( !operaAgentParams.getIsFinsh() && (zfAgent1.getParentId() != null && zfAgent1.getParentId() != 0)  ){
+            operaAgentParams.setAgentId(zfAgent1.getParentId());
+            operaAgentParams.setTransType(TransTypeEnum.TRANSFER.getValue());
+            operaAgentParams.setIsFinsh(true);
+            operaAgentParams.setRemark("给下级下分扣除" + operaAgentParams.getAcceptAmount());
+            operatBalance(operaAgentParams);
+        }
+    }
+
+    @Override
+    public void changeBalance(OperaAgentParams operaAgentParams) {
+        ZfAgentTrans zfAgentTrans = new ZfAgentTrans();
+        ZfAgent zfAgent = new ZfAgent();
+        zfAgent.setAgentId(operaAgentParams.getAgentId());
+        zfAgent.setAcceptAmount(operaAgentParams.getAcceptAmount());
+        zfAgentTrans.setAgentId(operaAgentParams.getAgentId());
+        ZfAgent zfAgent1 = zfAgentDao.queryById(operaAgentParams.getAgentId());
+        if(zfAgent1.getBalance().compareTo(operaAgentParams.getAmount()) < 0){
+            throw new BaseException(ResultEnum.NO_COMMISSION_AMOUNT);
+        }
+        zfAgent.setBalance(zfAgent1.getBalance().subtract(operaAgentParams.getAmount()));
+        zfAgent.setAcceptAmount(zfAgent1.getAcceptAmount().add(operaAgentParams.getAmount()));
+        zfAgentTrans.setPreBalance(zfAgent1.getBalance());
+        zfAgentTrans.setBalance(zfAgent1.getBalance().subtract(operaAgentParams.getAmount()));
+        zfAgentTrans.setTransType(TransTypeEnum.INTERNAL.getValue());
+        zfAgentTrans.setAmount(operaAgentParams.getAmount());
+        zfAgentTrans.setAcceptAmount(zfAgent1.getAcceptAmount().add(operaAgentParams.getAmount()));
+        zfAgentTrans.setRemark("佣金转积分金额");
         zfAgentTransService.insert(zfAgentTrans);
         zfAgentDao.update(zfAgent);
     }

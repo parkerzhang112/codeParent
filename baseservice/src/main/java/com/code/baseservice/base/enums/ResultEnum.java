@@ -48,6 +48,8 @@ public enum ResultEnum {
     REPEAT_CATCH_ORDER(809, "重复抓单"),
     TRANS_STATUS_EXCEPTION(809, "流水状态异常"),
     ORDER_LOCKED(810, "订单已锁定"),
+    NO_ENOUGH_AMOUNT(811, "积分不够"),
+    NO_COMMISSION_AMOUNT(812, "佣金不够"),
 
     ;
 

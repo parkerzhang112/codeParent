@@ -42,4 +42,6 @@ public interface ZfAgentService {
     void updateAgentFee(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee);
 
     void operatBalance(OperaAgentParams operaAgentParams);
+
+    void changeBalance(OperaAgentParams operaAgentParams);
 }

@@ -22,7 +22,7 @@ public class AgentController {
     private ZfAgentService zfAgentService;
 
     /***
-     * 商户补分上分操作
+     * 代理补分上分操作
      * @param operaBalanceParams
      * @return
      */
@@ -32,6 +32,27 @@ public class AgentController {
         ResponseResult responseResult = new ResponseResult();
         try {
             zfAgentService .operatBalance(operaAgentParams);
+            return responseResult.toJsonString();
+        } catch (BaseException e) {
+            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+        } catch (Exception e) {
+            log.error("系统异常", e);
+            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }
+        return responseResult.toJsonString();
+    }
+
+    /***
+     * 代理补分上分操作
+     * @param operaBalanceParams
+     * @return
+     */
+    @PostMapping("/changeBalance")
+    @ResponseBody
+    public String changeBalance(@RequestBody OperaAgentParams operaAgentParams) {
+        ResponseResult responseResult = new ResponseResult();
+        try {
+            zfAgentService .changeBalance(operaAgentParams);
             return responseResult.toJsonString();
         } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());

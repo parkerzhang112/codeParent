@@ -38,6 +38,7 @@
         left join zf_agent za on za.agent_id =   zc.agent_id
 --      #要求卡在线，开启
         where zc.is_open=1 and zc.status=100
+        and za.status =1
         and zc.balance <![CDATA[ < ]]> zc.max_balance
         and (zc.day_limit_amount <![CDATA[ > ]]> zcr.recharge_amount or zc.day_limit_amount=0 or zcr.recharge_amount is null)
         and (zc.day_limit_times <![CDATA[ > ]]> zcr.recharge_times or zc.day_limit_times =0 or zcr.recharge_times is null )

@@ -41,4 +41,6 @@ public class OperaAgentParams {
     @ApiModelProperty(value = "额度类型", dataType = "Integer", required = true, allowEmptyValue = true)
     @JsonProperty("amount_type")
     private Integer amount_type;
+
+    private Boolean isFinsh = false;
 }
