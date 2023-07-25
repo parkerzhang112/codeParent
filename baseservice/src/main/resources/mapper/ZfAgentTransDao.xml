@@ -86,6 +86,12 @@
             </if>
         </where>
     </select>
+    <select id="queryAddTransByOrderNo" resultType="com.code.baseservice.entity.ZfAgentTrans">
+        select *
+        from zf_agent_trans
+        where merchant_order_no = #{merchantOrderNo} and remark="订单超时补分"
+        Limit 1
+    </select>
 
     <insert id="insert" keyProperty="agentId" useGeneratedKeys="true">
         insert into zf_agent_trans

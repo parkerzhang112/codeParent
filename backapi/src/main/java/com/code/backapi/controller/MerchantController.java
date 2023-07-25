@@ -41,7 +41,7 @@ public class MerchantController {
         ResponseResult responseResult = new ResponseResult();
         try {
             zfMerchantService .operatBalance(operaBalanceParams);
-            zfRechargeService.operatOrder(operaBalanceParams);
+//            zfRechargeService.operatOrder(operaBalanceParams);
             return responseResult.toJsonString();
         } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());

@@ -63,6 +63,27 @@ public class OrderController {
         return responseResult.toJsonString();
     }
 
+    /**
+     * 区别于手动取消
+     * @param operaOrderParams
+     * @return
+     */
+    @RequestMapping("/autocancel")
+    @ResponseBody
+    public String autocancel(@RequestBody OperaOrderParams operaOrderParams) {
+        ResponseResult responseResult = new ResponseResult();
+        try {
+            zfRechargeService.autocancel(operaOrderParams);
+            return responseResult.toJsonString();
+        } catch (BaseException e) {
+            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+        } catch (Exception e) {
+            log.error("系统异常", e);
+            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }
+        return responseResult.toJsonString();
+    }
+
     @RequestMapping("/cancel")
     @ResponseBody
     public String cancelOrder(@RequestBody OperaOrderParams operaOrderParams) {

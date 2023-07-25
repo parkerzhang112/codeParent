@@ -58,5 +58,10 @@ public class ZfAgent implements Serializable {
      */
     private BigDecimal totalAcceptAmount;
 
+    /**
+     * 提示
+     */
+    private Integer notice;
+
 }
 

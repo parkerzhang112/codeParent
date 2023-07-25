@@ -297,6 +297,9 @@
             <if test="merchantFee != null">
                 merchant_fee = #{merchantFee},
             </if>
+            <if test="payName != null">
+                pay_name = #{payName},
+            </if>
         </set>
         where merchant_order_no = #{merchantOrderNo}
     </update>

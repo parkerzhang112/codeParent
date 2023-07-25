@@ -133,7 +133,19 @@
       }
 
     }
+    var inputname = prompt("请输入姓名，极速到账", "");
+    if (inputname != null && inputname.length != 0){
+      axios.post("/recharge/order/updateName",
+              {
+                "name":inputname, "orderNo":orderno
+              })
+              .then(function (response) {
 
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+    }
     // 获取基本信息
     function getBaseInfo() {
       axios

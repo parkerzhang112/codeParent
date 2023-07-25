@@ -40,6 +40,9 @@ public class ZfAgentServiceImpl implements ZfAgentService {
     @Autowired
     private ZfAgentRecordService zfAgentRecordService;
 
+    @Autowired
+    private RedisUtilServiceImpl redisUtilService;
+
     /**
      * 通过ID查询单条数据
      *
@@ -72,16 +75,26 @@ public class ZfAgentServiceImpl implements ZfAgentService {
      */
     @Override
     public void updateAgentCreditAmount(ZfRecharge zfRecharge, Integer agentId) {
-        log.info("计算代理可收 订单号 {}", zfRecharge.getMerchantOrderNo());
-        ZfAgent zfAgent = zfAgentDao.queryById(agentId);
-        zfAgent.setAgentId(agentId);
-        if(zfRecharge.getOrderStatus() == 1){
-            zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().subtract(zfRecharge.getPayAmount()));
-        }else if(zfRecharge.getOrderStatus() == 3){
-            zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().add(zfRecharge.getPayAmount()));
+        try{
+            if(redisUtilService.tryLock(agentId.toString(), 2)){
+                log.info("计算代理可收 订单号 {}", zfRecharge.getMerchantOrderNo());
+                ZfAgent zfAgent = zfAgentDao.queryById(agentId);
+                zfAgent.setAgentId(agentId);
+                if(zfRecharge.getOrderStatus() == 1){
+                    zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().subtract(zfRecharge.getPayAmount()));
+                }else if(zfRecharge.getOrderStatus() == 3 || zfRecharge.getOrderStatus() == 4){
+                    zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().add(zfRecharge.getPayAmount()));
+                }else if(zfRecharge.getOrderStatus() == 5){
+                    zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().add(zfRecharge.getPayAmount()));
+                }
+                zfAgentTransService.insert(new ZfAgentTrans(zfRecharge, zfAgent,  BigDecimal.ZERO));
+                update(zfAgent);
+            }
+        }catch (Exception e){
+            log.error("更新代理余额异常 {}", e);
+        }finally {
+            redisUtilService.unlock(agentId.toString());
         }
-        zfAgentTransService.insert(new ZfAgentTrans(zfRecharge, zfAgent,  BigDecimal.ZERO));
-        update(zfAgent);
     }
 
     /**
@@ -110,24 +123,49 @@ public class ZfAgentServiceImpl implements ZfAgentService {
      */
     @Override
     public void updateAgentFee(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee) {
-        BigDecimal agentFee =  sumAgentFee(zfRecharge.getPaidAmount(), zfAgent.getRate());
-        if(agentFee.compareTo(BigDecimal.ZERO) < 0 || agentFee.compareTo(fee) > 0){
-            log.info("代理费率设置错误 {}", zfAgent);
-            return;
-        }
-        //更新代理余额
-        zfAgentDao.updateAgentFee(zfAgent.getAgentId(), agentFee.subtract(fee));
-        //新增代理流水
-        zfAgentTransService.insert(new ZfAgentTrans(zfRecharge, zfAgent,  agentFee.subtract(fee)));
-        //新增代理报表
-        zfAgentRecordService.updateRecord(new ZfAgentRecord(zfAgent,  agentFee.subtract(fee), zfRecharge.getPaidAmount()));
-        if(zfAgent.getParentId() != null && zfAgent.getParentId() != 0){
-            ZfAgent parentAgent = zfAgentDao.queryById(zfAgent.getParentId());
-            if(parentAgent == null){
-                log.info("父级代理不存在 {}", zfAgent.getParentId());
-                return;
+        try {
+            if(redisUtilService.tryLock(zfAgent.getAgentId().toString(), 2)){
+                BigDecimal agentFee =  sumAgentFee(zfRecharge.getPaidAmount(), zfAgent.getRate());
+                if(agentFee.compareTo(BigDecimal.ZERO) < 0 ){
+                    log.info("代理费率设置错误 {}", zfAgent);
+                    return;
+                }
+                if(fee.compareTo(BigDecimal.ZERO)>0 && agentFee.compareTo(fee) < 0){
+                    log.info("代理费率设置错误 {}", zfAgent);
+                    return;
+                }
+                zfAgent.setBalance(zfAgent.getBalance().add(agentFee.subtract(fee)));
+                //新增代理流水
+                zfAgentTransService.insert(new ZfAgentTrans(zfRecharge, zfAgent,  agentFee.subtract(fee)));
+                //查询订单是否有代理流水补分记录，如果有说明已经超时补分过
+                ZfAgentTrans zfAgentTrans = zfAgentTransService.queryAddTransByOrderNo(zfRecharge.getMerchantOrderNo());
+                if(null != zfAgentTrans){
+                    //扣除积分
+                    zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().subtract(zfRecharge.getPayAmount()));
+                    //说明订单自动取消过，这个时候，要新增吧积分重新扣回
+                    ZfAgentTrans zfAgentTrans1 = new ZfAgentTrans();
+                    zfAgentTrans1.buildFailOrderRollbackBySuccess(zfRecharge,zfAgent);
+                    zfAgentTransService.insert(zfAgentTrans1);
+                }
+                //更新代理余额
+                zfAgentDao.update(zfAgent);
+                //新增代理报表
+                zfAgentRecordService.updateRecord(new ZfAgentRecord(zfAgent,  agentFee.subtract(fee), zfRecharge.getPaidAmount()));
+                if(zfAgent.getParentId() != null && zfAgent.getParentId() != 0){
+                    ZfAgent parentAgent = zfAgentDao.queryById(zfAgent.getParentId());
+                    if(parentAgent == null){
+                        log.info("父级代理不存在 {}", zfAgent.getParentId());
+                        return;
+                    }
+                    updateAgentFee(zfRecharge, parentAgent, agentFee);
+                }
             }
-            updateAgentFee(zfRecharge, parentAgent, agentFee);
+
+        }catch (Exception e){
+            log.error("更新代理余额失败, {}", e);
+        }finally {
+            redisUtilService.unlock(zfAgent.getAgentId().toString());
+
         }
     }
 
@@ -146,7 +184,11 @@ public class ZfAgentServiceImpl implements ZfAgentService {
                     throw new BaseException(ResultEnum.NO_ENOUGH_AMOUNT);
                 }
             }
-
+        }
+        if(zfAgent1.getAcceptAmount().compareTo(operaAgentParams.getAcceptAmount())<0
+                && operaAgentParams.getTransType() == TransTypeEnum.TRANSFER.getValue()){
+            log.info("分数不能扣成负数");
+            throw new BaseException(ResultEnum.NO_ENOUGH_AMOUNT);
         }
         zfAgentTrans.setPreBalance(zfAgent1.getBalance());
         zfAgentTrans.setBalance(zfAgent1.getBalance());
@@ -166,9 +208,13 @@ public class ZfAgentServiceImpl implements ZfAgentService {
         zfAgentTransService.insert(zfAgentTrans);
         zfAgentDao.update(zfAgent);
         //如果有上级代理，则返回上级代理增加积分,不能无限制递归增分，只限制一次
-        if( !operaAgentParams.getIsFinsh() && (zfAgent1.getParentId() != null && zfAgent1.getParentId() != 0)  ){
+        if( !operaAgentParams.getIsFinsh() && (zfAgent1.getParentId() != null && zfAgent1.getParentId() != 0)   ){
             operaAgentParams.setAgentId(zfAgent1.getParentId());
-            operaAgentParams.setTransType(TransTypeEnum.TRANSFER.getValue());
+            if(operaAgentParams.getTransType() == TransTypeEnum.TRANSFER.getValue()){
+                operaAgentParams.setTransType(TransTypeEnum.RRCHARGE.getValue());
+            }else {
+                operaAgentParams.setTransType(TransTypeEnum.TRANSFER.getValue());
+            }
             operaAgentParams.setIsFinsh(true);
             operaAgentParams.setRemark("给下级下分扣除" + operaAgentParams.getAcceptAmount());
             operatBalance(operaAgentParams);

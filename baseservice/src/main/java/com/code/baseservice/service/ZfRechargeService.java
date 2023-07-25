@@ -13,6 +13,8 @@ import com.code.baseservice.entity.ZfWithdraw;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.Map;
+
 /**
  * (ZfRecharge)表服务接口
  *
@@ -50,4 +52,7 @@ public interface ZfRechargeService {
 
     void operatOrder(OperaBalanceParams operaBalanceParams);
 
+    void autocancel(OperaOrderParams operaOrderParams);
+
+    void postName(Map<String, Object> map);
 }

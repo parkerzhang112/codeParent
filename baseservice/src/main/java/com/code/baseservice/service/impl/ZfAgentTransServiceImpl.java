@@ -79,4 +79,9 @@ public class ZfAgentTransServiceImpl implements ZfAgentTransService {
     public boolean deleteById(Integer agentId) {
         return this.zfAgentTransDao.deleteById(agentId) > 0;
     }
+
+    @Override
+    public ZfAgentTrans queryAddTransByOrderNo(String merchantOrderNo) {
+        return this.zfAgentTransDao.queryAddTransByOrderNo(merchantOrderNo);
+    }
 }

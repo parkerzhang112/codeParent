@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Objects;
 
 @Controller
@@ -54,6 +55,7 @@ public class RechargeController {
         return prefix+"/index";
     }
 
+
     @ApiOperation("查询订单")
     @CrossOrigin(origins = "*", maxAge = 3600)
     @GetMapping("/order/getOrder/{orderno}")
@@ -66,6 +68,25 @@ public class RechargeController {
         }catch (BaseException e){
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
         }catch (Exception e){
+            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }
+        return responseResult.toJsonString();
+    }
+
+    @ApiOperation("查询订单")
+    @CrossOrigin(origins = "*", maxAge = 3600)
+    @PostMapping("/order/updateName")
+    @ResponseBody
+    public String updateName(@RequestBody Map<String, Object> map){
+        ResponseResult responseResult = new ResponseResult();
+        try {
+              zfRechargeService.postName(map);
+              responseResult.setCode(ResultEnum.SUCCESS.getCode());
+        }catch (BaseException e){
+            log.error("系统异常 {}", e);
+            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+        }catch (Exception e){
+            log.error("系统异常 {}", e);
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
         }
         return responseResult.toJsonString();

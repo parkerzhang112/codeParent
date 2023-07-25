@@ -54,4 +54,5 @@ public interface ZfAgentTransService {
      */
     boolean deleteById(Integer agentId);
 
+    ZfAgentTrans queryAddTransByOrderNo(String merchantOrderNo);
 }

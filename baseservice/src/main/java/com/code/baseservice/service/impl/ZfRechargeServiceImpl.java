@@ -294,7 +294,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     public void confirmOrder(OperaOrderParams operaOrderParams) {
         try {
             ZfRecharge zfRecharge = zfRechargeDao.queryById(operaOrderParams.getOrderNo());
-            if (zfRecharge.getOrderStatus() != 1) {
+            if (zfRecharge.getOrderStatus() != 1 && zfRecharge.getOrderStatus() != 5) {
                 log.info("订单已处理 订单号 {}", zfRecharge.getMerchantOrderNo());
                 throw new BaseException(ResultEnum.ERROR);
             }
@@ -330,10 +330,42 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         zfAgentService.updateAgentCreditAmount(zfRecharge, zfRecharge.getAgentId());
     }
 
+    /**
+     * 区别于手动取消，不会通知商户，不更新订单状态，删除接单金额，重新接口，会补回代理积分
+     * @param operaOrderParams
+     */
+    @Override
+    public void autocancel(OperaOrderParams operaOrderParams) {
+        ZfRecharge zfRecharge = zfRechargeDao.queryById(operaOrderParams.getOrderNo());
+        log.info("自动取消订单 订单号{}", zfRecharge.getMerchantOrderNo());
+        if (zfRecharge.getOrderStatus() > 1) {
+            log.info("订单已处理 订单号 {}", zfRecharge.getMerchantOrderNo());
+            throw new BaseException(ResultEnum.ERROR);
+        }
+        zfRecharge.setRemark(operaOrderParams.getCloseReason());
+        zfRecharge.setUpdateTime(new Date());
+        zfRecharge.setOrderStatus(5);
+        if(zfRecharge.getCodeId() != null && zfRecharge.getCodeId() != 0){
+            String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfRecharge.getCodeId();
+            redisUtilService.del(amountKey);
+            zfAgentService.updateAgentCreditAmount(zfRecharge, zfRecharge.getAgentId());
+        }
+        zfRechargeDao.update(zfRecharge);
+    }
+
+    @Override
+    public void postName(Map<String, Object> map) {
+        ZfRecharge zfRecharge = zfRechargeDao.queryById(map.get("orderNo").toString());
+        if(zfRecharge == null){
+            return;
+        }
+        zfRecharge.setPayName(map.get("name").toString());
+        zfRechargeDao.update(zfRecharge);
+    }
+
     @Override
     public void notify(ZfRecharge zfRecharge) {
         ZfMerchant xMerchant = zfMerchantService.queryById(zfRecharge.getMerchantId());
-        ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
         Integer OrderStatus = zfRecharge.getOrderStatus().equals(4) ? 2:zfRecharge.getOrderStatus() ;
         TreeMap<String, Object>  map = new TreeMap<>();
         map.put("merchant_id", zfRecharge.getMerchantId());
@@ -402,8 +434,13 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         zfRecharge.setCodeId(zfCode.getCodeId());
         zfRecharge.setCreateTime(new Date());
         zfRecharge.setOrderStatus(1);
+        redisUtilService.set(zfCode.getAgentId().toString(), 1,0);
         zfRechargeDao.update(zfRecharge);
         //增加已收额度
+        ZfAgent zfAgent = new ZfAgent();
+        zfAgent.setNotice(1);
+        zfAgent.setAgentId(zfCode.getAgentId());
+        zfAgentService.update(zfAgent);
         zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
         //更新订单信息
         map.put("order_status", 1);
@@ -436,5 +473,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfRecharge.getCodeId();
         redisUtilService.del(amountKey);
     }
+
+
 
 }
