@@ -43,4 +43,8 @@ public class OperaAgentParams {
     private Integer amount_type;
 
     private Boolean isFinsh = false;
+
+    @ApiModelProperty(value = "是否是管理也操作", dataType = "Integer", required = true, allowEmptyValue = true)
+    @JsonProperty("is_admin")
+    private Boolean isAdmin  = false;
 }

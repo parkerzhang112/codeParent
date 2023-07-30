@@ -81,5 +81,9 @@ public interface ZfAgentTransDao {
     int deleteById(Integer agentId);
 
     ZfAgentTrans queryAddTransByOrderNo(@Param("merchantOrderNo") String merchantOrderNo);
+
+    ZfAgentTrans queryAddTransBySub(@Param("merchantOrderNo") String merchantOrderNo);
+
+
 }
 

@@ -86,10 +86,17 @@
             </if>
         </where>
     </select>
-    <select id="queryAddTransByOrderNo" resultType="com.code.baseservice.entity.ZfAgentTrans">
+    <select id="queryAddTransByOrderNo" resultMap="ZfAgentTransMap">
         select *
         from zf_agent_trans
         where merchant_order_no = #{merchantOrderNo} and remark="订单超时补分"
+        Limit 1
+    </select>
+
+    <select id="queryAddTransBySub" resultMap="ZfAgentTransMap">
+        select *
+        from zf_agent_trans
+        where merchant_order_no = #{merchantOrderNo} and trans_type=0
         Limit 1
     </select>
 

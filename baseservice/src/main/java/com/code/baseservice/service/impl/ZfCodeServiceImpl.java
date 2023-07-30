@@ -59,15 +59,14 @@ public class ZfCodeServiceImpl implements ZfCodeService {
         List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount());
         List<ZfCode> filterCard = new ArrayList<>();
         for (int i =0 ; i < zfCodes.size(); i ++){
-            String codeAmount = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(i).getName();
-            if(redisUtilService.hasKey(codeAmount)){
-                continue;
-            }
+//            String codeAmount = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(i).getName();
+//            if(redisUtilService.hasKey(codeAmount)){
+//                continue;
+//            }
             filterCard.add(zfCodes.get(i));
         }
         if(filterCard.size() == 0){
-            Telegram telegram = new Telegram();
-            telegram.sendWarrnSmsMessage(zfRecharge, "提单不出码");
+
 //            throw  new BaseException(ResultEnum.NO_CODE);
             return  filterCard;
         }

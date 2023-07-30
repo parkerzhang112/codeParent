@@ -60,19 +60,15 @@ public class Telegram {
     /**
      * 入款调单通知
      */
-    public void sendWarrnSmsMessage(ZfCode zfCode, String notice, String config){
-        String chatId= "-921812639";
-        if(StringUtils.isNotEmpty(config)){
-            AgentConfig agentConfig = JSONObject.parseObject(config,AgentConfig.class);
-            if(StringUtils.isNotEmpty(agentConfig.getCommonNotice())){
-                chatId = agentConfig.getExceptionTrans();
-            }
-        }
+    public void sendWarrnSmsMessage(ZfRecharge zfRecharge, String notice, String config){
+        String chatId= "-982175337";
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("【短信消息预警】\n");
         stringBuilder.append("预警原因："+notice + " \n");
-        stringBuilder.append("二维码：" + zfCode.getAccount().substring(zfCode.getAccount().length()-4)+"\n");
-        stringBuilder.append("余额：" + zfCode.getBalance()+"\n");
+        stringBuilder.append("商户id：" + zfRecharge.getMerchantId() + "\n");
+        stringBuilder.append("订单号:" + zfRecharge.getMerchantOrderNo() + "\n");
+        stringBuilder.append("订单金额：" + zfRecharge.getPayAmount() + "\n");
+        stringBuilder.append("查询码："+config );
         String url = "https://api.telegram.org/bot5569136092:AAGhxaVuxYlKmy2uqZP9RBbCh0PlBCmDJsI/sendMessage";
         Map<String, Object> map = new HashMap<>();
         map.put("chat_id", chatId);

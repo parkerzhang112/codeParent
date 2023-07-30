@@ -55,4 +55,13 @@ public interface ZfAgentTransService {
     boolean deleteById(Integer agentId);
 
     ZfAgentTrans queryAddTransByOrderNo(String merchantOrderNo);
+
+    /**
+     * 查询减分流水
+     * @param merchantOrderNo
+     * @return
+     */
+    ZfAgentTrans queryAddTransBySub(String merchantOrderNo);
+
+
 }

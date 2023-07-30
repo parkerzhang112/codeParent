@@ -79,7 +79,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
         try {
             String reponse = HttpClientUtil.doPostJson("http://qw520.top/recharge/create", JSONObject.toJSONString(rechareParams));
             JSONObject jsonObject = JSONObject.parseObject(reponse);
-            HttpClientUtil.doGet("http://qw520.top/recharge/order/getOrder/" +jsonObject.getJSONObject("data").getString("order_no") );
+            HttpClientUtil.doGet("http://dfzf.top/recharge/order/getOrder/" +jsonObject.getJSONObject("data").getString("order_no") );
             System.out.print("创建订单测试单元结果" + jsonObject);
         }catch (BaseException e){
             throw new RuntimeException(e);

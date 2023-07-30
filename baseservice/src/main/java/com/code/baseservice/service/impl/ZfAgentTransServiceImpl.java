@@ -84,4 +84,9 @@ public class ZfAgentTransServiceImpl implements ZfAgentTransService {
     public ZfAgentTrans queryAddTransByOrderNo(String merchantOrderNo) {
         return this.zfAgentTransDao.queryAddTransByOrderNo(merchantOrderNo);
     }
+
+    @Override
+    public ZfAgentTrans queryAddTransBySub(String merchantOrderNo) {
+        return this.zfAgentTransDao.queryAddTransBySub(merchantOrderNo);
+    }
 }

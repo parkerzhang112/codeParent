@@ -59,8 +59,15 @@ public class ZfAgentRecord implements Serializable {
         recordDate  = DateUtil.format(new Date(), DateUtil.YYYY_MM_DD);
     }
 
+    public  ZfAgentRecord(){
+
+    }
 
 
-
+    public void buildAgentRecordBySunAgentSuccessAndParent(ZfAgent zfAgent, BigDecimal fee) {
+        income  = fee;
+        agentId = zfAgent.getAgentId();
+        recordDate  = DateUtil.format(new Date(), DateUtil.YYYY_MM_DD);
+    }
 }
 
