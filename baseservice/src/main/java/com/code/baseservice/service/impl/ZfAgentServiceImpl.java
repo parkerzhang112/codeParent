@@ -222,6 +222,7 @@ public class ZfAgentServiceImpl implements ZfAgentService {
         zfAgentTrans.setTransType(operaAgentParams.getTransType());
         zfAgentTrans.setRemark(operaAgentParams.getRemark());
         zfAgentTransService.insert(zfAgentTrans);
+        log.info("更新代理信息 {}", zfAgent);
         zfAgentDao.update(zfAgent);
         //如果有上级代理，则返回上级代理增加积分,不能无限制递归增分，只限制一次
         if( !operaAgentParams.getIsFinsh() && (zfAgent1.getParentId() != null && zfAgent1.getParentId() != 0)   && !operaAgentParams.getIsAdmin() ){

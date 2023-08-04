@@ -49,7 +49,7 @@
         and za.accept_amount > #{pay_amount}
         and zc.max_amount >= #{pay_amount}
         and zc.min_amount  <![CDATA[ <= ]]> #{pay_amount}
-        order by update_time desc;
+        order by zc.code_id desc;
     </select>
 
     <select id="selectCardByTrans" resultMap="ZfCodeMap">

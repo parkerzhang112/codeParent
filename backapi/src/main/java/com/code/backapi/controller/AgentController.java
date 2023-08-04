@@ -31,6 +31,7 @@ public class AgentController {
     public String operatBalance(@RequestBody OperaAgentParams operaAgentParams) {
         ResponseResult responseResult = new ResponseResult();
         try {
+            log.info("开始操作代理积分，{}", operaAgentParams);
             zfAgentService .operatBalance(operaAgentParams);
             return responseResult.toJsonString();
         } catch (BaseException e) {
