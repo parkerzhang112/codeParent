@@ -82,6 +82,7 @@
                 <excludes>
                     <exclude>dev/*</exclude>
                     <exclude>pro/*</exclude>
+                    <exclude>jinhong/*</exclude>
                 </excludes>
             </resource>
             <resource>

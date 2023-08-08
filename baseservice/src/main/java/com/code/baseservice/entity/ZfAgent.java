@@ -63,5 +63,10 @@ public class ZfAgent implements Serializable {
      */
     private Integer notice;
 
+    /**
+     * 权重
+     */
+    private BigDecimal weight;
+
 }
 

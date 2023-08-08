@@ -8,6 +8,10 @@ public class RedisConstant {
 
     public static String CURRENT_CODE = "current_code";
 
+    public static String CURRENT_AGENT = "current_agent";
+    public static String WEIFHT_AGENT = "weight_agent";
+
+
     public static String PAID_ORDER = "p_order";
 
     public static String CARD_RECORD = "c_record";

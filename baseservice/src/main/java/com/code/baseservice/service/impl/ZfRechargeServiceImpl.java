@@ -151,13 +151,44 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         }
     }
 
+    private Integer selectOneAgentByRobin(List<Integer> zfAgents,String key, Integer merchantId){
+        Object currentAgent  =  redisUtilService.get(key);
+        if(currentAgent == null){
+            redisUtilService.set(key, zfAgents.get(0).intValue());
+            return zfAgents.get(0);
+        }
+
+        for (int i= 0;i < zfAgents.size(); i++) {
+            if(zfAgents.get(i) < (Integer) currentAgent ){
+                String weightAgent = merchantId+RedisConstant.WEIFHT_AGENT;
+                ZfAgent zfAgent = zfAgentService.queryById((Integer)currentAgent);
+                if(zfAgent.getWeight().compareTo(BigDecimal.ONE) > -1){
+                    BigDecimal weight  = (BigDecimal) redisUtilService.get(weightAgent);
+                    weight =  weight.add(zfAgent.getWeight().subtract(BigDecimal.ONE));
+                    if(weight.compareTo(BigDecimal.ONE) > -1){
+                        return (Integer) currentAgent;
+                    }else {
+                        redisUtilService.set(key, zfAgents.get(i).intValue());
+                    }
+                }
+                log.info("代理轮训下一位 {}", zfAgents.get(i));
+            }
+        }
+        log.info("代理轮询重置 取第一位 {}", zfAgents.get(0));
+        return zfAgents.get(0);
+    }
+
     private ZfCode selectOneCardByRobin(List<ZfCode> zfCodes, ZfRecharge zfRecharge) {
 
         Telegram telegram = new Telegram();
         List<String > codeDistinctList = zfCodes.stream().map(ZfCode::getName).collect(Collectors.toList());
         telegram.sendWarrnSmsMessage(zfRecharge, "存款出码", String.join("-", codeDistinctList));
+        List<Integer > agengids = zfCodes.stream().map(ZfCode::getAgentId).collect(Collectors.toList());
+        String agentKey = zfRecharge.getMerchantId()+RedisConstant.CURRENT_AGENT;
+
+        Integer agentId = selectOneAgentByRobin(agengids, agentKey, zfRecharge.getMerchantId());
         String amountBettwen = getAmountBettwen(zfRecharge);
-        String key = zfRecharge.getMerchantId()+amountBettwen+RedisConstant.CURRENT_CODE;
+        String key = zfRecharge.getMerchantId() + "_" + agentId + "_" +amountBettwen+RedisConstant.CURRENT_CODE;
         Object currentCard  =  redisUtilService.get(key);
         log.info("当前轮训的码 {}", currentCard);
         if(Objects.isNull(currentCard)){
@@ -175,7 +206,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 //            if(redisUtilService.hasKey(amountKey)){
 //                continue;
 //            }
-            if(zfCodes.get(i).getCodeId() < (Integer) currentCard ){
+            if(zfCodes.get(i).getCodeId() < (Integer) currentCard && zfCodes.get(i).getAgentId() == agentId){
                 log.info("码轮训下一位 {}", zfCodes.get(i));
                 redisUtilService.set(key, zfCodes.get(i).getCodeId().intValue());
                 redisUtilService.set(amountKey, 1, 600);

@@ -192,11 +192,12 @@ public class ZfAgentServiceImpl implements ZfAgentService {
         zfAgent.setAgentId(operaAgentParams.getAgentId());
         zfAgentTrans.setAgentId(operaAgentParams.getAgentId());
         ZfAgent zfAgent1 = zfAgentDao.queryById(operaAgentParams.getAgentId());
-        if(null  != zfAgent1.getParentId() && zfAgent1.getParentId() != 0 && !operaAgentParams.getIsAdmin()){
+        if(null  != zfAgent1.getParentId() && zfAgent1.getParentId() != 0 && !operaAgentParams.getIsAdmin() && !operaAgentParams.getIsFinsh()){
             //给下级加积分扣上级，计算上级积分
             if(operaAgentParams.getTransType().equals(TransTypeEnum.RRCHARGE.getValue())) {
                 ZfAgent zfAgentParent = zfAgentDao.queryById(zfAgent1.getParentId());
                 if(zfAgentParent.getAcceptAmount().compareTo(operaAgentParams.getAcceptAmount()) < 0){
+                    log.info("余额不够");
                     throw new BaseException(ResultEnum.NO_ENOUGH_AMOUNT);
                 }
             }
@@ -234,6 +235,8 @@ public class ZfAgentServiceImpl implements ZfAgentService {
             }
             operaAgentParams.setIsFinsh(true);
             operaAgentParams.setRemark("给下级下分扣除" + operaAgentParams.getAcceptAmount());
+            log.info("开始操作上级代理积分 {}", operaAgentParams);
+
             operatBalance(operaAgentParams);
         }
     }
