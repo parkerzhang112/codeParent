@@ -13,12 +13,14 @@
         <result property="agentAccount" column="agent_account" />
         <result property="acceptAmount" column="accept_amount" />
         <result property="notice" column="notice" />
+        <result property="weight" column="weight" />
+
     </resultMap>
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfAgentMap">
         select
-          agent_id, balance, name, rate, parent_id, pwd, google_code, agent_account,accept_amount
+          agent_id,weight, balance, name, rate, parent_id, pwd, google_code, agent_account,accept_amount
         from zf_agent
         where agent_id = #{agentId}
     </select>
@@ -164,7 +166,7 @@
         update zf_agent
         <set>
             <if test="balance != null">
-                balance = balance + #{fee},
+                balance = balance + #{balance},
             </if>
             <if test="acceptAmount != null">
                 accept_amount = accept_amount +  #{acceptAmount},

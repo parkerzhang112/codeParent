@@ -81,6 +81,6 @@ public interface ZfAgentDao {
      */
     int deleteById(Integer agentId);
 
-    void updateAgentFee(@Param("agentId") Integer agentId, @Param("fee") BigDecimal subtract);
+    void updateAgentFee(ZfAgent zfAgent);
 }
 

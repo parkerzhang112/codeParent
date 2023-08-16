@@ -33,7 +33,7 @@ public interface ZfAgentService {
      * @param zfAgent 实例对象
      * @return 实例对象
      */
-    ZfAgent update(ZfAgent zfAgent);
+    int update(ZfAgent zfAgent);
 
    void updateAgentCreditAmount(ZfRecharge zfRecharge, Integer agentId);
 

@@ -160,21 +160,40 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 
         for (int i= 0;i < zfAgents.size(); i++) {
             if(zfAgents.get(i) < (Integer) currentAgent ){
-                String weightAgent = merchantId+RedisConstant.WEIFHT_AGENT;
-                ZfAgent zfAgent = zfAgentService.queryById((Integer)currentAgent);
-                if(zfAgent.getWeight().compareTo(BigDecimal.ONE) > -1){
-                    BigDecimal weight  = (BigDecimal) redisUtilService.get(weightAgent);
-                    weight =  weight.add(zfAgent.getWeight().subtract(BigDecimal.ONE));
-                    if(weight.compareTo(BigDecimal.ONE) > -1){
-                        return (Integer) currentAgent;
-                    }else {
-                        redisUtilService.set(key, zfAgents.get(i).intValue());
-                    }
+                String weightAgent = merchantId+RedisConstant.WEIFHT_AGENT + zfAgents.get(i);
+                ZfAgent zfAgent = zfAgentService.queryById(zfAgents.get(i));
+                BigDecimal weight  = (BigDecimal) redisUtilService.get(weightAgent);
+                if (null == weight){
+                    weight = BigDecimal.ZERO;
                 }
-                log.info("代理轮训下一位 {}", zfAgents.get(i));
+                if(weight.compareTo(BigDecimal.ONE) > -1){
+                    redisUtilService.set(weightAgent, weight.subtract(BigDecimal.ONE));
+                    redisUtilService.set(key, (Integer) currentAgent);
+                    return zfAgents.get(i);
+                }else {
+                    redisUtilService.set(weightAgent, weight.add(zfAgent.getWeight().subtract(BigDecimal.ONE)));
+                    redisUtilService.set(key, zfAgents.get(i).intValue());
+                    return zfAgents.get(i);
+                }
+            }
+            log.info("代理轮训下一位 {}", zfAgents.get(i));
+        }
+        if(zfAgents.size() > 1){
+            String weightAgent = merchantId+RedisConstant.WEIFHT_AGENT +  zfAgents.get(0).intValue();
+            ZfAgent zfAgent = zfAgentService.queryById( zfAgents.get(0).intValue());
+            BigDecimal weight  = (BigDecimal) redisUtilService.get(weightAgent);
+            if (null == weight){
+                weight = BigDecimal.ZERO;
+            }
+            if(weight.compareTo(BigDecimal.ONE) > -1) {
+                redisUtilService.set(weightAgent, weight.subtract(BigDecimal.ONE));
+                return zfAgents.get(0).intValue();
+            }else {
+                redisUtilService.set(weightAgent, weight.add(zfAgent.getWeight().subtract(BigDecimal.ONE)));
             }
         }
         log.info("代理轮询重置 取第一位 {}", zfAgents.get(0));
+        redisUtilService.set(key, zfAgents.get(0).intValue());
         return zfAgents.get(0);
     }
 
@@ -183,10 +202,11 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         Telegram telegram = new Telegram();
         List<String > codeDistinctList = zfCodes.stream().map(ZfCode::getName).collect(Collectors.toList());
         telegram.sendWarrnSmsMessage(zfRecharge, "存款出码", String.join("-", codeDistinctList));
-        List<Integer > agengids = zfCodes.stream().map(ZfCode::getAgentId).collect(Collectors.toList());
+        Set<Integer > agengids = zfCodes.stream().map(ZfCode::getAgentId).collect(Collectors.toSet());
+        List<Integer> sortagentIds =  agengids.stream().sorted(((o1, o2) -> o2.compareTo(o1))).collect(Collectors.toList());
         String agentKey = zfRecharge.getMerchantId()+RedisConstant.CURRENT_AGENT;
-
-        Integer agentId = selectOneAgentByRobin(agengids, agentKey, zfRecharge.getMerchantId());
+        Integer agentId = selectOneAgentByRobin(sortagentIds, agentKey, zfRecharge.getMerchantId());
+        zfCodes =  zfCodes.stream().filter(o1-> o1.getAgentId().equals(agentId)).collect(Collectors.toList());
         String amountBettwen = getAmountBettwen(zfRecharge);
         String key = zfRecharge.getMerchantId() + "_" + agentId + "_" +amountBettwen+RedisConstant.CURRENT_CODE;
         Object currentCard  =  redisUtilService.get(key);
@@ -474,7 +494,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 zfRecharge.setCodeId(zfCode.getCodeId());
                 zfRecharge.setCreateTime(new Date());
                 zfRecharge.setOrderStatus(1);
-                redisUtilService.set(zfCode.getAgentId().toString(), 1,0);
                 zfRechargeDao.update(zfRecharge);
                 //增加已收额度
                 ZfAgent zfAgent = new ZfAgent();

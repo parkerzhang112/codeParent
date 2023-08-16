@@ -39,6 +39,8 @@ public class ZfAgentTrans implements Serializable {
 
     private Integer transType;
 
+    private BigDecimal preAcceptAmount;
+
 
     public ZfAgentTrans(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee) {
         agentId = zfAgent.getAgentId();
@@ -46,24 +48,29 @@ public class ZfAgentTrans implements Serializable {
         merchantOrderNo = zfRecharge.getMerchantOrderNo();
         amount = zfRecharge.getPayAmount();
         balance = zfAgent.getBalance();
+        preBalance = zfAgent.getBalance();
         if (zfRecharge.getOrderStatus().equals(1)) {
             acceptAmount = zfAgent.getAcceptAmount();
+            preAcceptAmount = acceptAmount.add(amount);
             transType = TransTypeEnum.TRANSFER.getValue();
             remark = "订单充值减分";
         } else if (zfRecharge.getOrderStatus().equals(3)) {
+            preAcceptAmount = acceptAmount.subtract(amount);
             acceptAmount = zfAgent.getAcceptAmount();
             transType = TransTypeEnum.RRCHARGE.getValue();
             remark = "订单失败上分";
         } else if(zfRecharge.getOrderStatus() == 2 || zfRecharge.getOrderStatus()== 4) {
             //成功写入积分，前面有计算。重新扣回
             acceptAmount = zfAgent.getAcceptAmount();
-            preBalance = zfAgent.getBalance();
+            preAcceptAmount = zfAgent.getAcceptAmount();
+
+            preBalance = zfAgent.getBalance().subtract(fee);
             amount = fee;
-            balance = preBalance.add(fee);
             transType = TransTypeEnum.RRCHARGE.getValue();
             remark = "订单成功返佣";
         }else if (zfRecharge.getOrderStatus() == 5){
             acceptAmount = zfAgent.getAcceptAmount();
+            preAcceptAmount = zfAgent.getAcceptAmount().subtract(amount);
             transType = TransTypeEnum.RRCHARGE.getValue();
             remark = "订单超时补分";
         }else {
