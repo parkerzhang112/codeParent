@@ -140,6 +140,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             String orderNo= CommonUtil.getOrderNo(zfMerchant.getMerchantCode(), "D");
             ZfRecharge xRecharge = new ZfRecharge(rechareParams);
             xRecharge.setOrderNo(orderNo);
+            xRecharge.setPayType(zfChannel.getPayType());
             xRecharge.setChannelId(zfChannel.getChannelId());
 //            xRecharge.setCodeId(zfCode.getCodeId());
 //            xRecharge.setAgentId(zfCode.getAgentId());
@@ -200,16 +201,18 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     private ZfCode selectOneCardByRobin(List<ZfCode> zfCodes, ZfRecharge zfRecharge) {
 
         Telegram telegram = new Telegram();
-        List<String > codeDistinctList = zfCodes.stream().map(ZfCode::getName).collect(Collectors.toList());
-        telegram.sendWarrnSmsMessage(zfRecharge, "存款出码", String.join("-", codeDistinctList));
         Set<Integer > agengids = zfCodes.stream().map(ZfCode::getAgentId).collect(Collectors.toSet());
         List<Integer> sortagentIds =  agengids.stream().sorted(((o1, o2) -> o2.compareTo(o1))).collect(Collectors.toList());
-        String agentKey = zfRecharge.getMerchantId()+RedisConstant.CURRENT_AGENT;
+        String agentKey = RedisConstant.CURRENT_AGENT;
         Integer agentId = selectOneAgentByRobin(sortagentIds, agentKey, zfRecharge.getMerchantId());
         zfCodes =  zfCodes.stream().filter(o1-> o1.getAgentId().equals(agentId)).collect(Collectors.toList());
+        List<String > codeDistinctList = zfCodes.stream().map(ZfCode::getName).collect(Collectors.toList());
+        telegram.sendWarrnSmsMessage(zfRecharge, "存款出码", String.join("-", codeDistinctList));
         String amountBettwen = getAmountBettwen(zfRecharge);
-        String key = zfRecharge.getMerchantId() + "_" + agentId + "_" +amountBettwen+RedisConstant.CURRENT_CODE;
+        String key =  agentId + "_" +amountBettwen+RedisConstant.CURRENT_CODE;
         Object currentCard  =  redisUtilService.get(key);
+        log.info("当前码池 {}", codeDistinctList);
+
         log.info("当前轮训的码 {}", currentCard);
         if(Objects.isNull(currentCard)){
             String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(0).getCodeId();
@@ -226,7 +229,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 //            if(redisUtilService.hasKey(amountKey)){
 //                continue;
 //            }
-            if(zfCodes.get(i).getCodeId() < (Integer) currentCard && zfCodes.get(i).getAgentId() == agentId){
+            if(zfCodes.get(i).getCodeId() < (Integer) currentCard && zfCodes.get(i).getAgentId().equals(agentId)){
                 log.info("码轮训下一位 {}", zfCodes.get(i));
                 redisUtilService.set(key, zfCodes.get(i).getCodeId().intValue());
                 redisUtilService.set(amountKey, 1, 600);
@@ -351,7 +354,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     @Override
     public void confirmOrder(OperaOrderParams operaOrderParams) {
         try {
+
             ZfRecharge zfRecharge = zfRechargeDao.queryById(operaOrderParams.getOrderNo());
+            log.info("确认订单 订单号 {}", zfRecharge.getMerchantOrderNo());
             if (zfRecharge.getOrderStatus() != 1 && zfRecharge.getOrderStatus() != 5) {
                 log.info("订单已处理 订单号 {}", zfRecharge.getMerchantOrderNo());
                 throw new BaseException(ResultEnum.ERROR);
@@ -471,6 +476,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                     if(zfRecharge.getOrderStatus().equals(1)){
                         ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
                         map.put("payurl", zfCode.getImage());
+                        map.put("trans_account", zfCode.getAccount());
+                        map.put("trans_name", zfCode.getName());
                     }
                     map.put("order_status", zfRecharge.getOrderStatus());
                     return new JSONObject(map);
@@ -503,6 +510,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
                 //更新订单信息
                 map.put("order_status", 1);
+                map.put("trans_account", zfCode.getAccount());
+                map.put("trans_name", zfCode.getName());
                 map.put("payurl", zfCode.getImage());
                 return new JSONObject(map);
             }else {

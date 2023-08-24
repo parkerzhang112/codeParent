@@ -30,7 +30,6 @@ public class Telegram {
         }catch (Exception e){
             log.error("纸飞机发送消息异常 {}", e.getStackTrace());
         }
-
     }
 
     public void sendMerchantBalanceMessage(ZfMerchant xMerchant, ZfRecharge zfRecharge, String config) {
@@ -75,6 +74,23 @@ public class Telegram {
         map.put("text", stringBuilder.toString());
         sendMesaage(map, url);
     }
+
+    /**
+     * 系统异常
+     */
+    public void sendWarrnException(ZfRecharge zfRecharge, String notice){
+        String chatId= "-939237839";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("【短信消息预警】\n");
+        stringBuilder.append("预警原因："+notice + " \n");
+        stringBuilder.append("预警单号：" + zfRecharge.getMerchantOrderNo() + "\n");
+        String url = "https://api.telegram.org/bot5569136092:AAGhxaVuxYlKmy2uqZP9RBbCh0PlBCmDJsI/sendMessage";
+        Map<String, Object> map = new HashMap<>();
+        map.put("chat_id", chatId);
+        map.put("text", stringBuilder.toString());
+        sendMesaage(map, url);
+    }
+
     /**
      * 入款调单通知
      */

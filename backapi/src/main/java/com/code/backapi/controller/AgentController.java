@@ -63,4 +63,25 @@ public class AgentController {
         }
         return responseResult.toJsonString();
     }
+
+    /***
+     * 代理补分上分操作
+     * @param operaAgentParams
+     * @return
+     */
+    @PostMapping("/recharge")
+    @ResponseBody
+    public String recharge(@RequestBody OperaAgentParams operaAgentParams) {
+        ResponseResult responseResult = new ResponseResult();
+        try {
+            zfAgentService .recharge(operaAgentParams);
+            return responseResult.toJsonString();
+        } catch (BaseException e) {
+            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+        } catch (Exception e) {
+            log.error("系统异常", e);
+            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }
+        return responseResult.toJsonString();
+    }
 }

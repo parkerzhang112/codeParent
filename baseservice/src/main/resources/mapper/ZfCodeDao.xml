@@ -33,9 +33,9 @@
           zc.*,
           zf_channel_code.channe_id
         from zf_code zc
-        left join zf_channel_code on zc.code_id = zf_channel_code.code_id
+        left join zf_agent za on za.agent_id =  zc.agent_id
+        left join zf_channel_code on zc.agent_id = zf_channel_code.code_id
         left join zf_code_record zcr on zcr.code_id = zc.code_id and zcr.record_date=current_date
-        left join zf_agent za on za.agent_id =   zc.agent_id
 --      #要求卡在线，开启
         where zc.is_open=1 and zc.status=100
         and za.status =1

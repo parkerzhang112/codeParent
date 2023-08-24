@@ -77,6 +77,20 @@ public class ZfAgentTrans implements Serializable {
             remark = "系统操作";
         }
     }
+
+    public ZfAgentTrans(ZfAgentRechargeOrder zfAgentRechargeOrder, ZfAgent zfAgent) {
+        agentId = zfAgentRechargeOrder.getAgentId();
+        transType = TransTypeEnum.RRCHARGE.getValue();
+        merchantOrderNo = zfAgentRechargeOrder.getOrderNo();
+        amount = zfAgentRechargeOrder.getPaidAmount();
+        balance = zfAgent.getBalance();
+        preBalance = zfAgent.getBalance();
+        acceptAmount = zfAgent.getAcceptAmount();
+        preAcceptAmount = acceptAmount.subtract(amount);
+        remark = "代理充值上分";
+    }
+
+
     public  void  buildFailOrderRollbackBySuccess(ZfRecharge zfRecharge, ZfAgent zfAgent){
         agentId = zfAgent.getAgentId();
         transType = TransTypeEnum.RRCHARGE.getValue();
@@ -84,6 +98,7 @@ public class ZfAgentTrans implements Serializable {
         amount = zfRecharge.getPayAmount();
         balance = zfAgent.getBalance();
         acceptAmount = zfAgent.getAcceptAmount();
+        preAcceptAmount  = zfAgent.getAcceptAmount().add(amount);
         transType = TransTypeEnum.TRANSFER.getValue();
         remark = "超时订单回滚扣分";
     }

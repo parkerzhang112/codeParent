@@ -1,5 +1,6 @@
 package com.code.baseservice.entity;
 
+import io.swagger.models.auth.In;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -42,6 +43,9 @@ public class ZfChannel implements Serializable {
      * 最大金额
      */
     private BigDecimal maxAmount;
+
+    /**支付类型*/
+    private Integer payType;
 
 }
 

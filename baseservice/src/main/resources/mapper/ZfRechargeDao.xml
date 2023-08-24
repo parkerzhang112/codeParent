@@ -17,11 +17,14 @@
         <result property="orderStatus" column="order_status" jdbcType="INTEGER"/>
         <result property="notifyStatus" column="notify_status" jdbcType="INTEGER"/>
         <result property="merchantFee" column="merchant_fee" />
+        <result property="payType" column="pay_type" />
+
+
     </resultMap>
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfRechargeMap">
-        select merchant_order_no, pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee
+        select merchant_order_no, pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee,pay_type
         from zf_recharge
         where order_no = #{orderNo}
     </select>
@@ -192,8 +195,10 @@
         <if test="merchantFee != null">
             merchant_fee ,
         </if>
+        <if test="payType != null">
+            pay_type ,
+        </if>
         </trim>
-
         values
         <trim prefix="(" suffix=")" suffixOverrides=",">
 
@@ -223,6 +228,9 @@
         </if>
         <if test="merchantFee != null">
              #{merchantFee},
+        </if>
+        <if test="payType != null">
+            #{payType},
         </if>
         </trim>
     </insert>

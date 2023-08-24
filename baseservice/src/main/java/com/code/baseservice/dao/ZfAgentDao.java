@@ -81,6 +81,6 @@ public interface ZfAgentDao {
      */
     int deleteById(Integer agentId);
 
-    void updateAgentFee(ZfAgent zfAgent);
+    int updateAgentFee(ZfAgent zfAgent);
 }
 

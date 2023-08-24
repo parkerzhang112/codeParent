@@ -3,6 +3,7 @@ package com.code.baseservice.service;
 import com.code.baseservice.dto.backapi.OperaAgentParams;
 import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import com.code.baseservice.entity.ZfAgent;
+import com.code.baseservice.entity.ZfAgentRechargeOrder;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfWithdraw;
 import org.springframework.data.domain.Page;
@@ -44,4 +45,12 @@ public interface ZfAgentService {
     void operatBalance(OperaAgentParams operaAgentParams);
 
     void changeBalance(OperaAgentParams operaAgentParams);
+
+    void recharge(OperaAgentParams operaAgentParams);
+
+    /**
+     *  代理充值
+     * @param zfAgentRechargeOrder
+     */
+     void updateAgentCreditAmount(ZfAgentRechargeOrder zfAgentRechargeOrder) ;
 }

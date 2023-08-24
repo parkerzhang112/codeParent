@@ -47,4 +47,10 @@ public class OperaAgentParams {
     @ApiModelProperty(value = "是否是管理也操作", dataType = "Integer", required = true, allowEmptyValue = true)
     @JsonProperty("is_admin")
     private Boolean isAdmin  = false;
+
+    @JsonProperty("order_no")
+    private String orderNo ;
+
+    @JsonProperty("update_by")
+    private String updateBy ;
 }

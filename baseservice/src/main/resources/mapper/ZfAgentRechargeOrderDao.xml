@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.baseservice.dao.ZfAgentRechargeOrderDao">
+
+    <resultMap type="com.code.baseservice.entity.ZfAgentRechargeOrder" id="ZfAgentRechargeOrderMap">
+        <result property="orderNo" column="order_no" jdbcType="VARCHAR"/>
+        <result property="payAmount" column="pay_amount" jdbcType="NUMERIC"/>
+        <result property="paidAmount" column="paid_amount" jdbcType="NUMERIC"/>
+        <result property="orderStatus" column="order_status" jdbcType="INTEGER"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="agentId" column="agent_id" jdbcType="INTEGER"/>
+        <result property="image" column="image" jdbcType="VARCHAR"/>
+        <result property="bankinfo" column="bankinfo" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="updateby" column="updateby" jdbcType="VARCHAR"/>
+        <result property="payType" column="pay_type" jdbcType="INTEGER"/>
+        <result property="payImage" column="pay_image" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ZfAgentRechargeOrderMap">
+        select
+          order_no, pay_amount, paid_amount, order_status, remark, agent_id, image, bankinfo, create_time, update_time, updateby, pay_type, pay_image
+        from zf_agent_recharge_order
+        where order_no = #{orderNo}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ZfAgentRechargeOrderMap">
+        select
+          order_no, pay_amount, paid_amount, order_status, remark, agent_id, image, bankinfo, create_time, update_time, updateby, pay_type, pay_image
+        from zf_agent_recharge_order
+        <where>
+            <if test="orderNo != null and orderNo != ''">
+                and order_no = #{orderNo}
+            </if>
+            <if test="payAmount != null">
+                and pay_amount = #{payAmount}
+            </if>
+            <if test="paidAmount != null">
+                and paid_amount = #{paidAmount}
+            </if>
+            <if test="orderStatus != null">
+                and order_status = #{orderStatus}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+            <if test="agentId != null">
+                and agent_id = #{agentId}
+            </if>
+            <if test="image != null and image != ''">
+                and image = #{image}
+            </if>
+            <if test="bankinfo != null and bankinfo != ''">
+                and bankinfo = #{bankinfo}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{updateTime}
+            </if>
+            <if test="updateby != null and updateby != ''">
+                and updateby = #{updateby}
+            </if>
+            <if test="payType != null">
+                and pay_type = #{payType}
+            </if>
+            <if test="payImage != null and payImage != ''">
+                and pay_image = #{payImage}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from zf_agent_recharge_order
+        <where>
+            <if test="orderNo != null and orderNo != ''">
+                and order_no = #{orderNo}
+            </if>
+            <if test="payAmount != null">
+                and pay_amount = #{payAmount}
+            </if>
+            <if test="paidAmount != null">
+                and paid_amount = #{paidAmount}
+            </if>
+            <if test="orderStatus != null">
+                and order_status = #{orderStatus}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+            <if test="agentId != null">
+                and agent_id = #{agentId}
+            </if>
+            <if test="image != null and image != ''">
+                and image = #{image}
+            </if>
+            <if test="bankinfo != null and bankinfo != ''">
+                and bankinfo = #{bankinfo}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="updateTime != null">
+                and update_time = #{updateTime}
+            </if>
+            <if test="updateby != null and updateby != ''">
+                and updateby = #{updateby}
+            </if>
+            <if test="payType != null">
+                and pay_type = #{payType}
+            </if>
+            <if test="payImage != null and payImage != ''">
+                and pay_image = #{payImage}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="orderNo" useGeneratedKeys="true">
+        insert into zf_agent_recharge_order(pay_amount, paid_amount, order_status, remark, agent_id, image, bankinfo, create_time, update_time, updateby, pay_type, pay_image)
+        values (#{payAmount}, #{paidAmount}, #{orderStatus}, #{remark}, #{agentId}, #{image}, #{bankinfo}, #{createTime}, #{updateTime}, #{updateby}, #{payType}, #{payImage})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="orderNo" useGeneratedKeys="true">
+        insert into zf_agent_recharge_order(pay_amount, paid_amount, order_status, remark, agent_id, image, bankinfo, create_time, update_time, updateby, pay_type, pay_image)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.payAmount}, #{entity.paidAmount}, #{entity.orderStatus}, #{entity.remark}, #{entity.agentId}, #{entity.image}, #{entity.bankinfo}, #{entity.createTime}, #{entity.updateTime}, #{entity.updateby}, #{entity.payType}, #{entity.payImage})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="orderNo" useGeneratedKeys="true">
+        insert into zf_agent_recharge_order(pay_amount, paid_amount, order_status, remark, agent_id, image, bankinfo, create_time, update_time, updateby, pay_type, pay_image)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.payAmount}, #{entity.paidAmount}, #{entity.orderStatus}, #{entity.remark}, #{entity.agentId}, #{entity.image}, #{entity.bankinfo}, #{entity.createTime}, #{entity.updateTime}, #{entity.updateby}, #{entity.payType}, #{entity.payImage})
+        </foreach>
+        on duplicate key update
+        pay_amount = values(pay_amount),
+        paid_amount = values(paid_amount),
+        order_status = values(order_status),
+        remark = values(remark),
+        agent_id = values(agent_id),
+        image = values(image),
+        bankinfo = values(bankinfo),
+        create_time = values(create_time),
+        update_time = values(update_time),
+        updateby = values(updateby),
+        pay_type = values(pay_type),
+        pay_image = values(pay_image)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update zf_agent_recharge_order
+        <set>
+            <if test="payAmount != null">
+                pay_amount = #{payAmount},
+            </if>
+            <if test="paidAmount != null">
+                paid_amount = #{paidAmount},
+            </if>
+            <if test="orderStatus != null">
+                order_status = #{orderStatus},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+            <if test="agentId != null">
+                agent_id = #{agentId},
+            </if>
+            <if test="image != null and image != ''">
+                image = #{image},
+            </if>
+            <if test="bankinfo != null and bankinfo != ''">
+                bankinfo = #{bankinfo},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="updateby != null and updateby != ''">
+                updateby = #{updateby},
+            </if>
+            <if test="payType != null">
+                pay_type = #{payType},
+            </if>
+            <if test="payImage != null and payImage != ''">
+                pay_image = #{payImage},
+            </if>
+        </set>
+        where order_no = #{orderNo}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from zf_agent_recharge_order where order_no = #{orderNo}
+    </delete>
+
+</mapper>
+

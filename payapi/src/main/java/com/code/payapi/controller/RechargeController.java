@@ -2,6 +2,7 @@ package com.code.payapi.controller;
 
 import com.alibaba.fastjson.JSONObject;
 
+import com.code.baseservice.base.enums.PaytypeEnum;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.payapi.QueryParams;
@@ -52,7 +53,12 @@ public class RechargeController {
         ZfRecharge xRecharge = zfRechargeService.queryById(orderno);
         modelMap.put("timeout", 10);
         modelMap.put("xrecharge", xRecharge);
-        return prefix+"/index";
+
+        if(xRecharge.getPayType()== PaytypeEnum.CODE.getValue()){
+            return prefix+"/index";
+        }else {
+            return prefix+"/trans";
+        }
     }
 
 

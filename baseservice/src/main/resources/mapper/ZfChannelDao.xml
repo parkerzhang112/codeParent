@@ -10,6 +10,8 @@
         <result property="channelStatus" column="channel_status" />
         <result property="minAmount" column="min_amount" />
         <result property="maxAmount" column="max_amount" />
+        <result property="payType" column="pay_type" />
+
     </resultMap>
 
     <!--查询单个-->
@@ -23,7 +25,7 @@
     <!--查询单个-->
     <select id="selectChannel" resultMap="ZfChannelMap">
         select
-          channel_id, channel_name, channel_type, channel_rate, channel_status, min_amount, max_amount
+          channel_id, channel_name, channel_type, channel_rate, channel_status, min_amount, max_amount,pay_type
         from zf_channel
         where merchant_id = #{merchant_id}
         and min_amount <![CDATA[ <= ]]> #{pay_amount}
