@@ -67,6 +67,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     @Autowired
     private ZfMerchantRecordService zfMerchantRecordService;
 
+    @Autowired
+    private CommonService commonService;
+
     /**
      * 通过ID查询单条数据
      *
@@ -99,10 +102,27 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 //        List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfChannels, rechareParams, zfMerchant);
         //轮码
 //        ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfMerchant, rechareParams);
+        commonService.request(zfChannel, rechareParams);
         //入单
         ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
+
         //返回
         return buildReuslt(zfMerchant,zfRecharge);
+    }
+
+    @Override
+    public JSONObject createA(RechareParams rechareParams) {
+        //验证商户有效性
+        ZfMerchant zfMerchant = zfMerchantService.vaildMerchant(rechareParams.getMerchant_id());
+        //延签
+        vaildSign(rechareParams, zfMerchant);
+        //去重
+        vaildRepeat(rechareParams);
+        //查渠道
+        ZfChannel zfChannel =  zfChannelService.queryChannelByParams(rechareParams);
+        //入单
+        ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
+        return  commonService.request(zfChannel, rechareParams);
     }
 
     private JSONObject buildReuslt( ZfMerchant zfMerchant,ZfRecharge zfRecharge) {
@@ -425,6 +445,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         zfRecharge.setPayName(map.get("name").toString());
         zfRechargeDao.update(zfRecharge);
     }
+
+
 
     @Override
     public void notify(ZfRecharge zfRecharge) {

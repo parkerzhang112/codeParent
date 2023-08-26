@@ -55,4 +55,6 @@ public interface ZfRechargeService {
     void autocancel(OperaOrderParams operaOrderParams);
 
     void postName(Map<String, Object> map);
+
+    JSONObject createA(RechareParams rechareParams);
 }
