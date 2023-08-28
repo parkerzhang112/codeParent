@@ -121,6 +121,7 @@ public class ZfAgentServiceImpl implements ZfAgentService {
             Telegram telegram = new Telegram();
             telegram.sendWarrnException(zfRecharge, "代理积分扣分失败");
             log.error("更新代理余额异常 {}", e);
+            throw  new RuntimeException(e);
         }finally {
             log.info("释放锁时间  {} 时间 {}", zfRecharge.getMerchantOrderNo(), System.currentTimeMillis());
             redisUtilService.unlock(agentId.toString());
@@ -155,8 +156,7 @@ public class ZfAgentServiceImpl implements ZfAgentService {
     public void updateAgentFee(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee) {
         try {
             log.info("更新代理手续费 {}", zfAgent);
-
-            if(redisUtilService.tryLock(zfAgent.getAgentId().toString())){
+            if(redisUtilService.tryLock(zfAgent.getAgentId().toString(),3000000)){
                 ZfAgent updateAgent  = new ZfAgent();
                 updateAgent.setAgentId(zfAgent.getAgentId());
                 BigDecimal agentFee =  sumAgentFee(zfRecharge.getPaidAmount(), zfAgent.getRate());
@@ -213,11 +213,11 @@ public class ZfAgentServiceImpl implements ZfAgentService {
                 telegram.sendWarrnException(zfRecharge, "代理积分扣分失败");
                 log.error("终端异常, {}", zfRecharge.getMerchantOrderNo());
             }
-
         }catch (Exception e){
             Telegram telegram = new Telegram();
             telegram.sendWarrnException(zfRecharge, "代理积分扣分失败");
             log.error("更新代理余额失败, {}", e);
+            throw new RuntimeException(e);
         }finally {
             redisUtilService.unlock(zfAgent.getAgentId().toString());
         }

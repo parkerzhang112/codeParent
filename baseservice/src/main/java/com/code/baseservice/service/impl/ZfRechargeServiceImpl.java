@@ -333,41 +333,56 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         return null;
     }
 
+    @Transactional()
     public void paidOrder(ZfRecharge zfRecharge) {
-        //订单状态处理中
-        ZfMerchant xMerchant = zfMerchantService.queryById(zfRecharge.getMerchantId());
-        if (xMerchant == null){
-            log.info("订单完成时 查询商户不存在 {}", zfRecharge.getMerchantId());
-            return;
-        }
-        ZfChannel xChannel = zfChannelService.queryById(zfRecharge.getChannelId());
-        if (xChannel == null){
-            log.info("订单完成时 查询渠道不存在 {}", zfRecharge.getMerchantId());
-            return;
-        }
-        ZfAgent zfAgent = zfAgentService.queryById(zfRecharge.getAgentId());
-        if (zfAgent == null){
-            log.info("订单完成时 查询代理不存在 {}", zfRecharge.getMerchantId());
-            return;
-        }
-        //计算会员手续费
-        BigDecimal fee = zfChannelService.sumChannelFee(zfRecharge.getPaidAmount(), xChannel);
-        zfRecharge.setMerchantFee(fee);
-        zfRechargeDao.update(zfRecharge);
-        zfAgentService.updateAgentFee(zfRecharge, zfAgent, BigDecimal.ZERO);
-        //更新码日报
-        zfCodeRecordService.updateRecord(new ZfCodeRecord(zfRecharge));
-        //计算商户渠道余额
-        zfMerchantService.sumMerchantBalance(zfRecharge.getMerchantId(), zfRecharge.getPaidAmount().subtract(fee));
-        //商户余额警告
-        zfMerchantService.warrnBalance(xMerchant, zfRecharge,zfAgent);
-        //记录商户流水
-        zfMerchantTransService.insert(new ZfMerchantTrans(zfRecharge, xMerchant));
-        //更新日报
-        zfMerchantRecordService.updateRecord(new ZfMerchantRecord(zfRecharge));
+        String redisKey = zfRecharge.getOrderNo();
+        try {
+            if(redisUtilService.tryLockWithLeaseTime(redisKey, 30)){
+                //订单状态处理中
+                ZfMerchant xMerchant = zfMerchantService.queryById(zfRecharge.getMerchantId());
+                if (xMerchant == null){
+                    log.info("订单完成时 查询商户不存在 {}", zfRecharge.getMerchantId());
+                    return;
+                }
+                ZfChannel xChannel = zfChannelService.queryById(zfRecharge.getChannelId());
+                if (xChannel == null){
+                    log.info("订单完成时 查询渠道不存在 {}", zfRecharge.getMerchantId());
+                    return;
+                }
+                ZfAgent zfAgent = zfAgentService.queryById(zfRecharge.getAgentId());
+                if (zfAgent == null){
+                    log.info("订单完成时 查询代理不存在 {}", zfRecharge.getMerchantId());
+                    return;
+                }
+                //计算会员手续费
+                BigDecimal fee = zfChannelService.sumChannelFee(zfRecharge.getPaidAmount(), xChannel);
+                zfRecharge.setMerchantFee(fee);
+                zfRechargeDao.update(zfRecharge);
+                zfAgentService.updateAgentFee(zfRecharge, zfAgent, BigDecimal.ZERO);
+                //更新码日报
+                zfCodeRecordService.updateRecord(new ZfCodeRecord(zfRecharge));
+                //计算商户渠道余额
+                zfMerchantService.sumMerchantBalance(zfRecharge.getMerchantId(), zfRecharge.getPaidAmount().subtract(fee));
+                //商户余额警告
+                zfMerchantService.warrnBalance(xMerchant, zfRecharge,zfAgent);
+                //记录商户流水
+                zfMerchantTransService.insert(new ZfMerchantTrans(zfRecharge, xMerchant));
+                //更新日报
+                zfMerchantRecordService.updateRecord(new ZfMerchantRecord(zfRecharge));
 
-        String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfRecharge.getCodeId();
-        redisUtilService.del(amountKey);
+                String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfRecharge.getCodeId();
+                redisUtilService.del(amountKey);
+            }else {
+                log.error("订单锁异常 {}", zfRecharge.getMerchantOrderNo());
+            }
+        }catch (Exception e){
+            log.error("订单异常 {}",zfRecharge.getMerchantOrderNo());
+            throw new RuntimeException();
+        }finally {
+            redisUtilService.unlock(redisKey);
+        }
+
+
         notify(zfRecharge);
     }
 
@@ -418,22 +433,34 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
      * @param operaOrderParams
      */
     @Override
+    @Transactional
     public void autocancel(OperaOrderParams operaOrderParams) {
-        ZfRecharge zfRecharge = zfRechargeDao.queryById(operaOrderParams.getOrderNo());
-        log.info("自动取消订单 订单号{}", zfRecharge.getMerchantOrderNo());
-        if (zfRecharge.getOrderStatus() > 1) {
-            log.info("订单已处理 订单号 {}", zfRecharge.getMerchantOrderNo());
-            throw new BaseException(ResultEnum.ERROR);
+        try {
+            if(redisUtilService.tryLockWithLeaseTime(operaOrderParams.getOrderNo(), 30)){
+                ZfRecharge zfRecharge = zfRechargeDao.queryById(operaOrderParams.getOrderNo());
+                log.info("自动取消订单 订单号{}", zfRecharge.getMerchantOrderNo());
+                if (zfRecharge.getOrderStatus() > 1) {
+                    log.info("订单已处理 订单号 {}", zfRecharge.getMerchantOrderNo());
+                    throw new BaseException(ResultEnum.ERROR);
+                }
+                zfRecharge.setRemark(operaOrderParams.getCloseReason());
+                zfRecharge.setUpdateTime(new Date());
+                zfRecharge.setOrderStatus(5);
+                if(zfRecharge.getCodeId() != null && zfRecharge.getCodeId() != 0){
+                    String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfRecharge.getCodeId();
+                    redisUtilService.del(amountKey);
+                    zfAgentService.updateAgentCreditAmount(zfRecharge, zfRecharge.getAgentId());
+                }
+                zfRechargeDao.update(zfRecharge);
+            }else {
+                log.error("订单执行超时异常 {}", operaOrderParams.getMerchanOrderNo());
+            }
+        }catch (Exception e){
+            log.error("订单执行超时异常 {} {}", operaOrderParams.getMerchanOrderNo(), e.getStackTrace());
+            throw  new RuntimeException(e);
+        }finally {
+            redisUtilService.unlock(operaOrderParams.getOrderNo());
         }
-        zfRecharge.setRemark(operaOrderParams.getCloseReason());
-        zfRecharge.setUpdateTime(new Date());
-        zfRecharge.setOrderStatus(5);
-        if(zfRecharge.getCodeId() != null && zfRecharge.getCodeId() != 0){
-            String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfRecharge.getCodeId();
-            redisUtilService.del(amountKey);
-            zfAgentService.updateAgentCreditAmount(zfRecharge, zfRecharge.getAgentId());
-        }
-        zfRechargeDao.update(zfRecharge);
     }
 
     @Override

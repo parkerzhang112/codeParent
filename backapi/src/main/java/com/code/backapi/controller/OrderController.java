@@ -1,6 +1,7 @@
 package com.code.backapi.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.base.constant.RedisConstant;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.enums.TransTypeEnum;
 import com.code.baseservice.base.exception.BaseException;
@@ -48,6 +49,7 @@ public class OrderController {
     public String confirmOrder(@RequestBody OperaOrderParams operaOrderParams) {
         ResponseResult responseResult = new ResponseResult();
         try {
+
             if (new Integer(1).equals(operaOrderParams.getOrderType())) {
                 zfRechargeService.confirmOrder(operaOrderParams);
             } else {

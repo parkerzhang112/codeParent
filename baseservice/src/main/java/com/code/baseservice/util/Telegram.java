@@ -79,7 +79,7 @@ public class Telegram {
      * 系统异常
      */
     public void sendWarrnException(ZfRecharge zfRecharge, String notice){
-        String chatId= "-939237839";
+        String chatId= "-1001859874119";
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("【短信消息预警】\n");
         stringBuilder.append("预警原因："+notice + " \n");
