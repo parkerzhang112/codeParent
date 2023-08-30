@@ -10,10 +10,14 @@ import com.code.baseservice.service.ZfMerchantService;
 import com.code.baseservice.service.ZfRechargeService;
 import com.code.baseservice.service.ZfWithdrawService;
 import org.junit.Test;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class OrderControllerTest extends BackapiApplicationTest {
 
@@ -28,30 +32,103 @@ public class OrderControllerTest extends BackapiApplicationTest {
 
     @Autowired
     private ZfMerchantService zfMerchantService;
+    @Autowired
+    RedissonClient redissonClient;
 
     @Test
     public void testConfrim() {
         OperaOrderParams operaOrderParams = new OperaOrderParams();
         operaOrderParams.setOrderType(2);
-        if (new Integer(1).equals(operaOrderParams.getOrderType())) {
-            ZfWithdraw zfWithdraw = zfWithdrawService.queryById("ADCW1619700624485M9LVaYJ5LmlRIi3");
-//            List<XTransfer> xTransfers = xTransferService.queryAllByLimit(0, 1);
-            ZfCode codes = zfCodeService.queryById(1);
-//            if (xTransfers.size() > 0) {
-                operaOrderParams.setOrderNo(zfWithdraw.getOrderNo());
-                operaOrderParams.setOrderType(1);
-                operaOrderParams.setCloseReason("支付成功");
-                operaOrderParams.setPaid_amt(zfWithdraw.getPayAmount());
-                operaOrderParams.setCodeId(codes.getCodeId());
-                zfWithdrawService.confirmOrder(operaOrderParams);
-//            }
-        } else {
-            ZfRecharge xRecharges = zfRechargeService.queryById("DDD1681031870730veKO4PRS45fN7d4f");
-            operaOrderParams.setOrderNo(xRecharges.getOrderNo());
-            operaOrderParams.setOrderType(1);
-            operaOrderParams.setCloseReason("支付成功");
-            operaOrderParams.setPaid_amt(xRecharges.getPayAmount());
-            zfRechargeService.confirmOrder(operaOrderParams);
+        Thread threadA=  new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<ZfRecharge> xRecharges = zfRechargeService.queryByLimit(50, 1);
+                for (ZfRecharge zfRecharge:xRecharges){
+                    operaOrderParams.setOrderNo(zfRecharge.getOrderNo());
+                    operaOrderParams.setOrderType(1);
+                    operaOrderParams.setCloseReason("支付成功");
+                    operaOrderParams.setPaid_amt(zfRecharge.getPayAmount());
+                    zfRechargeService.confirmOrder(operaOrderParams);
+                }
+            }
+        }, "threadA");
+
+        Thread threadB=  new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<ZfRecharge> xRecharges = zfRechargeService.queryByLimit(50, 2);
+                for (ZfRecharge zfRecharge:xRecharges){
+                    operaOrderParams.setOrderNo(zfRecharge.getOrderNo());
+                    operaOrderParams.setOrderType(1);
+                    operaOrderParams.setCloseReason("支付成功");
+                    operaOrderParams.setPaid_amt(zfRecharge.getPayAmount());
+                    zfRechargeService.confirmOrder(operaOrderParams);
+                }
+            }
+        }, "threadA");
+
+        Thread threadC=  new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<ZfRecharge> xRecharges = zfRechargeService.queryByLimit(50, 3);
+                for (ZfRecharge zfRecharge:xRecharges){
+                    operaOrderParams.setOrderNo(zfRecharge.getOrderNo());
+                    operaOrderParams.setOrderType(1);
+                    operaOrderParams.setCloseReason("支付成功");
+                    operaOrderParams.setPaid_amt(zfRecharge.getPayAmount());
+                    zfRechargeService.confirmOrder(operaOrderParams);
+                }
+            }
+        }, "threadA");
+        for (int i = 0; i <3 ; i++) {
+            if(!threadA.isAlive()){
+                threadA.run();
+            }
+            if(!threadB.isAlive()) {
+                threadB.run();
+            }
+            if(!threadC.isAlive()) {
+                threadC.run();
+            }
+        }
+
+
+//        }
+    }
+
+    @Test
+    public void testLock(){
+        RLock rLock = redissonClient.getLock("demo-spring-boot-redisson:lock");
+        if (Objects.isNull(rLock)) {
+            System.out.printf("exception");
+        }
+        try {
+            rLock.lock(30, TimeUnit.SECONDS);
+            while (true){
+
+            }
+        } catch (Exception e) {
+            System.out.printf("lock exception");
+        } finally {
+            if (rLock.isLocked()) {
+                rLock.unlock();
+            }
+        }
+    }
+
+    @Test
+    public void testLoc1(){
+        RLock rLock = redissonClient.getLock("demo-spring-boot-:lock");
+        if (Objects.isNull(rLock)) {
+            System.out.printf("exception");
+        }
+        try {
+            rLock.lock(5, TimeUnit.SECONDS);
+            System.out.printf(" exception");
+
+        } catch (Exception e) {
+            System.out.printf("lock exception");
+        } finally {
 
         }
     }

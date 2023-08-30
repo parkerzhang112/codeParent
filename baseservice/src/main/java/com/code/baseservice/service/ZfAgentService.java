@@ -40,7 +40,7 @@ public interface ZfAgentService {
 
     void updateAgentCreditAmount(ZfWithdraw zfWithdraw, Integer agentId);
 
-    void updateAgentFee(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee);
+    void updateAgentFee(ZfRecharge zfRecharg , Integer agentId,BigDecimal fee);
 
     void operatBalance(OperaAgentParams operaAgentParams);
 

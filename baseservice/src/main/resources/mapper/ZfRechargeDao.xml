@@ -66,50 +66,9 @@
           merchant_order_no, pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee
         from zf_recharge
         <where>
-            <if test="merchantOrderNo != null and merchantOrderNo != ''">
-                and merchant_order_no = #{merchantOrderNo}
-            </if>
-            <if test="payAmount != null">
-                and pay_amount = #{payAmount}
-            </if>
-            <if test="paidAmount != null">
-                and paid_amount = #{paidAmount}
-            </if>
-            <if test="orderNo != null and orderNo != ''">
-                and order_no = #{orderNo}
-            </if>
-            <if test="notifyUrl != null and notifyUrl != ''">
-                and notify_url = #{notifyUrl}
-            </if>
-            <if test="codeId != null">
-                and code_id = #{codeId}
-            </if>
-            <if test="createTime != null">
-                and create_time = #{createTime}
-            </if>
-            <if test="updateTime != null">
-                and update_time = #{updateTime}
-            </if>
-            <if test="merchantId != null">
-                and merchant_id = #{merchantId}
-            </if>
-            <if test="channelId != null">
-                and channel_id = #{channelId}
-            </if>
-            <if test="agentId != null">
-                and agent_id = #{agentId}
-            </if>
-            <if test="orderStatus != null">
-                and order_status = #{orderStatus}
-            </if>
-            <if test="notifyStatus != null">
-                and notify_status = #{notifyStatus}
-            </if>
-            <if test="merchantFee != null">
-                and merchant_fee = #{merchantFee}
-            </if>
+                 order_status = #{orderStatus}
         </where>
-        limit #{pageable.offset}, #{pageable.pageSize}
+        limit #{limit}, #{offset}
     </select>
 
     <!--统计总行数-->

@@ -34,15 +34,6 @@ public interface ZfRechargeDao {
     ZfRecharge queryByMerchantOrderNo(@Param("merchantOrderNo") String merchantOrderNo);
 
     /**
-     * 查询指定行数据
-     *
-     * @param zfRecharge 查询条件
-     * @param pageable         分页对象
-     * @return 对象列表
-     */
-    List<ZfRecharge> queryAllByLimit(ZfRecharge zfRecharge, @Param("pageable") Pageable pageable);
-
-    /**
      * 统计总行数
      *
      * @param zfRecharge 查询条件
@@ -91,5 +82,7 @@ public interface ZfRechargeDao {
     void toNotifySuccess(ZfRecharge zfRecharge);
 
     void toNotifyException(ZfRecharge zfRecharge);
+
+    List<ZfRecharge> queryAllByLimit(@Param("orderStatus")int status,@Param("limit") int limit, @Param("offset") int offset);
 }
 

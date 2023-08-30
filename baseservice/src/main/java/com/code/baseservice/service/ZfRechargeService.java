@@ -13,6 +13,7 @@ import com.code.baseservice.entity.ZfWithdraw;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,6 +23,9 @@ import java.util.Map;
  * @since 2023-03-19 23:08:26
  */
 public interface ZfRechargeService {
+
+    List<ZfRecharge> queryByLimit(int page, int pagenum);
+
 
     /**
      * 通过ID查询单条数据

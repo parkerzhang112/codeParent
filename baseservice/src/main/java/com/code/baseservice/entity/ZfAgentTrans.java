@@ -55,8 +55,8 @@ public class ZfAgentTrans implements Serializable {
             transType = TransTypeEnum.TRANSFER.getValue();
             remark = "订单充值减分";
         } else if (zfRecharge.getOrderStatus().equals(3)) {
-            preAcceptAmount = acceptAmount.subtract(amount);
             acceptAmount = zfAgent.getAcceptAmount();
+            preAcceptAmount = acceptAmount.subtract(amount);
             transType = TransTypeEnum.RRCHARGE.getValue();
             remark = "订单失败上分";
         } else if(zfRecharge.getOrderStatus() == 2 || zfRecharge.getOrderStatus()== 4) {

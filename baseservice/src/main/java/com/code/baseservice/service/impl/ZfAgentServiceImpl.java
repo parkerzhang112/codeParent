@@ -15,6 +15,8 @@ import com.code.baseservice.service.ZfAgentTransService;
 import com.code.baseservice.util.Telegram;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -23,6 +25,9 @@ import org.springframework.data.domain.PageRequest;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * (ZfAgent)表服务实现类
@@ -46,7 +51,15 @@ public class ZfAgentServiceImpl implements ZfAgentService {
     private RedisUtilServiceImpl redisUtilService;
 
     @Autowired
+    private RedissonClient redissonClient;
+
+    @Autowired
     private ZfAgentRechargeOrderService zfAgentRechargeOrderService;
+
+    @Autowired
+    private ZfAgentService zfAgentService;
+
+    private static final ConcurrentHashMap<String, ReentrantLock> lockPointMap = new ConcurrentHashMap<>();
 
 
     /**
@@ -81,42 +94,44 @@ public class ZfAgentServiceImpl implements ZfAgentService {
      */
     @Override
     public void updateAgentCreditAmount(ZfRecharge zfRecharge, Integer agentId) {
+        RLock rLock = redissonClient.getLock("agentid"+agentId);
         try{
             log.info("开始更新代理额度  {} 时间 {}", zfRecharge.getMerchantOrderNo(), System.currentTimeMillis());
-            if(redisUtilService.tryLock(agentId.toString())){
-                log.info("计算代理可收 订单号 {}", zfRecharge.getMerchantOrderNo());
-                ZfAgent zfAgent = zfAgentDao.queryById(agentId);
-                ZfAgent zfAgent1 = new ZfAgent();
-                zfAgent1.setAgentId(zfAgent.getAgentId());
-                zfAgent.setAgentId(agentId);
-                if(zfRecharge.getOrderStatus() == 1){
-                    zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().subtract(zfRecharge.getPayAmount()));
-                    zfAgent1.setAcceptAmount(BigDecimal.ZERO.subtract(zfRecharge.getPayAmount()));
-                }else if(zfRecharge.getOrderStatus() == 3 ){
+            rLock.lock(5, TimeUnit.SECONDS);
+            long start  = System.currentTimeMillis();
+            log.info("计算代理可收 订单号 {}", zfRecharge.getMerchantOrderNo());
+            ZfAgent zfAgent = zfAgentDao.queryById(agentId);
+            ZfAgent zfAgent1 = new ZfAgent();
+            zfAgent1.setAgentId(zfAgent.getAgentId());
+            zfAgent.setAgentId(agentId);
+            if(zfRecharge.getOrderStatus() == 1){
+                zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().subtract(zfRecharge.getPayAmount()));
+                zfAgent1.setAcceptAmount(BigDecimal.ZERO.subtract(zfRecharge.getPayAmount()));
+            }else if(zfRecharge.getOrderStatus() == 3 ){
+                zfAgent1.setAcceptAmount(BigDecimal.ZERO.add(zfRecharge.getPayAmount()));
+                zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().add(zfRecharge.getPayAmount()));
+            }else if(zfRecharge.getOrderStatus() == 5){
+                ZfAgentTrans zfAgentTrans = zfAgentTransService.queryAddTransBySub(zfRecharge.getMerchantOrderNo());
+                if(zfAgentTrans != null){
                     zfAgent1.setAcceptAmount(BigDecimal.ZERO.add(zfRecharge.getPayAmount()));
                     zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().add(zfRecharge.getPayAmount()));
-                }else if(zfRecharge.getOrderStatus() == 5){
-                    ZfAgentTrans zfAgentTrans = zfAgentTransService.queryAddTransBySub(zfRecharge.getMerchantOrderNo());
-                    if(zfAgentTrans != null){
-                        zfAgent1.setAcceptAmount(BigDecimal.ZERO.add(zfRecharge.getPayAmount()));
-                        zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().add(zfRecharge.getPayAmount()));
-                    }else {
-                        log.info("订单无入款减分流水，不给加分 订单号 {}", zfRecharge.getMerchantOrderNo());
-                        return;
-                    }
+                }else {
+                    log.info("订单无入款减分流水，不给加分 订单号 {}", zfRecharge.getMerchantOrderNo());
+                    return;
                 }
-                zfAgentTransService.insert(new ZfAgentTrans(zfRecharge, zfAgent,  BigDecimal.ZERO));
-               int r =   zfAgentDao.updateAgentFee(zfAgent1);
-               if(r == 0){
-                   Telegram telegram = new Telegram();
-                   telegram.sendWarrnException(zfRecharge, "代理积分扣分失败");
-                   log.error("更新代理费用失败");
-               }
-            }else {
-                Telegram telegram = new Telegram();
-                telegram.sendWarrnException(zfRecharge, "代理积分扣分失败");
-                log.error("终端异常 订单号 {}",zfRecharge.getMerchantOrderNo());
             }
+            zfAgentTransService.insert(new ZfAgentTrans(zfRecharge, zfAgent,  BigDecimal.ZERO));
+            int r =   zfAgentDao.updateAgentFee(zfAgent1);
+            long end  = System.currentTimeMillis();
+            if(start -end > 10000){
+                log.info("超时订单 {} 超时时间 {}", zfRecharge.getMerchantOrderNo(), start-end);
+            }
+            if(r == 0){
+               Telegram telegram = new Telegram();
+               telegram.sendWarrnException(zfRecharge, "代理积分扣分失败");
+               log.error("更新代理费用失败");
+           }
+
         }catch (Exception e){
             Telegram telegram = new Telegram();
             telegram.sendWarrnException(zfRecharge, "代理积分扣分失败");
@@ -124,7 +139,9 @@ public class ZfAgentServiceImpl implements ZfAgentService {
             throw  new RuntimeException(e);
         }finally {
             log.info("释放锁时间  {} 时间 {}", zfRecharge.getMerchantOrderNo(), System.currentTimeMillis());
-            redisUtilService.unlock(agentId.toString());
+            if (rLock.isLocked() && rLock.isHeldByCurrentThread()){
+                rLock.unlock();
+            }
         }
     }
 
@@ -153,73 +170,82 @@ public class ZfAgentServiceImpl implements ZfAgentService {
      * @param zfAgent
      */
     @Override
-    public void updateAgentFee(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee) {
+    public void updateAgentFee(ZfRecharge zfRecharge, Integer agentId,BigDecimal fee) {
+        log.info("开始更新代理额度  {} 时间 {}", zfRecharge.getMerchantOrderNo(), System.currentTimeMillis());
+        RLock rLock = redissonClient.getLock("agentid"+agentId.toString());
         try {
+            rLock.lock(5,TimeUnit.SECONDS);
+            ZfAgent zfAgent = zfAgentService.queryById(agentId);
             log.info("更新代理手续费 {}", zfAgent);
-            if(redisUtilService.tryLock(zfAgent.getAgentId().toString(),3000000)){
-                ZfAgent updateAgent  = new ZfAgent();
-                updateAgent.setAgentId(zfAgent.getAgentId());
-                BigDecimal agentFee =  sumAgentFee(zfRecharge.getPaidAmount(), zfAgent.getRate());
-                if(agentFee.compareTo(BigDecimal.ZERO) < 0 ){
-                    log.info("代理费率设置错误 {}", zfAgent);
-                    return;
-                }
-                if(fee.compareTo(BigDecimal.ZERO)>0 && agentFee.compareTo(fee) < 0){
-                    log.info("代理费率设置错误 {}", zfAgent);
-                    return;
-                }
-                updateAgent.setBalance(agentFee.subtract(fee));
-                zfAgent.setBalance(zfAgent.getBalance().add(agentFee.subtract(fee)));
-                //新增代理流水
-                zfAgentTransService.insert(new ZfAgentTrans(zfRecharge, zfAgent,  agentFee.subtract(fee)));
-                //查询订单是否有代理流水补分记录，如果有说明已经超时补分过
-                ZfAgentTrans zfAgentTrans = zfAgentTransService.queryAddTransByOrderNo(zfRecharge.getMerchantOrderNo());
-                log.info("代理超时流水 {}", zfAgentTrans);
-                if(null != zfAgentTrans && zfAgentTrans.getAgentId().equals(zfAgent.getAgentId())){
-                    //扣除积分
-                    zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().subtract(zfRecharge.getPayAmount()));
-                    updateAgent.setAcceptAmount(BigDecimal.ZERO.subtract(zfRecharge.getPayAmount()));
-                    //说明订单自动取消过，这个时候，要新增吧积分重新扣回
-                    ZfAgentTrans zfAgentTrans1 = new ZfAgentTrans();
-                    zfAgentTrans1.buildFailOrderRollbackBySuccess(zfRecharge,zfAgent);
-                    zfAgentTransService.insert(zfAgentTrans1);
-                }
-                //更新代理余额
-                int r = zfAgentDao.updateAgentFee(updateAgent);
-                if(r == 0){
-                    Telegram telegram = new Telegram();
-                    telegram.sendWarrnException(zfRecharge, "代理积分扣分失败");
-                }
-                //如果代理费用为0，假设为一级代理，不然则上下级平点位代理，则不管
-                if(fee.compareTo(BigDecimal.ZERO) == 0){
-                    //新增代理报表
-                    zfAgentRecordService.updateRecord(new ZfAgentRecord(zfAgent,  agentFee.subtract(fee), zfRecharge.getPaidAmount()));
-                }else {
-                    ZfAgentRecord zfAgentRecord = new ZfAgentRecord();
-                    zfAgentRecord.buildAgentRecordBySunAgentSuccessAndParent(zfAgent,agentFee.subtract(fee));
-                    zfAgentRecordService.updateRecord(zfAgentRecord);
-                }
-                if(zfAgent.getParentId() != null && zfAgent.getParentId() != 0){
-                    ZfAgent parentAgent = zfAgentDao.queryById(zfAgent.getParentId());
-                    log.info("父级代理 {}", zfAgent.getParentId());
 
-                    if(parentAgent == null){
-                        return;
-                    }
-                    updateAgentFee(zfRecharge, parentAgent, agentFee);
-                }
-            }else {
+            if (zfAgent == null){
+                log.info("订单完成时 查询代理不存在 {}", zfRecharge.getMerchantId());
+                return;
+            }
+            ZfAgent updateAgent  = new ZfAgent();
+            updateAgent.setAgentId(zfAgent.getAgentId());
+            BigDecimal agentFee =  sumAgentFee(zfRecharge.getPaidAmount(), zfAgent.getRate());
+            if(agentFee.compareTo(BigDecimal.ZERO) < 0 ){
+                log.info("代理费率设置错误 {}", zfAgent);
+                return;
+            }
+            if(fee.compareTo(BigDecimal.ZERO)>0 && agentFee.compareTo(fee) < 0){
+                log.info("代理费率设置错误 {}", zfAgent);
+                return;
+            }
+            updateAgent.setBalance(agentFee.subtract(fee));
+            zfAgent.setBalance(zfAgent.getBalance().add(agentFee.subtract(fee)));
+            //新增代理流水
+            zfAgentTransService.insert(new ZfAgentTrans(zfRecharge, zfAgent,  agentFee.subtract(fee)));
+            //查询订单是否有代理流水补分记录，如果有说明已经超时补分过
+            ZfAgentTrans zfAgentTrans = zfAgentTransService.queryAddTransByOrderNo(zfRecharge.getMerchantOrderNo());
+            log.info("代理超时流水 {}", zfAgentTrans);
+            if(null != zfAgentTrans && zfAgentTrans.getAgentId().equals(zfAgent.getAgentId())){
+                //扣除积分
+                zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().subtract(zfRecharge.getPayAmount()));
+                updateAgent.setAcceptAmount(BigDecimal.ZERO.subtract(zfRecharge.getPayAmount()));
+                //说明订单自动取消过，这个时候，要新增吧积分重新扣回
+                ZfAgentTrans zfAgentTrans1 = new ZfAgentTrans();
+                zfAgentTrans1.buildFailOrderRollbackBySuccess(zfRecharge,zfAgent);
+                zfAgentTransService.insert(zfAgentTrans1);
+            }
+            //更新代理余额
+            int r = zfAgentDao.updateAgentFee(updateAgent);
+            if(r == 0){
                 Telegram telegram = new Telegram();
                 telegram.sendWarrnException(zfRecharge, "代理积分扣分失败");
-                log.error("终端异常, {}", zfRecharge.getMerchantOrderNo());
             }
+            //如果代理费用为0，假设为一级代理，不然则上下级平点位代理，则不管
+            if(fee.compareTo(BigDecimal.ZERO) == 0){
+                //新增代理报表
+                zfAgentRecordService.updateRecord(new ZfAgentRecord(zfAgent,  agentFee.subtract(fee), zfRecharge.getPaidAmount()));
+            }else {
+                ZfAgentRecord zfAgentRecord = new ZfAgentRecord();
+                zfAgentRecord.buildAgentRecordBySunAgentSuccessAndParent(zfAgent,agentFee.subtract(fee));
+                zfAgentRecordService.updateRecord(zfAgentRecord);
+            }
+            if(rLock.isLocked() && rLock.isHeldByCurrentThread()){
+                rLock.unlock();
+            }
+            if(zfAgent.getParentId() != null && zfAgent.getParentId() != 0) {
+                ZfAgent parentAgent = zfAgentDao.queryById(zfAgent.getParentId());
+                log.info("父级代理 {}", zfAgent.getParentId());
+                if (parentAgent == null) {
+                    return;
+                }
+                updateAgentFee(zfRecharge, parentAgent.getAgentId(), agentFee);
+            }
+
         }catch (Exception e){
             Telegram telegram = new Telegram();
             telegram.sendWarrnException(zfRecharge, "代理积分扣分失败");
             log.error("更新代理余额失败, {}", e);
             throw new RuntimeException(e);
         }finally {
-            redisUtilService.unlock(zfAgent.getAgentId().toString());
+            log.info("结束更新代理额度  {} 时间 {}", zfRecharge.getMerchantOrderNo(), System.currentTimeMillis());
+            if(rLock.isLocked() && rLock.isHeldByCurrentThread()){
+                rLock.unlock();
+            }
         }
     }
 
