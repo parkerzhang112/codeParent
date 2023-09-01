@@ -520,10 +520,10 @@ public class RechargeControllerTest extends PayapiApplicationTests {
     public void testViewHttp(){
 
         TreeMap<String, Object> map = new TreeMap<>();
-        map.put("merchant_id", "768834");
-        map.put("merchant_order_no", "202304191318096284XJO");
+        map.put("merchant_id", "11168");
+        map.put("merchant_order_no", "202308310947400969VQY");
         String sign_str = new CommonUtil().getSign(map);
-        sign_str = sign_str.concat("key=".concat("LEYVGR4LCsKVDTcURpprTS3zm5mjkpYK"));
+        sign_str = sign_str.concat("key=".concat("GrSwUefNhjJZf9KBM6jxqu5CNbLVNWZg"));
         String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
         map.put("sign",sign);
         log.info("请求参数 {}", JSONObject.toJSON(map));

@@ -371,9 +371,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 
     @Override
     public void confirmOrder(OperaOrderParams operaOrderParams) {
-        RLock rLock = redissonClient.getLock(operaOrderParams.getOrderNo());
         try {
-            rLock.lock(5, TimeUnit.SECONDS);
 //            Thread.sleep(10000);
             ZfRecharge zfRecharge = zfRechargeDao.queryById(operaOrderParams.getOrderNo());
             log.info("确认订单 订单号 {}", zfRecharge.getMerchantOrderNo());
@@ -388,10 +386,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             paidOrder(zfRecharge);
         }catch (Exception e){
             log.error("系统异常", e);
-        }finally {
-            if(rLock.isLocked() && rLock.isHeldByCurrentThread()){
-                rLock.unlock();
-            }
         }
     }
 
@@ -502,8 +496,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     @Override
     public JSONObject getOrderStatus(String orderno) {
         TreeMap<String, Object>  map = new TreeMap<>();
+        RLock rLock = redisUtilService.lock("recharge:order" + orderno);
         try {
-            RLock rLock = redisUtilService.lock("recharge:order" + orderno);
             //查单码
             ZfRecharge zfRecharge = queryById(orderno);
             map.put("order_no", zfRecharge.getMerchantOrderNo());
@@ -536,33 +530,35 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 map.put("order_status", 0);
                 return new JSONObject(map);
             }
-            zfRecharge.setAgentId(zfCode.getAgentId());
-            zfRecharge.setCodeId(zfCode.getCodeId());
-            zfRecharge.setCreateTime(new Date());
-            zfRecharge.setOrderStatus(1);
-            zfRechargeDao.update(zfRecharge);
-            //增加已收额度
-            ZfAgent zfAgent = new ZfAgent();
-            zfAgent.setNotice(1);
-            zfAgent.setAgentId(zfCode.getAgentId());
-            zfAgentService.update(zfAgent);
-            zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
-            //更新订单信息
-            map.put("order_status", 1);
-            map.put("trans_account", zfCode.getAccount());
-            map.put("trans_name", zfCode.getName());
-            map.put("payurl", zfCode.getImage());
-            if(rLock.isLocked() && rLock.isHeldByCurrentThread()){
-                rLock.unlock();
-            }
-            return new JSONObject(map);
 
+            if(rLock.tryLock(2,5, TimeUnit.SECONDS)){
+                zfRecharge.setAgentId(zfCode.getAgentId());
+                zfRecharge.setCodeId(zfCode.getCodeId());
+                zfRecharge.setCreateTime(new Date());
+                zfRecharge.setOrderStatus(1);
+                zfRechargeDao.update(zfRecharge);
+                //增加已收额度
+                ZfAgent zfAgent = new ZfAgent();
+                zfAgent.setNotice(1);
+                zfAgent.setAgentId(zfCode.getAgentId());
+                zfAgentService.update(zfAgent);
+                zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
+                //更新订单信息
+                map.put("order_status", 1);
+                map.put("trans_account", zfCode.getAccount());
+                map.put("trans_name", zfCode.getName());
+                map.put("payurl", zfCode.getImage());
+                return new JSONObject(map);
+            }else {
+                map.put("order_status", 0);
+                return new JSONObject(map);
+            }
             //返回订单信息
         }catch (Exception e){
             log.error("查码异常 {}", e);
             return new JSONObject(map);
         }finally {
-            redisUtilService.unlock(orderno);
+            rLock.unlock();
         }
     }
 
