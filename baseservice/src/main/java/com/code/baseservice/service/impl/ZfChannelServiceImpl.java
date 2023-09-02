@@ -8,14 +8,14 @@ import com.code.baseservice.dto.XChannelRate;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfChannel;
-
+import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.service.ZfChannelService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -33,6 +33,9 @@ import java.util.List;
 public class ZfChannelServiceImpl implements ZfChannelService {
     @Resource
     private ZfChannelDao zfChannelDao;
+
+    @Autowired
+    private RedissonClient redissonClient;
 
     /**
      * 通过ID查询单条数据
@@ -92,6 +95,24 @@ public class ZfChannelServiceImpl implements ZfChannelService {
             log.error("手续费计算异常", e);
         }
         return BigDecimal.ZERO;
+    }
+
+    @Override
+    public void updateAgentFee(ZfRecharge zfRecharge) {
+        RLock rLock = redissonClient.getLock("channel"+zfRecharge.getChannelId());
+        try{
+            //查询渠道信息
+            //组装更新信息
+            //插入渠道流水
+            //更新渠道余额
+        }catch (Exception e){
+
+        }finally {
+            if(rLock.isLocked() && rLock.isHeldByCurrentThread()){
+                rLock.isLocked();
+            }
+        }
+
     }
 
 
