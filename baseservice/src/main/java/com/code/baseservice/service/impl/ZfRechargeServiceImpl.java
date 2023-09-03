@@ -1,7 +1,6 @@
 package com.code.baseservice.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.code.baseservice.base.constant.BankTypeConstans;
 import com.code.baseservice.base.constant.RedisConstant;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
@@ -18,7 +17,6 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -538,10 +536,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 zfRecharge.setOrderStatus(1);
                 zfRechargeDao.update(zfRecharge);
                 //增加已收额度
-                ZfAgent zfAgent = new ZfAgent();
-                zfAgent.setNotice(1);
-                zfAgent.setAgentId(zfCode.getAgentId());
-                zfAgentService.update(zfAgent);
+                redisUtilService.set("notice:agent:" + zfCode.getAgentId(), 1,1200);
                 zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
                 //更新订单信息
                 map.put("order_status", 1);
