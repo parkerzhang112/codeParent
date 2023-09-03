@@ -8,8 +8,12 @@ import com.code.baseservice.dto.XChannelRate;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfChannel;
+import com.code.baseservice.entity.ZfChannelRecord;
+import com.code.baseservice.entity.ZfChannelTrans;
 import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.service.ZfChannelRecordService;
 import com.code.baseservice.service.ZfChannelService;
+import com.code.baseservice.service.ZfChannelTransService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -36,6 +40,12 @@ public class ZfChannelServiceImpl implements ZfChannelService {
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private ZfChannelRecordService zfChannelRecordService;
+
+    @Autowired
+    private ZfChannelTransService zfChannelTransService;
 
     /**
      * 通过ID查询单条数据
@@ -78,6 +88,21 @@ public class ZfChannelServiceImpl implements ZfChannelService {
     }
 
     @Override
+    public BigDecimal sumThirdChannelFee(@NonNull BigDecimal PaidAmount, ZfChannel zfChannel) {
+        try {
+            if (null == zfChannel.getThirdMerchantChannelRate()) {
+                return BigDecimal.ZERO;
+            }
+
+                BigDecimal rate = zfChannel.getThirdMerchantChannelRate().divide(new BigDecimal("100"));
+                return PaidAmount.multiply(rate);
+        } catch (Exception e) {
+            log.error("手续费计算异常", e);
+        }
+        return BigDecimal.ZERO;
+    }
+
+    @Override
     public BigDecimal sumChannelFee(@NonNull BigDecimal PaidAmount, ZfChannel zfChannel) {
         try {
             if (Strings.isEmpty(zfChannel.getChannelRate())) {
@@ -98,21 +123,30 @@ public class ZfChannelServiceImpl implements ZfChannelService {
     }
 
     @Override
-    public void updateAgentFee(ZfRecharge zfRecharge) {
+    public void updateChannelFee(ZfRecharge zfRecharge) {
         RLock rLock = redissonClient.getLock("channel"+zfRecharge.getChannelId());
         try{
+            ZfChannel zfChannel1 = new ZfChannel();
             //查询渠道信息
+            ZfChannel zfChannel = zfChannelDao.queryById(zfRecharge.getChannelId());
+            BigDecimal channlFee = sumThirdChannelFee(zfRecharge.getPaidAmount(), zfChannel);
             //组装更新信息
+            ZfChannelTrans zfChannelTrans = new ZfChannelTrans(zfRecharge,zfChannel, channlFee);
+            ZfChannelRecord zfChannelRecord = new ZfChannelRecord(zfRecharge, zfChannel);
+            zfChannel1.setChannleBalance(zfRecharge.getPaidAmount().subtract(channlFee));
+            zfChannelDao.updateChannelFee(zfChannel1);
             //插入渠道流水
+            zfChannelRecordService.update(zfChannelRecord);
             //更新渠道余额
+            zfChannelTransService.insert(zfChannelTrans);
         }catch (Exception e){
-
+            log.error("计算渠道费用 单号{} 异常原因 {}", zfRecharge.getMerchantOrderNo(), e.getStackTrace());
+            throw  new RuntimeException(e);
         }finally {
             if(rLock.isLocked() && rLock.isHeldByCurrentThread()){
                 rLock.isLocked();
             }
         }
-
     }
 
 

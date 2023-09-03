@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.baseservice.dao.ZfChannelRecordDao">
+
+    <resultMap type="com.code.baseservice.entity.ZfChannelRecord" id="ZfChannelRecordMap">
+        <result property="channelId" column="channel_id" jdbcType="INTEGER"/>
+        <result property="rechargeAmount" column="recharge_amount" jdbcType="NUMERIC"/>
+        <result property="channeFee" column="channe_fee" jdbcType="NUMERIC"/>
+        <result property="recordDate" column="record_date" jdbcType="TIMESTAMP"/>
+        <result property="channelName" column="channel_name" jdbcType="VARCHAR"/>
+        <result property="merchantId" column="merchant_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ZfChannelRecordMap">
+        select
+          channel_id, recharge_amount, channe_fee, record_date, channel_name, merchant_id
+        from zf_channel_record
+        where channel_id = #{channelId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ZfChannelRecordMap">
+        select
+          channel_id, recharge_amount, channe_fee, record_date, channel_name, merchant_id
+        from zf_channel_record
+        <where>
+            <if test="channelId != null">
+                and channel_id = #{channelId}
+            </if>
+            <if test="rechargeAmount != null">
+                and recharge_amount = #{rechargeAmount}
+            </if>
+            <if test="channeFee != null">
+                and channe_fee = #{channeFee}
+            </if>
+            <if test="recordDate != null">
+                and record_date = #{recordDate}
+            </if>
+            <if test="channelName != null and channelName != ''">
+                and channel_name = #{channelName}
+            </if>
+            <if test="merchantId != null">
+                and merchant_id = #{merchantId}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from zf_channel_record
+        <where>
+            <if test="channelId != null">
+                and channel_id = #{channelId}
+            </if>
+            <if test="rechargeAmount != null">
+                and recharge_amount = #{rechargeAmount}
+            </if>
+            <if test="channeFee != null">
+                and channe_fee = #{channeFee}
+            </if>
+            <if test="recordDate != null">
+                and record_date = #{recordDate}
+            </if>
+            <if test="channelName != null and channelName != ''">
+                and channel_name = #{channelName}
+            </if>
+            <if test="merchantId != null">
+                and merchant_id = #{merchantId}
+            </if>
+        </where>
+    </select>
+    <select id="queryByIdAndDate" resultType="com.code.baseservice.entity.ZfChannelRecord">
+        select
+          channel_id, recharge_amount, channe_fee, record_date, channel_name,merchant_id
+        from zf_channel_record
+        where channel_id = #{channelId}
+        and record_date = #{recordDate}
+        and merchant_id = #{merchantId}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="channelId" useGeneratedKeys="true">
+        insert into zf_channel_record(recharge_amount, channe_fee, channel_name)
+        values (#{rechargeAmount}, #{channeFee}, #{channelName})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="channelId" useGeneratedKeys="true">
+        insert into zf_channel_record(recharge_amount, channe_fee, channel_name)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.rechargeAmount}, #{entity.channeFee}, #{entity.channelName})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="channelId" useGeneratedKeys="true">
+        insert into zf_channel_record(recharge_amount, channe_fee, channel_name)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.rechargeAmount}, #{entity.channeFee}, #{entity.channelName})
+        </foreach>
+        on duplicate key update
+        recharge_amount = values(recharge_amount),
+        channe_fee = values(channe_fee),
+        channel_name = values(channel_name)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update zf_channel_record
+        <set>
+            <if test="rechargeAmount != null">
+                recharge_amount = #{rechargeAmount},
+            </if>
+            <if test="channeFee != null">
+                channe_fee = #{channeFee},
+            </if>
+            <if test="channelName != null and channelName != ''">
+                channel_name = #{channelName},
+            </if>
+        </set>
+        where channel_id = #{channelId}
+    </update>
+
+    <update id="updateRecord">
+        update zf_channel_record
+        <set>
+            <if test="rechargeAmount != null">
+                recharge_amount = recharge_amount + #{rechargeAmount},
+            </if>
+            <if test="rechargeTimes != null">
+                recharge_times = recharge_times + 1,
+            </if>
+            <if test="channeFee != null">
+                channe_fee = channe_fee + #{channeFee},
+            </if>
+        </set>
+        where channel_id = #{channelId}
+        and record_date= #{recordDate}
+        and merchant_id = #{merchantId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from zf_channel_record where channel_id = #{channelId}
+    </delete>
+
+</mapper>
+

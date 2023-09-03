@@ -1,6 +1,5 @@
 package com.code.baseservice.entity;
 
-import io.swagger.models.auth.In;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -46,6 +45,20 @@ public class ZfChannel implements Serializable {
 
     /**支付类型*/
     private Integer payType;
+
+    //渠道余额
+    private BigDecimal channleBalance;
+
+    //三方商户id
+    private String thirdMerchantId;
+
+    //三方商户私钥
+    private String thirdMerchantPrivateKey;
+
+    //三方商户公钥
+    private String thirdMerchantPublicKey;
+
+    private BigDecimal thirdMerchantChannelRate;
 
 }
 

@@ -3,8 +3,6 @@ package com.code.baseservice.dao;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfChannel;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -33,5 +31,7 @@ public interface ZfChannelDao {
     List<ZfChannel> selectChannel(RechareParams rechareParams);
 
     List<ZfChannel> selectChannelByTrans(TransferParams transParams);
+
+    void updateChannelFee(ZfChannel zfChannel);
 }
 

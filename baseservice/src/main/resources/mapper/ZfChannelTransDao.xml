@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.code.baseservice.dao.ZfChannelTransDao">
+
+    <resultMap type="com.code.baseservice.entity.ZfChannelTrans" id="ZfChannelTransMap">
+        <result property="channelId" column="channel_id" jdbcType="INTEGER"/>
+        <result property="preBalance" column="pre_balance" jdbcType="NUMERIC"/>
+        <result property="balance" column="balance" jdbcType="NUMERIC"/>
+        <result property="channelFee" column="channel_fee" jdbcType="NUMERIC"/>
+        <result property="orderNo" column="order_no" jdbcType="VARCHAR"/>
+        <result property="merchantOrderNo" column="merchant_order_no" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ZfChannelTransMap">
+        select
+          channel_id, pre_balance, balance, channel_fee, order_no, merchant_order_no, create_time, remark, update_by
+        from zf_channel_trans
+        where channel_id = #{channelId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ZfChannelTransMap">
+        select
+          channel_id, pre_balance, balance, channel_fee, order_no, merchant_order_no, create_time, remark, update_by
+        from zf_channel_trans
+        <where>
+            <if test="channelId != null">
+                and channel_id = #{channelId}
+            </if>
+            <if test="preBalance != null">
+                and pre_balance = #{preBalance}
+            </if>
+            <if test="balance != null">
+                and balance = #{balance}
+            </if>
+            <if test="channelFee != null">
+                and channel_fee = #{channelFee}
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                and order_no = #{orderNo}
+            </if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+                and merchant_order_no = #{merchantOrderNo}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+            <if test="updateBy != null and updateBy != ''">
+                and update_by = #{updateBy}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from zf_channel_trans
+        <where>
+            <if test="channelId != null">
+                and channel_id = #{channelId}
+            </if>
+            <if test="preBalance != null">
+                and pre_balance = #{preBalance}
+            </if>
+            <if test="balance != null">
+                and balance = #{balance}
+            </if>
+            <if test="channelFee != null">
+                and channel_fee = #{channelFee}
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                and order_no = #{orderNo}
+            </if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+                and merchant_order_no = #{merchantOrderNo}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+            <if test="updateBy != null and updateBy != ''">
+                and update_by = #{updateBy}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="channelId" useGeneratedKeys="true">
+        insert into zf_channel_trans(pre_balance, balance, channel_fee, order_no, merchant_order_no, create_time, remark, update_by)
+        values (#{preBalance}, #{balance}, #{channelFee}, #{orderNo}, #{merchantOrderNo}, #{createTime}, #{remark}, #{updateBy})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="channelId" useGeneratedKeys="true">
+        insert into zf_channel_trans(pre_balance, balance, channel_fee, order_no, merchant_order_no, create_time, remark, update_by)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.preBalance}, #{entity.balance}, #{entity.channelFee}, #{entity.orderNo}, #{entity.merchantOrderNo}, #{entity.createTime}, #{entity.remark}, #{entity.updateBy})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="channelId" useGeneratedKeys="true">
+        insert into zf_channel_trans(pre_balance, balance, channel_fee, order_no, merchant_order_no, create_time, remark, update_by)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.preBalance}, #{entity.balance}, #{entity.channelFee}, #{entity.orderNo}, #{entity.merchantOrderNo}, #{entity.createTime}, #{entity.remark}, #{entity.updateBy})
+        </foreach>
+        on duplicate key update
+        pre_balance = values(pre_balance),
+        balance = values(balance),
+        channel_fee = values(channel_fee),
+        order_no = values(order_no),
+        merchant_order_no = values(merchant_order_no),
+        create_time = values(create_time),
+        remark = values(remark),
+        update_by = values(update_by)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update zf_channel_trans
+        <set>
+            <if test="preBalance != null">
+                pre_balance = #{preBalance},
+            </if>
+            <if test="balance != null">
+                balance = #{balance},
+            </if>
+            <if test="channelFee != null">
+                channel_fee = #{channelFee},
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                order_no = #{orderNo},
+            </if>
+            <if test="merchantOrderNo != null and merchantOrderNo != ''">
+                merchant_order_no = #{merchantOrderNo},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+            <if test="updateBy != null and updateBy != ''">
+                update_by = #{updateBy},
+            </if>
+        </set>
+        where channel_id = #{channelId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from zf_channel_trans where channel_id = #{channelId}
+    </delete>
+
+</mapper>
+

@@ -13,6 +13,14 @@
         <result property="payType" column="pay_type" />
 
     </resultMap>
+    <update id="updateChannelFee">
+
+        update zf_channel
+        <set>
+            channel_balance = channel_balance + #{channelBalance}
+        </set>
+        where channel_id = #{channelId}
+    </update>
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfChannelMap">

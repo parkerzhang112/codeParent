@@ -5,8 +5,6 @@ import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfChannel;
 import com.code.baseservice.entity.ZfRecharge;
 import lombok.NonNull;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -38,5 +36,8 @@ public interface ZfChannelService {
 
     BigDecimal sumChannelFee(@NonNull BigDecimal pay_amount, ZfChannel zfChannel);
 
-    void updateAgentFee(ZfRecharge zfRecharge);
+     BigDecimal sumThirdChannelFee(@NonNull BigDecimal PaidAmount, ZfChannel zfChannel);
+
+
+        void updateChannelFee(ZfRecharge zfRecharge);
 }

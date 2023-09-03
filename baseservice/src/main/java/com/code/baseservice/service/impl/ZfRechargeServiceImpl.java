@@ -355,7 +355,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             if(zfRecharge.getIsThird() == 0){
                 zfAgentService.updateAgentFee(zfRecharge, zfRecharge.getAgentId(), BigDecimal.ZERO);
             }else {
-                zfChannelService.updateAgentFee(zfRecharge);
+                zfChannelService.updateChannelFee(zfRecharge);
             }
             //更新码日报
             zfCodeRecordService.updateRecord(new ZfCodeRecord(zfRecharge));
