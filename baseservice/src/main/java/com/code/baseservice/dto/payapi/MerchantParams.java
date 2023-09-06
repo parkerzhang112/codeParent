@@ -12,7 +12,7 @@ class MerchantParams {
 
     @JsonProperty("merchant_id")
     @NonNull
-    private Integer merchant_id;
+    private String merchant_id;
 
     @JsonProperty("sign")
     @NonNull

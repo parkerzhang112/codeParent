@@ -57,9 +57,9 @@ public class ZfMerchantServiceImpl implements ZfMerchantService {
     }
 
     @Override
-    public ZfMerchant vaildMerchant(Integer merchant_id) {
+    public ZfMerchant vaildMerchant(String merchant_id) {
         log.info("验证商户合法性开始 {}", merchant_id);
-        ZfMerchant xMerchant =  zfMerchantDao.queryById(merchant_id);
+        ZfMerchant xMerchant =  zfMerchantDao.queryById(Integer.valueOf(merchant_id));
         if(Objects.isNull(xMerchant) && xMerchant.getStatus().equals(CommonStatusEnum.STATR.getValue())){
             log.info("无效商户 {}", merchant_id);
             throw new BaseException(ResultEnum.NO_VAILD_MERCHANT);

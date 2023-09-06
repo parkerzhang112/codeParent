@@ -5,14 +5,10 @@ import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.entity.ZfChannel;
 import com.code.baseservice.entity.ZfRecharge;
 
-public interface CommonService {
-
+public interface BaseService {
 
 
     JSONObject notify(QueryParams queryParams);
-
-
-
 
 
     JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge);

@@ -1,7 +1,6 @@
 package com.code.baseservice.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.code.baseservice.dto.autoapi.TransParams;
 import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import com.code.baseservice.dto.backapi.OperaOrderParams;
 import com.code.baseservice.dto.payapi.QueryParams;
@@ -9,9 +8,6 @@ import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfTransRecord;
-import com.code.baseservice.entity.ZfWithdraw;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -61,4 +57,6 @@ public interface ZfRechargeService {
     void postName(Map<String, Object> map);
 
     JSONObject createA(RechareParams rechareParams);
+
+    ZfRecharge queryByOrderNo(String merchant_order_no);
 }

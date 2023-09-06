@@ -1,7 +1,6 @@
 package com.code.payapi;
 
 import com.alibaba.fastjson.JSONObject;
-
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.ResponseResult;
@@ -9,7 +8,6 @@ import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfMerchant;
 import com.code.baseservice.service.ZfMerchantService;
-import com.code.baseservice.service.ZfRechargeService;
 import com.code.baseservice.service.ZfWithdrawService;
 import com.code.baseservice.util.CommonUtil;
 import com.code.baseservice.util.MD5Util;
@@ -77,7 +75,7 @@ public class TransControllerTest extends PayapiApplicationTests {
     public void testView() {
         QueryParams queryParams = new QueryParams();
         ZfMerchant xMerchant = zfMerchantService.queryById(10019);
-        queryParams.setMerchant_Id(xMerchant.getMerchantId());
+        queryParams.setMerchant_Id(xMerchant.getMerchantId().toString());
         queryParams.setMerchant_order_no("dsadasdsaW1679713803244WwvNtvHDX");
         TreeMap<String, Object> map = new TreeMap<>();
         map.put("merchant_id", queryParams.getMerchant_Id());

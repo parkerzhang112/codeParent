@@ -57,7 +57,7 @@ public class ZfRecharge implements Serializable {
     private Integer payType;
 
     public  ZfRecharge(RechareParams rechareParams){
-        setMerchantId(rechareParams.getMerchant_id());
+        setMerchantId(Integer.valueOf(rechareParams.getMerchant_id()));
         setMerchantOrderNo(rechareParams.getMerchant_order_no());
         setNotifyUrl(rechareParams.getNotify_url());
         setPayAmount(rechareParams.getPay_amount());

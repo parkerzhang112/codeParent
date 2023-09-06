@@ -34,7 +34,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
                 ZfMerchant xMerchant = zfMerchantService.queryById(10019);
                 RechareParams rechareParams = new RechareParams();
                 rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
-                rechareParams.setMerchant_id(10019);
+                rechareParams.setMerchant_id("10019");
                 Random random = new Random();
                 int amount = random.nextInt(107);
                 rechareParams.setPay_amount(new BigDecimal("146"));
@@ -88,7 +88,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
                 ZfMerchant xMerchant = zfMerchantService.queryById(10019);
                 RechareParams rechareParams = new RechareParams();
                 rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
-                rechareParams.setMerchant_id(10019);
+                rechareParams.setMerchant_id("10019");
                 Random random = new Random();
                 int amount = random.nextInt(107);
                 rechareParams.setPay_amount(new BigDecimal("146"));
@@ -142,7 +142,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
                 ZfMerchant xMerchant = zfMerchantService.queryById(10019);
                 RechareParams rechareParams = new RechareParams();
                 rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
-                rechareParams.setMerchant_id(10019);
+                rechareParams.setMerchant_id("10019");
                 Random random = new Random();
                 int amount = random.nextInt(107);
                 rechareParams.setPay_amount(new BigDecimal("146"));
@@ -196,7 +196,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
                 ZfMerchant xMerchant = zfMerchantService.queryById(10019);
                 RechareParams rechareParams = new RechareParams();
                 rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
-                rechareParams.setMerchant_id(10019);
+                rechareParams.setMerchant_id("10019");
                 Random random = new Random();
                 int amount = random.nextInt(107);
                 rechareParams.setPay_amount(new BigDecimal("146"));
@@ -250,7 +250,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
                 ZfMerchant xMerchant = zfMerchantService.queryById(10019);
                 RechareParams rechareParams = new RechareParams();
                 rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
-                rechareParams.setMerchant_id(10019);
+                rechareParams.setMerchant_id("10019");
                 Random random = new Random();
                 int amount = random.nextInt(107);
                 rechareParams.setPay_amount(new BigDecimal("146"));
@@ -304,7 +304,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
                 ZfMerchant xMerchant = zfMerchantService.queryById(10019);
                 RechareParams rechareParams = new RechareParams();
                 rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
-                rechareParams.setMerchant_id(10019);
+                rechareParams.setMerchant_id("10019");
                 Random random = new Random();
                 int amount = random.nextInt(107);
                 rechareParams.setPay_amount(new BigDecimal("146"));
@@ -358,7 +358,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
                 ZfMerchant xMerchant = zfMerchantService.queryById(10019);
                 RechareParams rechareParams = new RechareParams();
                 rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
-                rechareParams.setMerchant_id(10019);
+                rechareParams.setMerchant_id("10019");
                 Random random = new Random();
                 int amount = random.nextInt(107);
                 rechareParams.setPay_amount(new BigDecimal("146"));
@@ -412,7 +412,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
                 ZfMerchant xMerchant = zfMerchantService.queryById(10019);
                 RechareParams rechareParams = new RechareParams();
                 rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
-                rechareParams.setMerchant_id(10019);
+                rechareParams.setMerchant_id("10019");
                 Random random = new Random();
                 int amount = random.nextInt(107);
                 rechareParams.setPay_amount(new BigDecimal("146"));
@@ -490,7 +490,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
         ZfMerchant xMerchant = zfMerchantService.queryById(10019);
         RechareParams rechareParams = new RechareParams();
         rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
-        rechareParams.setMerchant_id(871245555);
+        rechareParams.setMerchant_id("871245555");
         Random random = new Random();
         int amount = random.nextInt(107);
         rechareParams.setPay_amount(new BigDecimal("146"));
@@ -517,6 +517,36 @@ public class RechargeControllerTest extends PayapiApplicationTests {
     }
 
     @Test
+    public void testCreateHttpA() {
+        ZfMerchant xMerchant = zfMerchantService.queryById(10019);
+        RechareParams rechareParams = new RechareParams();
+        rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
+        rechareParams.setMerchant_id("88945");
+        Random random = new Random();
+        int amount = random.nextInt(107);
+        rechareParams.setPay_amount(new BigDecimal("146"));
+        rechareParams.setNotify_url("http://127.0.0.1:8081/test/notify");
+        rechareParams.setRemark(StringUtil.createRandomStr1(3));
+        TreeMap<String, Object> map = new TreeMap<>();
+        map.put("merchant_id", rechareParams.getMerchant_id());
+        map.put("merchant_order_no", rechareParams.getMerchant_order_no());
+        map.put("pay_amount", rechareParams.getPay_amount());
+        map.put("notify_url", rechareParams.getNotify_url());
+        String sign_str = new CommonUtil().getSign(map);
+        sign_str = sign_str.concat("key=1231231223123");
+        log.info("签名字符串: {}", sign_str);
+        String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
+        rechareParams.setSign(sign);
+        try {
+            String reponse = HttpClientUtil.doPostJson("http://127.0.0.1:8081/recharge/create_a", JSONObject.toJSONString(rechareParams));
+            JSONObject jsonObject = JSONObject.parseObject(reponse);
+            System.out.print("创建订单测试单元结果" + jsonObject);
+        }catch (BaseException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
     public void testViewHttp(){
 
         TreeMap<String, Object> map = new TreeMap<>();
@@ -532,12 +562,27 @@ public class RechargeControllerTest extends PayapiApplicationTests {
     }
 
     @Test
+    public void testNotify(){
+
+        TreeMap<String, Object> map = new TreeMap<>();
+        map.put("merchant_id", "10019");
+        map.put("merchant_order_no", "DGG1693935719951wWI6MkjqxgeF2SYZ");
+        String sign_str = new CommonUtil().getSign(map);
+        sign_str = sign_str.concat("key=".concat("GrSwUefNhjJZf9KBM6jxqu5CNbLVNWZg"));
+        String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
+        map.put("sign",sign);
+        log.info("请求参数 {}", JSONObject.toJSON(map));
+        String reponse = HttpClientUtil.doPostJson("http://127.0.0.1:8081/recharge/notify", JSONObject.toJSONString(map));
+        System.out.print("查询订单测试单元" + reponse);
+    }
+
+    @Test
     public void testView(){
         QueryParams queryParams = new QueryParams();
         ZfRecharge xRecharges = zfRechargeService.queryById("DDD1681388713213MWllk8DexsBDrpsA");
         ZfMerchant xMerchant = zfMerchantService.queryById(xRecharges.getMerchantId());
         queryParams.setMerchant_order_no(xRecharges.getMerchantOrderNo());
-        queryParams.setMerchant_Id(xRecharges.getMerchantId());
+        queryParams.setMerchant_Id(xRecharges.getMerchantId().toString());
 
         TreeMap<String, Object> map = new TreeMap<>();
         map.put("merchant_id", queryParams.getMerchant_Id());

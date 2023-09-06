@@ -129,12 +129,12 @@ public class ZfChannelServiceImpl implements ZfChannelService {
             ZfChannel zfChannel1 = new ZfChannel();
             //查询渠道信息
             ZfChannel zfChannel = zfChannelDao.queryById(zfRecharge.getChannelId());
-            BigDecimal channlFee = sumThirdChannelFee(zfRecharge.getPaidAmount(), zfChannel);
+            BigDecimal channlFee = sumThirdChannelFee(zfRecharge.getPayAmount(), zfChannel);
             //组装更新信息
             ZfChannelTrans zfChannelTrans = new ZfChannelTrans(zfRecharge,zfChannel, channlFee);
-            ZfChannelRecord zfChannelRecord = new ZfChannelRecord(zfRecharge, zfChannel);
-            zfChannel1.setChannleBalance(zfRecharge.getPaidAmount().subtract(channlFee));
-            zfChannelDao.updateChannelFee(zfChannel1);
+            ZfChannelRecord zfChannelRecord = new ZfChannelRecord(zfRecharge, zfChannel, channlFee);
+            zfChannel1.setChannelBalance(zfRecharge.getPaidAmount().subtract(channlFee));
+            zfChannelDao.updateChannelFee(zfChannel1.getChannelBalance(), zfRecharge.getChannelId());
             //插入渠道流水
             zfChannelRecordService.update(zfChannelRecord);
             //更新渠道余额
@@ -147,6 +147,11 @@ public class ZfChannelServiceImpl implements ZfChannelService {
                 rLock.isLocked();
             }
         }
+    }
+
+    @Override
+    public ZfChannel queryByMerchantId(String thirdMerchantId) {
+        return zfChannelDao.queryByMerchantId(thirdMerchantId);
     }
 
 

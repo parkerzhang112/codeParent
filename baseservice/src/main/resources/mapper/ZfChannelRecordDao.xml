@@ -3,12 +3,12 @@
 <mapper namespace="com.code.baseservice.dao.ZfChannelRecordDao">
 
     <resultMap type="com.code.baseservice.entity.ZfChannelRecord" id="ZfChannelRecordMap">
-        <result property="channelId" column="channel_id" jdbcType="INTEGER"/>
-        <result property="rechargeAmount" column="recharge_amount" jdbcType="NUMERIC"/>
-        <result property="channeFee" column="channe_fee" jdbcType="NUMERIC"/>
-        <result property="recordDate" column="record_date" jdbcType="TIMESTAMP"/>
-        <result property="channelName" column="channel_name" jdbcType="VARCHAR"/>
-        <result property="merchantId" column="merchant_id" jdbcType="INTEGER"/>
+        <result property="channelId" column="channel_id"/>
+<!--        <result property="rechargeAmount" column="recharge_amount" />-->
+<!--        <result property="channelFee" column="channe_fee" />-->
+<!--        <result property="recordDate" column="record_date" />-->
+<!--&lt;!&ndash;        <result property="channelName" column="channel_name" />&ndash;&gt;-->
+<!--        <result property="merchantId" column="merchant_id" />-->
     </resultMap>
 
     <!--查询单个-->
@@ -55,26 +55,18 @@
             <if test="channelId != null">
                 and channel_id = #{channelId}
             </if>
-            <if test="rechargeAmount != null">
-                and recharge_amount = #{rechargeAmount}
-            </if>
-            <if test="channeFee != null">
-                and channe_fee = #{channeFee}
-            </if>
+
             <if test="recordDate != null">
                 and record_date = #{recordDate}
-            </if>
-            <if test="channelName != null and channelName != ''">
-                and channel_name = #{channelName}
             </if>
             <if test="merchantId != null">
                 and merchant_id = #{merchantId}
             </if>
         </where>
     </select>
-    <select id="queryByIdAndDate" resultType="com.code.baseservice.entity.ZfChannelRecord">
+    <select id="queryByIdAndDate" resultMap="ZfChannelRecordMap">
         select
-          channel_id, recharge_amount, channe_fee, record_date, channel_name,merchant_id
+        channel_id
         from zf_channel_record
         where channel_id = #{channelId}
         and record_date = #{recordDate}
@@ -83,8 +75,8 @@
 
     <!--新增所有列-->
     <insert id="insert" keyProperty="channelId" useGeneratedKeys="true">
-        insert into zf_channel_record(recharge_amount, channe_fee, channel_name)
-        values (#{rechargeAmount}, #{channeFee}, #{channelName})
+        insert into zf_channel_record(channel_id,record_date,merchant_id,recharge_amount, channe_fee, channel_name)
+        values (#{channelId},#{recordDate}, #{merchantId},#{rechargeAmount}, #{channelFee}, #{channelName})
     </insert>
 
     <insert id="insertBatch" keyProperty="channelId" useGeneratedKeys="true">
@@ -112,10 +104,10 @@
         update zf_channel_record
         <set>
             <if test="rechargeAmount != null">
-                recharge_amount = #{rechargeAmount},
+                recharge_amount = recharge_amount+#{rechargeAmount},
             </if>
-            <if test="channeFee != null">
-                channe_fee = #{channeFee},
+            <if test="channelFee != null">
+                channe_fee = channe_fee + #{channelFee},
             </if>
             <if test="channelName != null and channelName != ''">
                 channel_name = #{channelName},
@@ -130,11 +122,9 @@
             <if test="rechargeAmount != null">
                 recharge_amount = recharge_amount + #{rechargeAmount},
             </if>
-            <if test="rechargeTimes != null">
-                recharge_times = recharge_times + 1,
-            </if>
-            <if test="channeFee != null">
-                channe_fee = channe_fee + #{channeFee},
+             recharge_times = recharge_times + 1,
+            <if test="channelFee != null">
+                channe_fee = channe_fee + #{channelFee},
             </if>
         </set>
         where channel_id = #{channelId}

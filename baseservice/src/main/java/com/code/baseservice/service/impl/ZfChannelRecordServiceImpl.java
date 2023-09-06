@@ -65,8 +65,8 @@ public class ZfChannelRecordServiceImpl implements ZfChannelRecordService {
      */
     @Override
     public void update(ZfChannelRecord zfChannelRecord) {
-        ZfChannelRecord zfChannelRecord1 =  zfChannelRecordDao.queryByIdAndDate(zfChannelRecord);
-        if(zfChannelRecord1 == null){
+        long count =  zfChannelRecordDao.count(zfChannelRecord);
+        if(count == 0 ){
             zfChannelRecordDao.insert(zfChannelRecord);
         }else {
             zfChannelRecordDao.updateRecord(zfChannelRecord);

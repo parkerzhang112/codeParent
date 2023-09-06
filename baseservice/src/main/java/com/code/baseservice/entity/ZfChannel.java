@@ -47,7 +47,10 @@ public class ZfChannel implements Serializable {
     private Integer payType;
 
     //渠道余额
-    private BigDecimal channleBalance;
+    private BigDecimal channelBalance;
+
+    //商户代码
+    private String channelCode;
 
     //三方商户id
     private String thirdMerchantId;

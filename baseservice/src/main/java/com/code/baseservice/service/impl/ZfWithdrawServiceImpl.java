@@ -20,9 +20,6 @@ import com.code.baseservice.util.Telegram;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -95,7 +92,7 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         //去重
         buildRepeat(transParams);
         redisUtilService.mlock(RedisConstant.TRANS_LOCK,2000);
-        ZfMerchant xMerchant = zfMerchantService.vaildMerchant(transParams.getMerchant_id());
+        ZfMerchant xMerchant = zfMerchantService.vaildMerchant(transParams.getMerchant_id().toString());
         //验证有效商户
         zfMerchantService.verifSign(transParams,xMerchant);
         //支持银行
@@ -125,7 +122,7 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         //验签
         zfMerchantService.verifSign(queryParams, xMerchant);
         //查询订单
-        ZfWithdraw zfWithdraw = zfWithdrawDao.queryByParams(queryParams.getMerchant_order_no(), queryParams.getMerchant_Id());
+        ZfWithdraw zfWithdraw = zfWithdrawDao.queryByParams(queryParams.getMerchant_order_no(), Integer.valueOf(queryParams.getMerchant_Id()));
         if(Objects.isNull(zfWithdraw)){
             throw  new BaseException(ResultEnum.ORDER_NO_EXIST);
         }

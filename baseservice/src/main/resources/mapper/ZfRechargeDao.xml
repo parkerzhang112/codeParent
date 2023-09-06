@@ -18,13 +18,13 @@
         <result property="notifyStatus" column="notify_status" jdbcType="INTEGER"/>
         <result property="merchantFee" column="merchant_fee" />
         <result property="payType" column="pay_type" />
-
+        <result property="isThird" column="is_third" />
 
     </resultMap>
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfRechargeMap">
-        select merchant_order_no, pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee,pay_type
+        select merchant_order_no, pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee,pay_type,is_third
         from zf_recharge
         where order_no = #{orderNo}
     </select>
@@ -120,6 +120,12 @@
             </if>
         </where>
     </select>
+    <select id="queryByOrderNo" resultMap="ZfRechargeMap">
+    select
+        *
+        from zf_recharge
+        where order_no = #{orderNo}
+    </select>
 
     <!--新增所有列-->
     <insert id="insert" keyProperty="merchantOrderNo" useGeneratedKeys="true">
@@ -157,6 +163,9 @@
         <if test="payType != null">
             pay_type ,
         </if>
+            <if test="isThird != null">
+                is_third ,
+            </if>
         </trim>
         values
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -190,6 +199,9 @@
         </if>
         <if test="payType != null">
             #{payType},
+        </if>
+        <if test="isThird != null">
+            #{isThird},
         </if>
         </trim>
     </insert>

@@ -112,7 +112,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 //        List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfChannels, rechareParams, zfMerchant);
         //轮码
 //        ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfMerchant, rechareParams);
-        commonService.request(zfChannel, rechareParams);
         //入单
         ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
 
@@ -132,8 +131,24 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         ZfChannel zfChannel =  zfChannelService.queryChannelByParams(rechareParams);
         //入单
         ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
-        commonService.request(zfChannel, rechareParams);
-        return  new JSONObject();
+
+        try {
+            JSONObject jsonObject = commonService.create(zfChannel, zfRecharge);
+            zfRecharge.setOrderStatus(1);
+            zfRechargeDao.update(zfRecharge);
+            return jsonObject;
+        }catch (Exception e){
+            zfRecharge.setRemark(e.getMessage());
+            zfRecharge.setOrderStatus(0);
+            zfRechargeDao.update(zfRecharge);
+
+        }
+        throw new BaseException(ResultEnum.ERROR);
+    }
+
+    @Override
+    public ZfRecharge queryByOrderNo(String order_no) {
+        return zfRechargeDao.queryByOrderNo(order_no);
     }
 
     private JSONObject buildReuslt( ZfMerchant zfMerchant,ZfRecharge zfRecharge) {
@@ -152,7 +167,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     }
 
     private JSONObject buildViewReuslt( ZfMerchant zfMerchant,ZfRecharge zfRecharge) {
-        Integer orderStatus =  zfRecharge.getOrderStatus() == 4 ? 2: zfRecharge.getOrderStatus();
+       Integer orderStatus =  zfRecharge.getOrderStatus() == 4 ? 2: zfRecharge.getOrderStatus();
         TreeMap<String, Object>  map = new TreeMap<>();
         map.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
         map.put("pay_amount", zfRecharge.getPayAmount());
@@ -173,6 +188,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             xRecharge.setOrderNo(orderNo);
             xRecharge.setPayType(zfChannel.getPayType());
             xRecharge.setChannelId(zfChannel.getChannelId());
+            xRecharge.setIsThird(StringUtils.isNotEmpty(zfChannel.getThirdMerchantId())?1:0);
 //            xRecharge.setCodeId(zfCode.getCodeId());
 //            xRecharge.setAgentId(zfCode.getAgentId());
             zfRechargeDao.insert(xRecharge);
@@ -335,7 +351,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         return null;
     }
 
-    @Transactional()
     public void paidOrder(ZfRecharge zfRecharge) {
         try {
             ZfMerchant xMerchant = zfMerchantService.queryById(zfRecharge.getMerchantId());
@@ -354,11 +369,11 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             zfRechargeDao.update(zfRecharge);
             if(zfRecharge.getIsThird() == 0){
                 zfAgentService.updateAgentFee(zfRecharge, zfRecharge.getAgentId(), BigDecimal.ZERO);
+                //更新码日报
+                zfCodeRecordService.updateRecord(new ZfCodeRecord(zfRecharge));
             }else {
                 zfChannelService.updateChannelFee(zfRecharge);
             }
-            //更新码日报
-            zfCodeRecordService.updateRecord(new ZfCodeRecord(zfRecharge));
             //计算商户渠道余额
             zfMerchantService.sumMerchantBalance(zfRecharge.getMerchantId(), zfRecharge.getPaidAmount().subtract(fee));
             //记录商户流水
@@ -370,7 +385,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             throw new RuntimeException(e);
         }
         notify(zfRecharge);
-
     }
 
     @Override
@@ -464,7 +478,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 
     @Override
     public void notify(ZfRecharge zfRecharge) {
-        if(!zfRecharge.getNotifyUrl().contains("127.0.0.1")){
+//        if(!zfRecharge.getNotifyUrl().contains("127.0.0.1")){
             ZfMerchant xMerchant = zfMerchantService.queryById(zfRecharge.getMerchantId());
             Integer OrderStatus = zfRecharge.getOrderStatus().equals(4) ? 2:zfRecharge.getOrderStatus() ;
             TreeMap<String, Object>  map = new TreeMap<>();
@@ -493,7 +507,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 log.error("通知异常 订单号 {}", zfRecharge.getMerchantOrderNo(), e);
                 zfRechargeDao.toNotifyException(zfRecharge);
             }
-        }
+//        }
 
     }
 

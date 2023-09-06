@@ -57,8 +57,8 @@ public class ZfChannelTrans implements Serializable {
     private Integer transType;
 
     public ZfChannelTrans(ZfRecharge zfRecharge, ZfChannel zfChannel, BigDecimal fee) {
-        preBalance  = zfChannel.getChannleBalance();
-        balance  = zfChannel.getChannleBalance().add(zfRecharge.getPayAmount()).subtract(fee);
+        preBalance  = zfChannel.getChannelBalance();
+        balance  = zfChannel.getChannelBalance().add(zfRecharge.getPayAmount()).subtract(fee);
         channelFee = fee;
         orderNo = zfRecharge.getOrderNo();
         merchantOrderNo = zfRecharge.getMerchantOrderNo();

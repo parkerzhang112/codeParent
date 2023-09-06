@@ -40,4 +40,6 @@ public interface ZfChannelService {
 
 
         void updateChannelFee(ZfRecharge zfRecharge);
+
+    ZfChannel queryByMerchantId(String thirdMerchantId);
 }

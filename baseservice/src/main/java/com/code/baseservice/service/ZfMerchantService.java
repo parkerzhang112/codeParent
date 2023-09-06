@@ -8,8 +8,6 @@ import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfAgent;
 import com.code.baseservice.entity.ZfMerchant;
 import com.code.baseservice.entity.ZfRecharge;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 
@@ -30,7 +28,7 @@ public interface ZfMerchantService {
     ZfMerchant queryById(Integer merchantId);
 
 
-    ZfMerchant vaildMerchant(Integer merchant_id);
+    ZfMerchant vaildMerchant(String merchant_id);
 
     void verifSign(QueryParams queryParams, ZfMerchant zfMerchant);
 

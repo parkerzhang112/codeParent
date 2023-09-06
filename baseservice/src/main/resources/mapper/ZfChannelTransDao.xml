@@ -96,8 +96,8 @@
 
     <!--新增所有列-->
     <insert id="insert" keyProperty="channelId" useGeneratedKeys="true">
-        insert into zf_channel_trans(pre_balance, balance, channel_fee, order_no, merchant_order_no, create_time, remark, update_by)
-        values (#{preBalance}, #{balance}, #{channelFee}, #{orderNo}, #{merchantOrderNo}, #{createTime}, #{remark}, #{updateBy})
+        insert into zf_channel_trans(pre_balance, balance, channel_fee, order_no, merchant_order_no, remark, update_by, trans_type)
+        values (#{preBalance}, #{balance}, #{channelFee}, #{orderNo}, #{merchantOrderNo}, #{remark}, #{updateBy}, #{transType})
     </insert>
 
     <insert id="insertBatch" keyProperty="channelId" useGeneratedKeys="true">

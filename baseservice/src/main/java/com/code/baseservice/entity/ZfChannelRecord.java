@@ -27,7 +27,7 @@ public class ZfChannelRecord implements Serializable {
     /**
      * 充值费用
      */
-    private Double channeFee;
+    private BigDecimal channelFee;
     /**
      * 记录时间
      */
@@ -41,12 +41,13 @@ public class ZfChannelRecord implements Serializable {
      */
     private Integer merchantId;
 
-    public ZfChannelRecord(ZfRecharge zfRecharge,ZfChannel zfChannel) {
+    public ZfChannelRecord(ZfRecharge zfRecharge, ZfChannel zfChannel, BigDecimal Fee) {
         channelId = zfRecharge.getChannelId();
         merchantId = zfRecharge.getMerchantId();
         recordDate = DateUtil.format(new Date(), DateUtil.YYYY_MM_DD);
         channelName= zfChannel.getChannelName();
-        rechargeAmount = zfRecharge.getPaidAmount();
+        rechargeAmount = zfRecharge.getPayAmount();
+        channelFee = Fee;
     }
 }
 

@@ -15,9 +15,13 @@ public class QueryParams {
     @NonNull
     private String merchant_order_no;
 
+    @JsonAlias(value = {"s_order_no"})
+    @NonNull
+    private String order_no;
+
     @JsonProperty("merchant_id")
     @NonNull
-    private Integer merchant_Id;
+    private String merchant_Id;
 
     @JsonProperty("sign")
     @NonNull

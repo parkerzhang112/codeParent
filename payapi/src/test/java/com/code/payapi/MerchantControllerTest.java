@@ -9,8 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-
 @Slf4j
 public class MerchantControllerTest extends PayapiApplicationTests {
 
@@ -21,7 +19,7 @@ public class MerchantControllerTest extends PayapiApplicationTests {
     public void testBalance() {
         MerchantParams merchantParams = new MerchantParams();
         ZfMerchant zfMerchant= zfMerchantService.queryById(10019);
-        merchantParams.setMerchant_id(zfMerchant.getMerchantId());
+        merchantParams.setMerchant_id(zfMerchant.getMerchantId().toString());
         String encod_str = "merchant_id=" + merchantParams.getMerchant_id()
                 + "&key=" + zfMerchant.getKey();
         log.info("签名字符串 {}", encod_str);

@@ -1,14 +1,14 @@
 package com.code.payapi.controller;
 
 import com.alibaba.fastjson.JSONObject;
-
 import com.code.baseservice.base.enums.PaytypeEnum;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
+import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
-import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.service.CommonService;
 import com.code.baseservice.service.ZfRechargeService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,6 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Objects;
 
 @Controller
 @Slf4j
@@ -29,6 +28,9 @@ public class RechargeController {
 
     @Autowired
     ZfRechargeService zfRechargeService;
+
+    @Autowired
+    CommonService commonService;
 
     @ApiOperation("创建订单")
     @PostMapping("/create")
@@ -123,6 +125,28 @@ public class RechargeController {
         ResponseResult responseResult = new ResponseResult();
         try {
             JSONObject jsonObject = zfRechargeService.query(queryParams);
+            responseResult.setData(jsonObject);
+        }catch (BaseException e){
+            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+        }catch (Exception e){
+            log.error("系统异常 {}", e);
+            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }
+        return responseResult.toJsonString();
+    }
+
+    /**
+     * 下游商户进行订单通知
+     * @param queryParams
+     * @return
+     */
+    @ApiOperation("查询订单")
+    @PostMapping("/notify")
+    @ResponseBody
+    public String notify(@RequestBody QueryParams queryParams){
+        ResponseResult responseResult = new ResponseResult();
+        try {
+            JSONObject jsonObject = commonService.notify(queryParams);
             responseResult.setData(jsonObject);
         }catch (BaseException e){
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
