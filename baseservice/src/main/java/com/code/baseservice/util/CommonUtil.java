@@ -6,12 +6,9 @@ import java.util.regex.Pattern;
 
 public class CommonUtil {
     public static String getOrderNo(String merchantCode, String orderPrex) {
-        String str = "MLPNKOBJIVHICGUXFYDTRSEWAQZ123456789";
-        String prex = orderPrex.concat(merchantCode);
-        long between = System.currentTimeMillis();
-        int needLength = 32- (prex+between).length();
-        String random = StringUtil.createRandomStr1(needLength);
-        return prex+between+random;
+        String timeStr =  merchantCode+  DateUtil.format(new Date(), DateUtil.YYYY_MM_DD_HH_MM_SS2);
+        String random = StringUtil.createRandomStr1(5);
+        return timeStr + random;
     }
 
 

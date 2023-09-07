@@ -141,7 +141,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             zfRecharge.setRemark(e.getMessage());
             zfRecharge.setOrderStatus(0);
             zfRechargeDao.update(zfRecharge);
-
         }
         throw new BaseException(ResultEnum.ERROR);
     }

@@ -520,25 +520,25 @@ public class RechargeControllerTest extends PayapiApplicationTests {
     public void testCreateHttpA() {
         ZfMerchant xMerchant = zfMerchantService.queryById(10019);
         RechareParams rechareParams = new RechareParams();
-        rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
-        rechareParams.setMerchant_id("88945");
+        rechareParams.setMerchant_order_no("test0000001");
+        rechareParams.setMerchant_id("55372");
         Random random = new Random();
         int amount = random.nextInt(107);
-        rechareParams.setPay_amount(new BigDecimal("146"));
-        rechareParams.setNotify_url("http://127.0.0.1:8081/test/notify");
-        rechareParams.setRemark(StringUtil.createRandomStr1(3));
+        rechareParams.setPay_amount(new BigDecimal("1000.00"));
+        rechareParams.setNotify_url("https://testapi.jjezx.info/m_pay/pay_wuxian_notifies");
+//        rechareParams.setRemark(StringUtil.createRandomStr1(3));
         TreeMap<String, Object> map = new TreeMap<>();
         map.put("merchant_id", rechareParams.getMerchant_id());
-        map.put("merchant_order_no", rechareParams.getMerchant_order_no());
-        map.put("pay_amount", rechareParams.getPay_amount());
+        map.put("merchant_order_no", "test0000001");
+        map.put("pay_amount", "1000.00");
         map.put("notify_url", rechareParams.getNotify_url());
         String sign_str = new CommonUtil().getSign(map);
-        sign_str = sign_str.concat("key=1231231223123");
+        sign_str = sign_str.concat("key=BkEuentrMfXbaVRBBkYZeHAMREwSKgsc");
         log.info("签名字符串: {}", sign_str);
         String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
         rechareParams.setSign(sign);
         try {
-            String reponse = HttpClientUtil.doPostJson("http://127.0.0.1:8081/recharge/create_a", JSONObject.toJSONString(rechareParams));
+            String reponse = HttpClientUtil.doPostJson("http://ec55666.top/recharge/create_a", JSONObject.toJSONString(rechareParams));
             JSONObject jsonObject = JSONObject.parseObject(reponse);
             System.out.print("创建订单测试单元结果" + jsonObject);
         }catch (BaseException e){

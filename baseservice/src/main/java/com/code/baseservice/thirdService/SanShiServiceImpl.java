@@ -31,7 +31,7 @@ public class SanShiServiceImpl implements BaseService {
     @Autowired
     private ZfRechargeService zfRechargeService;
 
-    private String domain = "http://127.0.0.1:8081";
+    private String domain = "http://qw520.top";
 
 
     @Override
@@ -59,6 +59,7 @@ public class SanShiServiceImpl implements BaseService {
 
     @Override
     public JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge) {
+        log.info("开始创建三世支付订单 {}", zfRecharge);
         RechareParams rechareParams1= new RechareParams();
         rechareParams1.setMerchant_order_no(zfRecharge.getOrderNo());
         rechareParams1.setMerchant_id(zfChannel.getThirdMerchantId());
@@ -76,9 +77,14 @@ public class SanShiServiceImpl implements BaseService {
         String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
         rechareParams1.setSign(sign);
         try {
+            log.info("单号 {} 开始请求 {}  参数 {}",zfRecharge.getMerchantOrderNo(), domain + "/recharge/create", JSONObject.toJSONString(rechareParams1));
             String reponse = HttpClientUtil.doPostJson(domain + "/recharge/create", JSONObject.toJSONString(rechareParams1));
             JSONObject jsonObject = JSONObject.parseObject(reponse);
-            return jsonObject.getJSONObject("data");
+            log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), reponse);
+            if(jsonObject.getInteger("code" ) == 200){
+                return jsonObject.getJSONObject("data");
+            }
+            throw new BaseException(ResultEnum.ERROR);
         }catch (BaseException e){
             log.error("请求异常 {} 订单号{}", e, zfRecharge.getOrderNo());
             throw new BaseException(ResultEnum.ERROR);
