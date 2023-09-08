@@ -1,5 +1,6 @@
 package com.code.baseservice.service;
 
+import com.code.baseservice.dto.backapi.OperaChannelParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfChannel;
@@ -39,7 +40,13 @@ public interface ZfChannelService {
      BigDecimal sumThirdChannelFee(@NonNull BigDecimal PaidAmount, ZfChannel zfChannel);
 
 
-        void updateChannelFee(ZfRecharge zfRecharge);
+     void updateChannelFee(ZfRecharge zfRecharge);
 
     ZfChannel queryByMerchantId(String thirdMerchantId);
+
+    /**
+     * 操作渠道余额
+     * @param operaChannelParams
+     */
+    void operatBalance(OperaChannelParams operaChannelParams);
 }

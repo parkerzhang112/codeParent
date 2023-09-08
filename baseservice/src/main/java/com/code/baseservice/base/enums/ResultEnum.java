@@ -50,6 +50,8 @@ public enum ResultEnum {
     ORDER_LOCKED(810, "订单已锁定"),
     NO_ENOUGH_AMOUNT(811, "积分不够"),
     NO_COMMISSION_AMOUNT(812, "佣金不够"),
+    CHANNEL_BALANCE_NO_ENOUGH(813, "渠道余额不足"),
+
 
     ;
 

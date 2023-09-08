@@ -40,6 +40,11 @@ public class ZfChannelTrans implements Serializable {
      * 商户订单号
      */
     private String merchantOrderNo;
+
+    /**
+     * 交易金额
+     */
+    private BigDecimal amount;
     /**
      * 创建时间
      */
@@ -65,9 +70,12 @@ public class ZfChannelTrans implements Serializable {
         remark = "订单上分";
         channelId  = zfChannel.getChannelId();
         transType = TransTypeEnum.RRCHARGE.getValue();
+        amount = zfRecharge.getPayAmount();
     }
 
 
+    public ZfChannelTrans() {
 
+    }
 }
 

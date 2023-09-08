@@ -2,15 +2,14 @@ package com.code.baseservice.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.enums.ResultEnum;
+import com.code.baseservice.base.enums.TransTypeEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfChannelDao;
 import com.code.baseservice.dto.XChannelRate;
+import com.code.baseservice.dto.backapi.OperaChannelParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.dto.payapi.TransferParams;
-import com.code.baseservice.entity.ZfChannel;
-import com.code.baseservice.entity.ZfChannelRecord;
-import com.code.baseservice.entity.ZfChannelTrans;
-import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.entity.*;
 import com.code.baseservice.service.ZfChannelRecordService;
 import com.code.baseservice.service.ZfChannelService;
 import com.code.baseservice.service.ZfChannelTransService;
@@ -120,6 +119,26 @@ public class ZfChannelServiceImpl implements ZfChannelService {
             log.error("手续费计算异常", e);
         }
         return BigDecimal.ZERO;
+    }
+
+    @Override
+    public void operatBalance(OperaChannelParams operaChannelParams) {
+        ZfChannelTrans zfChannelTrans = new ZfChannelTrans();
+        zfChannelTrans.setChannelId(operaChannelParams.getChannelId());
+        ZfChannel zfChannel1 = zfChannelDao.queryById(operaChannelParams.getChannelId());
+        if(null == zfChannel1.getChannelBalance()){
+            throw new BaseException(ResultEnum.CHANNEL_BALANCE_NO_ENOUGH);
+        }
+        if(zfChannel1.getChannelBalance().compareTo(operaChannelParams.getAmount()) < 0){
+            throw new BaseException(ResultEnum.CHANNEL_BALANCE_NO_ENOUGH);
+        }
+        zfChannelTrans.setPreBalance(zfChannel1.getChannelBalance());
+        zfChannelTrans.setBalance(zfChannel1.getChannelBalance().subtract(operaChannelParams.getAmount()));
+        zfChannelTrans.setTransType(TransTypeEnum.TRANSFER.getValue());
+        zfChannelTrans.setAmount(operaChannelParams.getAmount());
+        zfChannelTrans.setRemark(operaChannelParams.getRemark());
+        zfChannelTransService.insert(zfChannelTrans);
+        zfChannelDao.updateChannelFee(BigDecimal.ZERO.subtract(operaChannelParams.getAmount()), operaChannelParams.getChannelId());
     }
 
     @Override
