@@ -414,11 +414,10 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
      * @param operaOrderParams
      */
     @Override
-    @Transactional
     public void autocancel(OperaOrderParams operaOrderParams) {
-        RLock rLock = redisUtilService.lock(operaOrderParams.getOrderNo(),5);
+//        RLock rLock = redisUtilService.lock(operaOrderParams.getOrderNo(),5);
         try {
-                rLock.lock(5,TimeUnit.SECONDS);
+//            if(rLock.tryLock(5,10, TimeUnit.SECONDS)){
                 ZfRecharge zfRecharge = zfRechargeDao.queryById(operaOrderParams.getOrderNo());
                 log.info("自动取消订单 订单号{}", zfRecharge.getMerchantOrderNo());
                 if (zfRecharge.getOrderStatus() > 1) {
@@ -434,13 +433,16 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                     zfAgentService.updateAgentCreditAmount(zfRecharge, zfRecharge.getAgentId());
                 }
                 zfRechargeDao.update(zfRecharge);
+//            } else{
+//                log.error("订单执行超时异常 {} ", operaOrderParams.getMerchanOrderNo());
+//            }
         }catch (Exception e){
             log.error("订单执行超时异常 {} {}", operaOrderParams.getMerchanOrderNo(), e.getStackTrace());
             throw  new RuntimeException(e);
         }finally {
-            if(rLock.isLocked() && rLock.isHeldByCurrentThread()){
-                rLock.unlock();
-            }
+//            if(rLock.isLocked() && rLock.isHeldByCurrentThread()){
+//                rLock.unlock();
+//            }
         }
     }
 
