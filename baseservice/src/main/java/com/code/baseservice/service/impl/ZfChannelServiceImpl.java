@@ -13,6 +13,9 @@ import com.code.baseservice.entity.*;
 import com.code.baseservice.service.ZfChannelRecordService;
 import com.code.baseservice.service.ZfChannelService;
 import com.code.baseservice.service.ZfChannelTransService;
+import com.code.baseservice.util.CommonUtil;
+import com.code.baseservice.util.HttpClientUtil;
+import com.code.baseservice.util.MD5Util;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -24,6 +27,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Random;
+import java.util.TreeMap;
 
 /**
  * (ZfChannel)表服务实现类
@@ -65,7 +70,7 @@ public class ZfChannelServiceImpl implements ZfChannelService {
             log.info("无可用渠道 订单号 {}", rechareParams.getMerchant_order_no());
             throw new BaseException(ResultEnum.NO_CHANNEL);
         }
-        log.info("渠道查询结果 订单号 {}", rechareParams.getMerchant_order_no(), channels);
+        log.info("渠道查询结果 订单号 {},渠道集合:{}", rechareParams.getMerchant_order_no(), channels);
 
         return channels.get(0);
     }
@@ -173,5 +178,59 @@ public class ZfChannelServiceImpl implements ZfChannelService {
         return zfChannelDao.queryByMerchantId(thirdMerchantId);
     }
 
-
+    public static void main(String[] args) {
+        RechareParams rechareParams = new RechareParams();
+        rechareParams.setMerchant_order_no("test0000003");
+        rechareParams.setMerchant_id("55372");
+        Random random = new Random();
+        int amount = random.nextInt(107);
+        rechareParams.setPay_amount(new BigDecimal("3000.00"));
+        rechareParams.setNotify_url("https://testapi.jjezx.info/m_pay/pay_wuxian_notifies");
+//        rechareParams.setRemark(StringUtil.createRandomStr1(3));
+        TreeMap<String, Object> map = new TreeMap<>();
+        map.put("merchant_id", rechareParams.getMerchant_id());
+        map.put("merchant_order_no", "test0000003");
+        map.put("pay_amount", "3000.00");
+        map.put("notify_url", rechareParams.getNotify_url());
+        String sign_str = new CommonUtil().getSign(map);
+        sign_str = sign_str.concat("key=BkEuentrMfXbaVRBBkYZeHAMREwSKgsc");
+        log.info("签名字符串: {}", sign_str);
+        String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
+        rechareParams.setSign(sign);
+        try {
+            String reponse = HttpClientUtil.doPostJson("http://ec55666.top/recharge/create_a", JSONObject.toJSONString(rechareParams));
+            JSONObject jsonObject = JSONObject.parseObject(reponse);
+            System.out.print("创建订单测试单元结果" + jsonObject);
+        }catch (BaseException e){
+            throw new RuntimeException(e);
+        }
+    }
+    public void testCreateHttpA() {
+        //ZfMerchant xMerchant = zfMerchantService.queryById(10019);
+        RechareParams rechareParams = new RechareParams();
+        rechareParams.setMerchant_order_no("test0000001");
+        rechareParams.setMerchant_id("55372");
+        Random random = new Random();
+        int amount = random.nextInt(107);
+        rechareParams.setPay_amount(new BigDecimal("1000.00"));
+        rechareParams.setNotify_url("https://testapi.jjezx.info/m_pay/pay_wuxian_notifies");
+//        rechareParams.setRemark(StringUtil.createRandomStr1(3));
+        TreeMap<String, Object> map = new TreeMap<>();
+        map.put("merchant_id", rechareParams.getMerchant_id());
+        map.put("merchant_order_no", "test0000001");
+        map.put("pay_amount", "1000.00");
+        map.put("notify_url", rechareParams.getNotify_url());
+        String sign_str = new CommonUtil().getSign(map);
+        sign_str = sign_str.concat("key=BkEuentrMfXbaVRBBkYZeHAMREwSKgsc");
+        log.info("签名字符串: {}", sign_str);
+        String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
+        rechareParams.setSign(sign);
+        try {
+            String reponse = HttpClientUtil.doPostJson("http://ec55666.top/recharge/create_a", JSONObject.toJSONString(rechareParams));
+            JSONObject jsonObject = JSONObject.parseObject(reponse);
+            System.out.print("创建订单测试单元结果" + jsonObject);
+        }catch (BaseException e){
+            throw new RuntimeException(e);
+        }
+    }
 }

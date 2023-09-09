@@ -24,7 +24,7 @@ import java.util.Map;
 @RequestMapping("/recharge")
 public class RechargeController {
 
-    private String prefix = "pay" ;
+    private String prefix = "pay";
 
     @Autowired
     ZfRechargeService zfRechargeService;
@@ -41,9 +41,9 @@ public class RechargeController {
         try {
             JSONObject jsonObject = zfRechargeService.create(rechareParams);
             responseResult.setData(jsonObject);
-        }catch (BaseException e){
+        } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("系统异常", e);
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
         }
@@ -59,12 +59,13 @@ public class RechargeController {
         try {
             JSONObject jsonObject = zfRechargeService.createA(rechareParams);
             responseResult.setData(jsonObject);
-        }catch (BaseException e){
+        } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("系统异常", e);
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
         }
+        log.info("订单：{}，下单返回结果:{}", rechareParams.getMerchant_order_no(), responseResult);
         return responseResult.toJsonString();
     }
 
@@ -74,10 +75,10 @@ public class RechargeController {
         modelMap.put("timeout", 10);
         modelMap.put("xrecharge", xRecharge);
 
-        if(xRecharge.getPayType()== PaytypeEnum.CODE.getValue()){
-            return prefix+"/index";
-        }else {
-            return prefix+"/trans";
+        if (xRecharge.getPayType() == PaytypeEnum.CODE.getValue()) {
+            return prefix + "/index";
+        } else {
+            return prefix + "/trans";
         }
     }
 
@@ -86,14 +87,14 @@ public class RechargeController {
     @CrossOrigin(origins = "*", maxAge = 3600)
     @GetMapping("/order/getOrder/{orderno}")
     @ResponseBody
-    public String getOrderStatus(@PathVariable("orderno") String orderno){
+    public String getOrderStatus(@PathVariable("orderno") String orderno) {
         ResponseResult responseResult = new ResponseResult();
         try {
-           JSONObject jsonObject =  zfRechargeService.getOrderStatus(orderno);
+            JSONObject jsonObject = zfRechargeService.getOrderStatus(orderno);
             responseResult.setData(jsonObject);
-        }catch (BaseException e){
+        } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
-        }catch (Exception e){
+        } catch (Exception e) {
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
         }
         return responseResult.toJsonString();
@@ -103,15 +104,15 @@ public class RechargeController {
     @CrossOrigin(origins = "*", maxAge = 3600)
     @PostMapping("/order/updateName")
     @ResponseBody
-    public String updateName(@RequestBody Map<String, Object> map){
+    public String updateName(@RequestBody Map<String, Object> map) {
         ResponseResult responseResult = new ResponseResult();
         try {
-              zfRechargeService.postName(map);
-              responseResult.setCode(ResultEnum.SUCCESS.getCode());
-        }catch (BaseException e){
+            zfRechargeService.postName(map);
+            responseResult.setCode(ResultEnum.SUCCESS.getCode());
+        } catch (BaseException e) {
             log.error("系统异常 {}", e);
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("系统异常 {}", e);
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
         }
@@ -121,14 +122,14 @@ public class RechargeController {
     @ApiOperation("查询订单")
     @PostMapping("/view")
     @ResponseBody
-    public String view(@RequestBody QueryParams queryParams){
+    public String view(@RequestBody QueryParams queryParams) {
         ResponseResult responseResult = new ResponseResult();
         try {
             JSONObject jsonObject = zfRechargeService.query(queryParams);
             responseResult.setData(jsonObject);
-        }catch (BaseException e){
+        } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("系统异常 {}", e);
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
         }
@@ -137,20 +138,21 @@ public class RechargeController {
 
     /**
      * 下游商户进行订单通知
+     *
      * @param queryParams
      * @return
      */
     @ApiOperation("查询订单")
     @PostMapping("/notify")
     @ResponseBody
-    public String notify(@RequestBody QueryParams queryParams){
+    public String notify(@RequestBody QueryParams queryParams) {
         ResponseResult responseResult = new ResponseResult();
         try {
             JSONObject jsonObject = commonService.notify(queryParams);
             responseResult.setData(jsonObject);
-        }catch (BaseException e){
+        } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("系统异常 {}", e);
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
         }
