@@ -33,7 +33,7 @@ public class RechargeController {
     CommonService commonService;
 
     @ApiOperation("创建订单")
-    @PostMapping("/create")
+    @PostMapping("/createxxxx")
     @ResponseBody
     public String create(@RequestBody RechareParams rechareParams) {
         log.info("入款参数 订单号 {} 信息 {}", rechareParams.getMerchant_order_no(), rechareParams.toString());
