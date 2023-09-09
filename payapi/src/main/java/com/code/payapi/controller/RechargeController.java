@@ -51,7 +51,7 @@ public class RechargeController {
     }
 
     @ApiOperation("创建订单")
-    @PostMapping("/create_a")
+    @PostMapping("/create")
     @ResponseBody
     public String createA(@RequestBody RechareParams rechareParams) {
         log.info("入款参数 订单号 {} 信息 {}", rechareParams.getMerchant_order_no(), rechareParams.toString());
