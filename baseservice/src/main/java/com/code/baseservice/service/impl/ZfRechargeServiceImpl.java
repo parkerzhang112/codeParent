@@ -423,9 +423,10 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfRecharge.getCodeId();
             redisUtilService.del(amountKey);
         }
-
+        if(zfRecharge.getIsThird() == 0){
+            zfAgentService.updateAgentCreditAmount(zfRecharge, zfRecharge.getAgentId());
+        }
 //        notify(zfRecharge);
-        zfAgentService.updateAgentCreditAmount(zfRecharge, zfRecharge.getAgentId());
     }
 
     /**
