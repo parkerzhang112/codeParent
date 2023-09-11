@@ -134,9 +134,6 @@ public class ZfChannelServiceImpl implements ZfChannelService {
         if(null == zfChannel1.getChannelBalance()){
             throw new BaseException(ResultEnum.CHANNEL_BALANCE_NO_ENOUGH);
         }
-        if(zfChannel1.getChannelBalance().compareTo(operaChannelParams.getAmount()) < 0){
-            throw new BaseException(ResultEnum.CHANNEL_BALANCE_NO_ENOUGH);
-        }
         zfChannelTrans.setPreBalance(zfChannel1.getChannelBalance());
         zfChannelTrans.setBalance(zfChannel1.getChannelBalance().subtract(operaChannelParams.getAmount()));
         zfChannelTrans.setTransType(TransTypeEnum.TRANSFER.getValue());
