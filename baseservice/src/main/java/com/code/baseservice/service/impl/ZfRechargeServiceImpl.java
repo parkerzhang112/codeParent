@@ -159,7 +159,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         String sign_str = new CommonUtil().getSign(map);
         sign_str = sign_str.concat("key=".concat(zfMerchant.getKey()));
         String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
-        log.info("订单号 {}  签名字符串 {} ", zfRecharge.getOrderNo(), sign_str);
+        log.info("订单号 {}  签名字符串 {} 加密字符串 {}", zfRecharge.getOrderNo(), sign_str, sign);
         map.put("sign", sign);
         return new JSONObject(map);
 
@@ -183,6 +183,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     }
 
     private Integer selectOneAgentByRobin(List<Integer> zfAgents,String key, Integer merchantId){
+        if(zfAgents.contains(335)){
+            return 335;
+        }
         Object currentAgent  =  redisUtilService.get(key);
         if(currentAgent == null){
             redisUtilService.set(key, zfAgents.get(0).intValue());
@@ -202,6 +205,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                     redisUtilService.set(key, (Integer) currentAgent);
                     return zfAgents.get(i);
                 }else {
+                    if(weight.compareTo(zfAgent.getWeight())> -1){
+                        weight = zfAgent.getWeight();
+                    }
                     redisUtilService.set(weightAgent, weight.add(zfAgent.getWeight().subtract(BigDecimal.ONE)));
                     redisUtilService.set(key, zfAgents.get(i).intValue());
                     return zfAgents.get(i);
@@ -452,6 +458,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         if(zfRecharge == null){
             return;
         }
+
         zfRecharge.setPayName(map.get("name").toString());
         zfRechargeDao.update(zfRecharge);
     }
@@ -467,8 +474,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             map.put("merchant_id", zfRecharge.getMerchantId());
             map.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
             map.put("order_status", OrderStatus);
-            map.put("pay_amount", zfRecharge.getPayAmount());
-            map.put("paid_amount", zfRecharge.getPaidAmount());
+            map.put("pay_amount", zfRecharge.getPayAmount().toString());
+            map.put("paid_amount", zfRecharge.getPaidAmount().toString());
             String sign_str = new CommonUtil().getSign(map);
             sign_str = sign_str.concat("key=".concat(xMerchant.getKey()));
             String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
@@ -496,66 +503,67 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     @Override
     public JSONObject getOrderStatus(String orderno) {
         TreeMap<String, Object>  map = new TreeMap<>();
-        RLock rLock = redisUtilService.lock("recharge:order" + orderno);
+        RLock rLockOrder = redisUtilService.lock("recharge:order" + orderno);
         try {
-            //查单码
-            ZfRecharge zfRecharge = queryById(orderno);
-            map.put("order_no", zfRecharge.getMerchantOrderNo());
-            map.put("pay_amount", zfRecharge.getPayAmount());
-            map.put("time",DateUtil.format1(new Date(zfRecharge.getCreateTime().getTime() + 300000), DateUtil.YYYY_MM_DD_HH_MM_SS1) );
-            //检查订单状态 超时，
-            if(new Date().getTime() - zfRecharge.getCreateTime().getTime()  > 300000){
-                map.put("order_status", 3);
-                return new JSONObject(map);
-            }
-            if(!zfRecharge.getOrderStatus().equals(0)){
-                if(zfRecharge.getOrderStatus().equals(1)){
-                    ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
-                    map.put("payurl", zfCode.getImage());
+                //查单码
+                ZfRecharge zfRecharge = queryById(orderno);
+                map.put("order_no", zfRecharge.getMerchantOrderNo());
+                map.put("pay_amount", zfRecharge.getPayAmount());
+                map.put("time",DateUtil.format1(new Date(zfRecharge.getCreateTime().getTime() + 300000), DateUtil.YYYY_MM_DD_HH_MM_SS1) );
+                //检查订单状态 超时，
+                if(new Date().getTime() - zfRecharge.getCreateTime().getTime()  > 300000){
+                    map.put("order_status", 3);
+                    return new JSONObject(map);
+                }
+                if(!zfRecharge.getOrderStatus().equals(0)){
+                    if(zfRecharge.getOrderStatus().equals(1)){
+                        ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
+                        map.put("payurl", zfCode.getImage());
+                        map.put("trans_account", zfCode.getAccount());
+                        map.put("trans_name", zfCode.getName());
+                    }
+                    map.put("order_status", zfRecharge.getOrderStatus());
+                    return new JSONObject(map);
+                }
+                //没有分配码，则尝试分配
+                List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfRecharge);
+                //没有找到二维码，则继续等待
+                if(zfCodes.size() == 0){
+                    map.put("order_status", 0);
+                    return new JSONObject(map);
+                }
+                if(rLockOrder.tryLock(2,5, TimeUnit.SECONDS)){
+                    ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfRecharge);
+                    if(zfCode == null){
+                        map.put("order_status", 0);
+                        return new JSONObject(map);
+                    }
+                    zfRecharge.setAgentId(zfCode.getAgentId());
+                    zfRecharge.setCodeId(zfCode.getCodeId());
+                    zfRecharge.setCreateTime(new Date());
+                    zfRecharge.setOrderStatus(1);
+                    zfRechargeDao.update(zfRecharge);
+                    //增加已收额度
+                    redisUtilService.set("notice:agent:" + zfCode.getAgentId(), 1,1200);
+                    zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
+                    //更新订单信息
+                    map.put("order_status", 1);
                     map.put("trans_account", zfCode.getAccount());
                     map.put("trans_name", zfCode.getName());
+                    map.put("payurl", zfCode.getImage());
+                    return new JSONObject(map);
+                }else {
+                    map.put("order_status", 0);
+                    return new JSONObject(map);
                 }
-                map.put("order_status", zfRecharge.getOrderStatus());
-                return new JSONObject(map);
-            }
-            //没有分配码，则尝试分配
-            List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfRecharge);
-            //没有找到二维码，则继续等待
-            if(zfCodes.size() == 0){
-                map.put("order_status", 0);
-                return new JSONObject(map);
-            }
-            ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfRecharge);
-            if(zfCode == null){
-                map.put("order_status", 0);
-                return new JSONObject(map);
-            }
-
-            if(rLock.tryLock(2,5, TimeUnit.SECONDS)){
-                zfRecharge.setAgentId(zfCode.getAgentId());
-                zfRecharge.setCodeId(zfCode.getCodeId());
-                zfRecharge.setCreateTime(new Date());
-                zfRecharge.setOrderStatus(1);
-                zfRechargeDao.update(zfRecharge);
-                //增加已收额度
-                redisUtilService.set("notice:agent:" + zfCode.getAgentId(), 1,1200);
-                zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
-                //更新订单信息
-                map.put("order_status", 1);
-                map.put("trans_account", zfCode.getAccount());
-                map.put("trans_name", zfCode.getName());
-                map.put("payurl", zfCode.getImage());
-                return new JSONObject(map);
-            }else {
-                map.put("order_status", 0);
-                return new JSONObject(map);
-            }
             //返回订单信息
         }catch (Exception e){
-            log.error("查码异常 {}", e);
+            log.error("查码异常 {}", e.getStackTrace());
             return new JSONObject(map);
         }finally {
-            rLock.unlock();
+            if(rLockOrder.isLocked() && rLockOrder.isHeldByCurrentThread()){
+                rLockOrder.unlock();
+            }
         }
     }
 

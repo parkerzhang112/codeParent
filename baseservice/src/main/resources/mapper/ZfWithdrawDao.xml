@@ -371,9 +371,6 @@
     <update id="updatePaidOrder">
         update zf_withdraw
         <set>
-            <if test="merchantOrderNo != null and merchantOrderNo != ''">
-                merchant_order_no = #{merchantOrderNo},
-            </if>
             <if test="payAmount != null">
                 pay_amount = #{payAmount},
             </if>
@@ -450,7 +447,7 @@
     <!--查询单个-->
     <select id="queryByParams" resultMap="ZfWithdrawMap">
         select
-          order_no, merchant_order_no, pay_amount, paid_amount, code_id, channel_id, merchant_id, order_status, agent_id, notify_url, notify_status, create_time, update_time, card_account, card_address, card_name, card_type, remark, channel_fee, order_type, image, member_fee, parent_order_no, is_split
+          order_no, merchant_order_no, pay_amount, paid_amount, code_id, channel_id, merchant_id, order_status, agent_id, notify_url, notify_status, create_time, update_time, card_account, card_address, card_name, card_type, remark, channel_fee, order_type, image, parent_order_no, is_split
         from zf_withdraw
         where merchant_order_no = #{merchantOrderNo}
         and merchant_id = #{merchantId}

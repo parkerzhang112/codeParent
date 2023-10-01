@@ -41,6 +41,9 @@ public class ZfAgentTrans implements Serializable {
 
     private BigDecimal preAcceptAmount;
 
+    private Integer operType;
+
+
 
     public ZfAgentTrans(ZfRecharge zfRecharge, ZfAgent zfAgent, BigDecimal fee) {
         agentId = zfAgent.getAgentId();
@@ -77,6 +80,25 @@ public class ZfAgentTrans implements Serializable {
             remark = "系统操作";
         }
     }
+
+    public ZfAgentTrans(ZfWithdraw zfWithdraw, ZfAgent zfAgent, BigDecimal fee) {
+        agentId = zfAgent.getAgentId();
+        transType = TransTypeEnum.RRCHARGE.getValue();
+        merchantOrderNo = zfWithdraw.getMerchantOrderNo();
+        if(!zfWithdraw.getAgentId().equals(zfAgent.getAgentId())){
+            amount = fee;
+            remark = "返佣:"+fee ;
+        }else {
+            amount = zfWithdraw.getPayAmount().add(fee);
+            remark = String.format("订单代付:%.2f-返佣:%.2f", zfWithdraw.getPayAmount(), fee);
+        }
+        balance = zfAgent.getBalance();
+        preBalance = zfAgent.getBalance();
+        acceptAmount = zfAgent.getAcceptAmount();
+        preAcceptAmount = acceptAmount.subtract(amount);
+        transType = TransTypeEnum.RRCHARGE.getValue();
+    }
+
 
     public ZfAgentTrans(ZfAgentRechargeOrder zfAgentRechargeOrder, ZfAgent zfAgent) {
         agentId = zfAgentRechargeOrder.getAgentId();

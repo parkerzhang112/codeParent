@@ -1,13 +1,10 @@
 package com.code.baseservice.service;
 
 import com.code.baseservice.dto.backapi.OperaAgentParams;
-import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import com.code.baseservice.entity.ZfAgent;
 import com.code.baseservice.entity.ZfAgentRechargeOrder;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfWithdraw;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 
@@ -38,9 +35,9 @@ public interface ZfAgentService {
 
    void updateAgentCreditAmount(ZfRecharge zfRecharge, Integer agentId);
 
-    void updateAgentCreditAmount(ZfWithdraw zfWithdraw, Integer agentId);
 
     void updateAgentFee(ZfRecharge zfRecharg , Integer agentId,BigDecimal fee);
+    void updateAgentFee(ZfWithdraw zfWithdraw , Integer agentId,BigDecimal fee);
 
     void operatBalance(OperaAgentParams operaAgentParams);
 
@@ -53,4 +50,5 @@ public interface ZfAgentService {
      * @param zfAgentRechargeOrder
      */
      void updateAgentCreditAmount(ZfAgentRechargeOrder zfAgentRechargeOrder) ;
+
 }

@@ -11,7 +11,11 @@ import java.util.Map;
 @Slf4j
 public class Telegram {
     public void  sendMesaage(Map<String, Object> map, String url){
-        HttpClientUtil.doPostJson(url, JSONObject.toJSONString(map));
+        try {
+            HttpClientUtil.doPostJson(url, JSONObject.toJSONString(map));
+        }catch (Exception e){
+            log.error("发送纸飞机消息失败 {}", e);
+        }
     }
 
     public void sendWarrnSmsMessage(ZfRecharge zfRecharge, String notice) {
@@ -60,6 +64,7 @@ public class Telegram {
      * 入款调单通知
      */
     public void sendWarrnSmsMessage(ZfRecharge zfRecharge, String notice, String config){
+
         String chatId= "-982175337";
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("【短信消息预警】\n");

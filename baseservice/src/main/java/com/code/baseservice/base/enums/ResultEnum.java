@@ -50,6 +50,7 @@ public enum ResultEnum {
     ORDER_LOCKED(810, "订单已锁定"),
     NO_ENOUGH_AMOUNT(811, "积分不够"),
     NO_COMMISSION_AMOUNT(812, "佣金不够"),
+    DE_ERR(812, "分配代理与操作代理不一致"),
 
     ;
 

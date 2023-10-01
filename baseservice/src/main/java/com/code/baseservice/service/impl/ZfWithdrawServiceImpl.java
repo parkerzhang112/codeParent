@@ -16,13 +16,11 @@ import com.code.baseservice.service.*;
 import com.code.baseservice.util.CommonUtil;
 import com.code.baseservice.util.HttpClientUtil;
 import com.code.baseservice.util.MD5Util;
-import com.code.baseservice.util.Telegram;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -31,6 +29,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 提款订单表(ZfWithdraw)表服务实现类
@@ -52,6 +51,9 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
 
     @Autowired
     private ZfMerchantRecordService zfMerchantRecordService;
+
+    @Autowired
+    private RedissonClient redissonClient;
 
     @Autowired
     private ZfMerchantTransService  zfMerchantTransService;
@@ -146,22 +148,20 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
 
     @Override
     public void confirmOrder(OperaOrderParams operaOrderParams) {
+        log.info("开始确认订单 {}", operaOrderParams);
         ZfWithdraw zfWithdraw = zfWithdrawDao.queryById(operaOrderParams.getOrderNo());
-        if (zfWithdraw.getOrderStatus() != 0) {
+        if (zfWithdraw.getOrderStatus() != 1) {
             log.info("订单已处理 订单号 {}", zfWithdraw.getMerchantOrderNo());
             throw new BaseException(ResultEnum.ORDER_STATUS_ERROR);
         }
 
         //如果已经有银行卡接单，清空
-        if(zfWithdraw.getCodeId() != null && zfWithdraw.getCodeId() != 0){
-            ZfCode zfCode = zfCodeService.queryById(zfWithdraw.getCodeId());
-            zfCode.setTransferStatus(0);
-            zfCodeService.update(zfCode);
+        if(!zfWithdraw.getAgentId().equals( operaOrderParams.getAgentId() )){
+            log.info("订单分配者异常 订单号 {}", zfWithdraw.getMerchantOrderNo());
+            throw new BaseException(ResultEnum.DE_ERR);
         }
-        ZfCode zfCode = zfCodeService.queryById(operaOrderParams.getCodeId());
-        zfWithdraw.setAgentId(zfCode.getAgentId());
-        zfWithdraw.setCodeId(operaOrderParams.getCodeId());
-        zfWithdraw.setOrderStatus(2);
+        ZfAgent zfAgent = zfAgentService.queryById(operaOrderParams.getAgentId());
+        zfWithdraw.setAgentId(zfAgent.getAgentId());
         zfWithdraw.setImage(operaOrderParams.getImage());
         zfWithdraw.setRemark(operaOrderParams.getCloseReason());
         zfWithdraw.setPaidAmount(operaOrderParams.getPaid_amt());
@@ -172,7 +172,7 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
     public void cancelOrder(OperaOrderParams operaOrderParams) {
         //修改订单数据
         ZfWithdraw zfWithdraw = zfWithdrawDao.queryById(operaOrderParams.getOrderNo());
-        if (zfWithdraw.getOrderStatus() != 0) {
+        if (zfWithdraw.getOrderStatus() > 1) {
             log.info("订单已处理 订单号 {}", zfWithdraw.getMerchantOrderNo());
             throw new BaseException(ResultEnum.ERROR);
         }
@@ -180,20 +180,12 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
 //        if(zfTransRecords.size() == 1 && zfTransRecords.get(0).getTransType().equals(TransTypeEnum.TRANSFER.getValue())){
 //            throw new BaseException(ResultEnum.TRANS_EXIST_TRANSFER);
 //        }
-        //如果已经有银行卡接单，清空
-        if(zfWithdraw.getCodeId() != null && zfWithdraw.getCodeId() != 0){
-            ZfCode zfCode = zfCodeService.queryById(zfWithdraw.getCodeId());
-            zfCode.setTransferStatus(0);
-            zfCodeService.update(zfCode);
-
-        }
         if("交易失败".equals(operaOrderParams.getCloseReason())){
             redisUtilService.set("refuseNameTrans"+zfWithdraw.getCardName(), 3600*24);
         }
         ZfMerchant xMerchant  = zfMerchantService.queryById(zfWithdraw.getMerchantId());
         zfWithdraw.setRemark(operaOrderParams.getCloseReason());
         zfWithdraw.setOrderStatus(3);
-        zfWithdraw.setCodeId(0);
         zfWithdraw.setAgentId(0);
         if(zfWithdraw.getParentOrderNo().equals("") &&
                 !zfWithdraw.getOrderType().equals(TransOrderTypeEnum.INI_ORDER.getValue())
@@ -210,14 +202,17 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
 
     private void onPaidOrder(ZfWithdraw zfWithdraw) {
         String redisKey = RedisConstant.PAID_ORDER+zfWithdraw.getOrderNo();
+        RLock rLock = redissonClient.getLock(redisKey);
         try {
-            if(redisUtilService.tryLock(redisKey, 2)){
+            if(rLock.tryLock( 2,5, TimeUnit.SECONDS)){
                 //订单信息的写入
-                zfWithdrawDao.updatePaidOrder(zfWithdraw);
-                zfAgentService.updateAgentCreditAmount(zfWithdraw, zfWithdraw.getAgentId());
+                zfAgentService.updateAgentFee(zfWithdraw, zfWithdraw.getAgentId(), BigDecimal.ZERO);
                 if(zfWithdraw.getOrderType().equals(TransOrderTypeEnum.INI_ORDER.getValue())){
                     return;
                 }
+                zfWithdraw.setOrderStatus(2);
+                zfWithdrawDao.updatePaidOrder(zfWithdraw);
+
                 //订单通知
                 notify(zfWithdraw);
                 if(zfWithdraw.getPayAmount().compareTo(zfWithdraw.getPaidAmount()) != 0){
@@ -240,7 +235,7 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
                     ZfMerchant zfMerchant = zfMerchantService.queryById(zfWithdraw.getMerchantId());
                     TreeMap<String, Object>  map = new TreeMap<>();
                     map.put("merchant_id", zfWithdraw.getMerchantId());
-                    map.put("order_no", zfWithdraw.getMerchantOrderNo());
+                    map.put("merchant_order_no", zfWithdraw.getMerchantOrderNo());
                     map.put("order_status", zfWithdraw.getOrderStatus());
                     map.put("pay_amount", zfWithdraw.getPayAmount());
                     map.put("paid_amount", zfWithdraw.getPaidAmount());
@@ -249,7 +244,7 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
                     String sign = MD5Util.getMD5Str(sign_str);
                     map.put("sign", sign);
                     String response = HttpClientUtil.doPostJson(zfWithdraw.getNotifyUrl(), JSONObject.toJSONString(map));
-                    log.info("订单号 {}  推送地址 {}   推送数据 {} , 回调结果 {}", zfWithdraw.getMerchantOrderNo(), zfWithdraw.getNotifyUrl(), map, response);
+                    log.info("订单号 {}  推送地址 {}   推送数据 {} , 回调结果 {} 签名字符串 {}", zfWithdraw.getMerchantOrderNo(), zfWithdraw.getNotifyUrl(), map, response, sign_str);
                     if ("success".equals(response) || "回调成功".equals(response)) {
                         zfWithdraw.setNotifyStatus(1);
                         zfWithdraw.setUpdateTime(new Date());
@@ -298,20 +293,7 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         zfWithdraw.setOrderNo(orderNo);
         zfWithdraw.setMerchantId(xMerchant.getMerchantId());
         BigDecimal fee = zfChannelService.sumChannelFee(transParams.getPay_amount(), zfChannel);
-        zfWithdraw.setChannelFee(fee);
-        ZfCode zfCode = zfCodeService.selectCardByTrans(zfWithdraw);
-        if(zfCode != null){
-            ZfAgent zfAgent = zfAgentService.queryById(zfCode.getAgentId());
-            zfWithdraw.setCodeId(zfCode.getCodeId());
-            zfWithdraw.setAgentId(zfAgent.getAgentId());
-            Telegram telegram = new Telegram();
-            telegram.sendWarrnWithdraw(zfWithdraw,
-                    zfCode.getAccount().substring(zfCode.getAccount().length()-4, zfCode.getAccount().length()),
-                    zfAgent.getConfig());
-            zfCode.setTransStatus(1);
-            //更新银行卡出款状态
-            zfCodeService.update(zfCode);
-        }
+        zfWithdraw.setChannelFee(fee.add(new BigDecimal(2)));
         zfWithdrawDao.insert(zfWithdraw);
 
         return zfWithdraw;
@@ -343,23 +325,17 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
             log.info("暂无可出款订单");
             throw new BaseException(ResultEnum.ORDER_NO_EXIST);
         }
-        if(zfWithdraw.getCodeId() != null && zfWithdraw.getCodeId() != 0){
+        if(zfWithdraw.getOrderStatus() != 0){
+            throw new BaseException(ResultEnum.ORDER_LOCKED);
+        }
+        if(zfWithdraw.getAgentId() != null && zfWithdraw.getAgentId() != 0){
             throw new BaseException(ResultEnum.REFUSE_ORRDER);
         }
-        ZfCode zfCode = zfCodeService.queryById(operaOrderParams.getCodeId());
-        if(zfCode == null ){
-            log.info("异常银行卡");
-        }
-        zfCode.setTransferStatus(1);
-        zfWithdraw.setAgentId(zfCode.getAgentId());
-        zfWithdraw.setCodeId(zfCode.getCodeId());
+        redisUtilService.set("notice:agent:" + operaOrderParams.getAgentId(), 1,1200);
+        zfWithdraw.setAgentId(operaOrderParams.getAgentId());
+        zfWithdraw.setOrderStatus(1);
+        zfWithdraw.setUpdateTime(new Date());
         zfWithdrawDao.update(zfWithdraw);
-        zfCodeService.update(zfCode);
-        ZfAgent zfAgent = zfAgentService.queryById(zfCode.getAgentId());
-        Telegram telegram = new Telegram();
-        String bankCode =  zfCode.getAccount().substring(zfCode.getAccount().length()-4, zfCode.getAccount().length())
-                + "-" + zfCode.getName();
-        telegram.sendWarrnWithdraw(zfWithdraw,  bankCode, zfAgent.getConfig());
         return  ;
     }
 

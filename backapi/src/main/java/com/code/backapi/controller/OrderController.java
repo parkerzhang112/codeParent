@@ -1,12 +1,9 @@
 package com.code.backapi.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import com.code.baseservice.base.constant.RedisConstant;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.enums.TransTypeEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.ResponseResult;
-import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import com.code.baseservice.dto.backapi.OperaOrderParams;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfTransRecord;
@@ -18,9 +15,6 @@ import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Objects;
 
 @RestController
 @Api(tags = "订单操作", description = "订单操作 API")
@@ -171,7 +165,6 @@ public class OrderController {
         ResponseResult responseResult = new ResponseResult();
         try {
             zfWithdrawService.lock(operaOrderParams);
-
         } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
         } catch (Exception e) {
