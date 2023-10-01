@@ -53,4 +53,7 @@ public class OperaAgentParams {
 
     @JsonProperty("update_by")
     private String updateBy ;
+
+    @JsonProperty("agent_code")
+    private String agentCode ;
 }

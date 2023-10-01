@@ -50,4 +50,7 @@ public class OperaOrderParams {
     @JsonProperty("name")
     private String name;
 
+    @JsonProperty("agent_id")
+    private Integer agentId;
+
 }

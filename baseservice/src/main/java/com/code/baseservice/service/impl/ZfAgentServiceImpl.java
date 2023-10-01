@@ -4,10 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.enums.TransTypeEnum;
 import com.code.baseservice.base.exception.BaseException;
-import com.code.baseservice.dto.backapi.OperaAgentParams;
-import com.code.baseservice.dto.backapi.OperaBalanceParams;
-import com.code.baseservice.entity.*;
 import com.code.baseservice.dao.ZfAgentDao;
+import com.code.baseservice.dto.backapi.OperaAgentParams;
+import com.code.baseservice.entity.*;
 import com.code.baseservice.service.ZfAgentRechargeOrderService;
 import com.code.baseservice.service.ZfAgentRecordService;
 import com.code.baseservice.service.ZfAgentService;
@@ -18,10 +17,8 @@ import org.apache.logging.log4j.util.Strings;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -47,8 +44,8 @@ public class ZfAgentServiceImpl implements ZfAgentService {
     @Autowired
     private ZfAgentRecordService zfAgentRecordService;
 
-    @Autowired
-    private RedisUtilServiceImpl redisUtilService;
+    @Value("${app.between_amount:800}")
+    private BigDecimal betweenAmount;
 
     @Autowired
     private RedissonClient redissonClient;
@@ -159,14 +156,55 @@ public class ZfAgentServiceImpl implements ZfAgentService {
      * @return 实例对象
      */
     @Override
-    public void updateAgentCreditAmount(ZfWithdraw zfWithdraw, Integer agentId) {
-        ZfAgent zfAgent = new ZfAgent();
-        zfAgent.setAgentId(agentId);
-        if(zfWithdraw.getOrderStatus() == 2){
-            zfAgent.setAcceptAmount(BigDecimal.ZERO.subtract(zfWithdraw.getPayAmount()));
+    public void updateAgentFee(ZfWithdraw zfWithdraw, Integer agentId, BigDecimal fee) {
+        RLock rLock = redissonClient.getLock("agentid"+agentId);
+        try{
+            log.info("开始更新代理额度  {} 时间 {}", zfWithdraw.getMerchantOrderNo(), System.currentTimeMillis());
+            if(rLock.tryLock(5,10,TimeUnit.SECONDS)){
+                ZfAgent zfAgent = queryById(agentId);
+                BigDecimal agentFee =  sumAgentFeeByWithdraw(zfWithdraw.getPayAmount(), zfAgent.getRate());
+                long start  = System.currentTimeMillis();
+                log.info("计算代理可收 订单号 {}", zfWithdraw.getMerchantOrderNo());
+                ZfAgent zfAgent1 = new ZfAgent();
+                zfAgent1.setAgentId(zfAgent.getAgentId());
+                zfAgent.setAgentId(agentId);
+                if(zfWithdraw.getOrderStatus() != 1) {
+                    throw  new BaseException(ResultEnum.ORDER_STATUS_ERROR);
+                }
+                if(zfWithdraw.getAgentId().equals(agentId)){
+                    zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().add(zfWithdraw.getPaidAmount()).add(agentFee.subtract(fee)));
+                    zfAgent1.setAcceptAmount(zfWithdraw.getPaidAmount().add(agentFee.subtract(fee)));
+                }else {
+                    zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().add(agentFee.subtract(fee)));
+                    zfAgent1.setAcceptAmount((agentFee.subtract(fee)));
+                }
+                zfAgentTransService.insert(new ZfAgentTrans(zfWithdraw, zfAgent, agentFee.subtract(fee)));
+                long end  = System.currentTimeMillis();
+                if(start -end > 10000){
+                    log.info("超时订单 {} 超时时间 {}", zfWithdraw.getMerchantOrderNo(), start-end);
+                }
+                zfAgentDao.updateAgentFee(zfAgent1);
+                if(zfAgent.getParentId() != null && zfAgent.getParentId() != 0) {
+                    ZfAgent parentAgent = zfAgentDao.queryById(zfAgent.getParentId());
+                    log.info("父级代理 {}", zfAgent.getParentId());
+                    if (parentAgent == null) {
+                        return;
+                    }
+                    updateAgentFee(zfWithdraw, parentAgent.getAgentId(), agentFee);
+                }
+            }else {
+                log.error("更新代理余额异常 {} ",zfWithdraw.getMerchantOrderNo());
+                throw  new RuntimeException();
+            }
+        }catch (Exception e){
+            log.error("更新代理余额异常 {}", e);
+            throw  new RuntimeException(e);
+        }finally {
+            log.info("释放锁时间  {} 时间 {}", zfWithdraw.getMerchantOrderNo(), System.currentTimeMillis());
+            if (rLock.isLocked() && rLock.isHeldByCurrentThread()){
+                rLock.unlock();
+            }
         }
-
-        update(zfAgent);
     }
 
 
@@ -228,7 +266,7 @@ public class ZfAgentServiceImpl implements ZfAgentService {
                     zfAgentRecordService.updateRecord(new ZfAgentRecord(zfAgent,  agentFee.subtract(fee), zfRecharge.getPaidAmount()));
                 }else {
                     ZfAgentRecord zfAgentRecord = new ZfAgentRecord();
-                    zfAgentRecord.buildAgentRecordBySunAgentSuccessAndParent(zfAgent,agentFee.subtract(fee));
+                    zfAgentRecord.buildAgentRecordBySunAgentSuccessAndParent(zfAgent,agentFee.subtract(fee),zfRecharge);
                     zfAgentRecordService.updateRecord(zfAgentRecord);
                 }
                 if(rLock.isLocked() && rLock.isHeldByCurrentThread()){
@@ -263,11 +301,16 @@ public class ZfAgentServiceImpl implements ZfAgentService {
 
     @Override
     public void operatBalance(OperaAgentParams operaAgentParams) {
+        ZfAgent zfAgent1;
         ZfAgentTrans zfAgentTrans = new ZfAgentTrans();
+        if(null != operaAgentParams.getAgentCode() ){
+             zfAgent1 = zfAgentDao.queryByCode(operaAgentParams.getAgentCode());
+        }else {
+             zfAgent1 = zfAgentDao.queryById(operaAgentParams.getAgentId());
+        }
         ZfAgent zfAgent = new ZfAgent();
-        zfAgent.setAgentId(operaAgentParams.getAgentId());
-        zfAgentTrans.setAgentId(operaAgentParams.getAgentId());
-        ZfAgent zfAgent1 = zfAgentDao.queryById(operaAgentParams.getAgentId());
+        zfAgent.setAgentId(zfAgent1.getAgentId());
+        zfAgentTrans.setAgentId(zfAgent1.getAgentId());
         if(null  != zfAgent1.getParentId() && zfAgent1.getParentId() != 0 && !operaAgentParams.getIsAdmin() && !operaAgentParams.getIsFinsh()){
             //给下级加积分扣上级，计算上级积分
             if(operaAgentParams.getTransType().equals(TransTypeEnum.RRCHARGE.getValue())) {
@@ -300,7 +343,12 @@ public class ZfAgentServiceImpl implements ZfAgentService {
 
         }
         zfAgentTrans.setTransType(operaAgentParams.getTransType());
-        zfAgentTrans.setRemark(operaAgentParams.getRemark());
+        zfAgentTrans.setRemark(operaAgentParams.getRemark() + "操作代码"+ operaAgentParams.getAgentCode());
+        if(operaAgentParams.getIsAdmin()){
+            zfAgentTrans.setOperType(1);
+        }else {
+            zfAgentTrans.setOperType(2);
+        }
         zfAgentTransService.insert(zfAgentTrans);
         log.info("更新代理信息 {}", zfAgent);
         zfAgentDao.updateAgentFee(zfAgent);
@@ -315,7 +363,6 @@ public class ZfAgentServiceImpl implements ZfAgentService {
             operaAgentParams.setIsFinsh(true);
             operaAgentParams.setRemark("给下级下分扣除" + operaAgentParams.getAcceptAmount());
             log.info("开始操作上级代理积分 {}", operaAgentParams);
-
             operatBalance(operaAgentParams);
         }
     }
@@ -399,6 +446,8 @@ public class ZfAgentServiceImpl implements ZfAgentService {
     }
 
 
+
+
     public BigDecimal sumAgentFee(BigDecimal paidAmount, String rate) {
         try{
             if(Strings.isEmpty(rate)){
@@ -407,6 +456,34 @@ public class ZfAgentServiceImpl implements ZfAgentService {
             JSONObject jsonObject = JSONObject.parseObject(rate);
             if(jsonObject.containsKey("recharge")){
                 JSONObject rechargeRate = jsonObject.getJSONObject("recharge");
+                 String rate_type_key  =  betweenAmount.compareTo(paidAmount) > 0 ?"s_rate_type" : "rate_type";
+                String rate_value_key  =  betweenAmount.compareTo(paidAmount) > 0 ?"s_rate_value" : "rate_value";
+                if(!Strings.isEmpty(rechargeRate.getString(rate_type_key))&& !Strings.isEmpty(rechargeRate.getString(rate_type_key))){
+                    Integer rate_type = rechargeRate.getInteger(rate_type_key);
+                    Double rate_value = rechargeRate.getDoubleValue(rate_value_key);
+                    if(rate_type == 0){
+                        return BigDecimal.valueOf(rate_value);
+                    }else{
+                        BigDecimal rate1 = BigDecimal.valueOf(rate_value).divide(new BigDecimal("100"));
+                        return paidAmount.multiply(rate1);
+                    }
+                }
+            }
+            return BigDecimal.ZERO;
+        }catch (Exception e){
+            log.info("会员手续费异常", e);
+            return BigDecimal.ZERO;
+        }
+    }
+
+    public BigDecimal sumAgentFeeByWithdraw(BigDecimal paidAmount, String rate) {
+        try{
+            if(Strings.isEmpty(rate)){
+                return  BigDecimal.ZERO;
+            }
+            JSONObject jsonObject = JSONObject.parseObject(rate);
+            if(jsonObject.containsKey("trans")){
+                JSONObject rechargeRate = jsonObject.getJSONObject("trans");
                 if(!Strings.isEmpty(rechargeRate.getString("rate_type"))&& !Strings.isEmpty(rechargeRate.getString("rate_value"))){
                     Integer rate_type = rechargeRate.getInteger("rate_type");
                     Double rate_value = rechargeRate.getDoubleValue("rate_value");
@@ -424,4 +501,5 @@ public class ZfAgentServiceImpl implements ZfAgentService {
             return BigDecimal.ZERO;
         }
     }
+
 }

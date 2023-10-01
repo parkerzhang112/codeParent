@@ -2,33 +2,25 @@ package com.code.baseservice.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.enums.ResultEnum;
-import com.code.baseservice.base.enums.TransTypeEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfChannelDao;
 import com.code.baseservice.dto.XChannelRate;
-import com.code.baseservice.dto.backapi.OperaChannelParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.dto.payapi.TransferParams;
-import com.code.baseservice.entity.*;
-import com.code.baseservice.service.ZfChannelRecordService;
+import com.code.baseservice.entity.ZfChannel;
+
 import com.code.baseservice.service.ZfChannelService;
-import com.code.baseservice.service.ZfChannelTransService;
-import com.code.baseservice.util.CommonUtil;
-import com.code.baseservice.util.HttpClientUtil;
-import com.code.baseservice.util.MD5Util;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Random;
-import java.util.TreeMap;
 
 /**
  * (ZfChannel)表服务实现类

@@ -75,7 +75,7 @@ public class ZfMerchantServiceImpl implements ZfMerchantService {
         String sign_str = new CommonUtil().getSign(map);
         sign_str = sign_str.concat("key=".concat(zfMerchant.getKey()));
         String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
-        log.info("订单号 {} 当前我方签名 {} 签名字符串  对方签名 {}", queryParams.getMerchant_order_no(), sign, sign_str, queryParams.getSign());
+        log.info("订单号 {} 当前我方签名 {} 签名字符串 {}  对方签名 {}", queryParams.getMerchant_order_no(), sign, sign_str, queryParams.getSign());
         if (!sign.equals(queryParams.getSign())) {
             throw new BaseException(ResultEnum.SIGN_ERROR);
         }

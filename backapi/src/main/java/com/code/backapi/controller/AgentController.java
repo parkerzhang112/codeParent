@@ -4,7 +4,6 @@ import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.backapi.OperaAgentParams;
-import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import com.code.baseservice.service.ZfAgentService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +41,7 @@ public class AgentController {
         }
         return responseResult.toJsonString();
     }
+
 
     /***
      * 代理补分上分操作

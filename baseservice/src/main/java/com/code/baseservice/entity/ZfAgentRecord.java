@@ -45,6 +45,22 @@ public class ZfAgentRecord implements Serializable {
      */
     private BigDecimal income;
 
+    /**
+     * next_recharge_amount
+     * @param zfAgent
+     * @param fee
+     * @param paidAmount
+     */
+    private BigDecimal nextRechargeAmount;
+
+    /**
+     *
+     * @param zfAgent
+     * @param fee
+     * @param paidAmount
+     */
+    private Integer nextRechargeTimes;
+
     public ZfAgentRecord(ZfAgent zfAgent, BigDecimal fee, BigDecimal paidAmount) {
         if(paidAmount.compareTo(BigDecimal.ZERO) > 0){
             rechargeTimes =1;
@@ -64,9 +80,11 @@ public class ZfAgentRecord implements Serializable {
     }
 
 
-    public void buildAgentRecordBySunAgentSuccessAndParent(ZfAgent zfAgent, BigDecimal fee) {
+    public void buildAgentRecordBySunAgentSuccessAndParent(ZfAgent zfAgent, BigDecimal fee, ZfRecharge zfRecharge) {
         income  = fee;
         agentId = zfAgent.getAgentId();
+        nextRechargeAmount = zfRecharge.getPaidAmount();
+        nextRechargeTimes = 1;
         recordDate  = DateUtil.format(new Date(), DateUtil.YYYY_MM_DD);
     }
 }
