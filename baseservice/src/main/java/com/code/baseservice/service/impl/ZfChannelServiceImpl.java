@@ -2,25 +2,33 @@ package com.code.baseservice.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.enums.ResultEnum;
+import com.code.baseservice.base.enums.TransTypeEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfChannelDao;
 import com.code.baseservice.dto.XChannelRate;
+import com.code.baseservice.dto.backapi.OperaChannelParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.dto.payapi.TransferParams;
-import com.code.baseservice.entity.ZfChannel;
-
+import com.code.baseservice.entity.*;
+import com.code.baseservice.service.ZfChannelRecordService;
 import com.code.baseservice.service.ZfChannelService;
+import com.code.baseservice.service.ZfChannelTransService;
+import com.code.baseservice.util.CommonUtil;
+import com.code.baseservice.util.HttpClientUtil;
+import com.code.baseservice.util.MD5Util;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Random;
+import java.util.TreeMap;
 
 /**
  * (ZfChannel)表服务实现类
@@ -89,14 +97,14 @@ public class ZfChannelServiceImpl implements ZfChannelService {
             if (null == zfChannel.getThirdMerchantChannelRate()) {
                 return BigDecimal.ZERO;
             }
-
-                BigDecimal rate = zfChannel.getThirdMerchantChannelRate().divide(new BigDecimal("100"));
-                return PaidAmount.multiply(rate);
+            BigDecimal rate = zfChannel.getThirdMerchantChannelRate().divide(new BigDecimal("100"));
+            return PaidAmount.multiply(rate);
         } catch (Exception e) {
             log.error("手续费计算异常", e);
         }
         return BigDecimal.ZERO;
     }
+
 
     @Override
     public BigDecimal sumChannelFee(@NonNull BigDecimal PaidAmount, ZfChannel zfChannel) {
@@ -136,6 +144,34 @@ public class ZfChannelServiceImpl implements ZfChannelService {
     }
 
     @Override
+    public void updateChannelFee(ZfWithdraw zfWithdraw) {
+        RLock rLock = redissonClient.getLock("channel"+zfWithdraw.getChannelId());
+        try{
+            ZfChannel zfChannel1 = new ZfChannel();
+            //查询渠道信息
+            ZfChannel zfChannel = zfChannelDao.queryById(zfWithdraw.getChannelId());
+            BigDecimal channlFee = sumThirdChannelFee(zfWithdraw.getPayAmount(), zfChannel);
+            channlFee =  channlFee.add(new BigDecimal("2"));
+            //组装更新信息
+            ZfChannelTrans zfChannelTrans = new ZfChannelTrans(zfWithdraw,zfChannel, channlFee);
+            ZfChannelRecord zfChannelRecord = new ZfChannelRecord(zfWithdraw, zfChannel, channlFee);
+            zfChannel1.setChannelBalance(BigDecimal.ZERO.subtract(zfWithdraw.getPaidAmount().add(channlFee)));
+            zfChannelDao.updateChannelFee(zfChannel1.getChannelBalance(), zfWithdraw.getChannelId());
+            //插入渠道流水
+            zfChannelRecordService.update(zfChannelRecord);
+            //更新渠道余额
+            zfChannelTransService.insert(zfChannelTrans);
+        }catch (Exception e){
+            log.error("计算渠道费用 单号{} 异常原因 {}", zfWithdraw.getMerchantOrderNo(), e.getStackTrace());
+            throw  new RuntimeException(e);
+        }finally {
+            if(rLock.isLocked() && rLock.isHeldByCurrentThread()){
+                rLock.isLocked();
+            }
+        }
+    }
+
+    @Override
     public void updateChannelFee(ZfRecharge zfRecharge) {
         RLock rLock = redissonClient.getLock("channel"+zfRecharge.getChannelId());
         try{
@@ -166,6 +202,7 @@ public class ZfChannelServiceImpl implements ZfChannelService {
     public ZfChannel queryByMerchantId(String thirdMerchantId) {
         return zfChannelDao.queryByMerchantId(thirdMerchantId);
     }
+
 
     public static void main(String[] args) {
         RechareParams rechareParams = new RechareParams();

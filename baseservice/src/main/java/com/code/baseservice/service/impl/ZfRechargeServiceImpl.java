@@ -97,29 +97,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         return this.zfRechargeDao.queryByMerchantOrderNo(merchanOrderNo);
     }
 
-
-    @Override
-    public JSONObject create(RechareParams rechareParams) {
-        //验证商户有效性
-        ZfMerchant zfMerchant = zfMerchantService.vaildMerchant(rechareParams.getMerchant_id());
-        //延签
-        vaildSign(rechareParams, zfMerchant);
-        //去重
-        vaildRepeat(rechareParams);
-        //查渠道
-        ZfChannel zfChannel = zfChannelService.queryChannelByParams(rechareParams);
-        //查码
-//        List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfChannels, rechareParams, zfMerchant);
-        //轮码
-//        ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfMerchant, rechareParams);
-        commonService.request(zfChannel, rechareParams);
-        //入单
-        ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
-
-        //返回
-        return buildReuslt(zfMerchant, zfRecharge);
-    }
-
     @Override
     public JSONObject createA(RechareParams rechareParams) {
         //验证商户有效性

@@ -49,5 +49,14 @@ public class ZfChannelRecord implements Serializable {
         rechargeAmount = zfRecharge.getPayAmount();
         channelFee = Fee;
     }
+
+    public ZfChannelRecord(ZfWithdraw zfWithdraw, ZfChannel zfChannel, BigDecimal channlFee) {
+        channelId = zfWithdraw.getChannelId();
+        merchantId = zfWithdraw.getMerchantId();
+        recordDate = DateUtil.format(new Date(), DateUtil.YYYY_MM_DD);
+        channelName= zfChannel.getChannelName();
+        rechargeAmount = zfWithdraw.getPayAmount();
+        channelFee = channlFee;
+    }
 }
 

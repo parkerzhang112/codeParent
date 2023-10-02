@@ -5,6 +5,7 @@ import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfChannel;
 import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.entity.ZfWithdraw;
 import lombok.NonNull;
 
 import java.math.BigDecimal;
@@ -49,4 +50,6 @@ public interface ZfChannelService {
      * @param operaChannelParams
      */
     void operatBalance(OperaChannelParams operaChannelParams);
+
+    void updateChannelFee(ZfWithdraw zfWithdraw);
 }

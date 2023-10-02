@@ -77,5 +77,17 @@ public class ZfChannelTrans implements Serializable {
     public ZfChannelTrans() {
 
     }
+
+    public ZfChannelTrans(ZfWithdraw zfWithdraw, ZfChannel zfChannel, BigDecimal channlFee) {
+        preBalance  = zfChannel.getChannelBalance();
+        balance  = zfChannel.getChannelBalance().subtract((zfWithdraw.getPayAmount()).add(channlFee));
+        channelFee = channlFee;
+        orderNo = zfWithdraw.getOrderNo();
+        merchantOrderNo = zfWithdraw.getMerchantOrderNo();
+        remark = "代付订单减额";
+        channelId  = zfChannel.getChannelId();
+        transType = TransTypeEnum.TRANSFER.getValue();
+        amount = zfWithdraw.getPayAmount();
+    }
 }
 

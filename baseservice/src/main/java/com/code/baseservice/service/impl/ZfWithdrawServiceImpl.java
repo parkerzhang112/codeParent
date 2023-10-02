@@ -62,7 +62,7 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
     private ZfChannelService zfChannelService;
 
     @Autowired
-    private ZfCodeService zfCodeService;
+    private CommonService commonService;
 
     @Autowired
     private ZfAgentService zfAgentService;
@@ -115,6 +115,15 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         //结束商户余额
         zfMerchantService.sumMerchantBalance(xMerchant.getMerchantId(), BigDecimal.ZERO.subtract(transParams.getPay_amount()).subtract(zfWithdraw.getChannelFee()));
         zfMerchantTransService.insert(new ZfMerchantTrans(zfWithdraw, xMerchant,TransTypeEnum.TRANSFER.getValue()));
+        try {
+            JSONObject jsonObject = commonService.create(zfChannel, zfWithdraw);
+            if(jsonObject.getInteger("code") == 200){
+                zfWithdraw.setOrderStatus(1);
+                zfWithdrawDao.update(zfWithdraw);
+            }
+        }catch (Exception e){
+            log.error("代付入单异常失败", e.getStackTrace());
+        }
         JSONObject result = buildResult(transParams, zfWithdraw, xMerchant);
         //组着参数返回
         return result;
@@ -142,8 +151,21 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
     }
 
     @Override
-    public void paidOrder(ZfWithdraw zfWithdraw) {
-
+    public void onPaidOrderThird(ZfWithdraw zfWithdraw) {
+        String redisKey = RedisConstant.PAID_ORDER + zfWithdraw.getOrderNo();
+        RLock rLock = redissonClient.getLock(redisKey);
+        try {
+            if (rLock.tryLock(2, 5, TimeUnit.SECONDS)) {
+                //订单信息的写入
+                zfChannelService.updateChannelFee(zfWithdraw);
+                zfWithdraw.setOrderStatus(2);
+                zfWithdrawDao.updatePaidOrder(zfWithdraw);
+            }
+        } catch (Exception e) {
+            log.error("订单号 {} 系统异常", zfWithdraw.getMerchantOrderNo(), e);
+        } finally {
+            redisUtilService.unlock(redisKey);
+        }
     }
 
     @Override
@@ -337,6 +359,23 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         zfWithdraw.setUpdateTime(new Date());
         zfWithdrawDao.update(zfWithdraw);
         return  ;
+    }
+
+    @Override
+    public JSONObject queryByWithdraw( QueryParams queryParams) {
+        ZfWithdraw zfWithdraw = zfWithdrawDao.queryByParams(queryParams.getMerchant_order_no(), Integer.valueOf(queryParams.getMerchant_Id()) );
+        if(zfWithdraw == null){
+            new BaseException(ResultEnum.ORDER_NO_EXIST);
+        }
+        ZfChannel zfChannel = zfChannelService.queryById(zfWithdraw.getChannelId());
+        if(zfChannel == null){
+            new BaseException(ResultEnum.REFUSE_ORRDER);
+        }
+        JSONObject jsonObject =   commonService.queryByWithdraw(zfChannel,zfWithdraw);
+        if("200".equals(jsonObject.getString("code"))){
+            onPaidOrderThird(zfWithdraw);
+        }
+        return jsonObject;
     }
 
 

@@ -51,7 +51,7 @@ public enum ResultEnum {
     NO_ENOUGH_AMOUNT(811, "积分不够"),
     NO_COMMISSION_AMOUNT(812, "佣金不够"),
     DE_ERR(812, "分配代理与操作代理不一致"),
-
+    CHANNEL_BALANCE_NO_ENOUGH(813, "渠道余额不足")
     ;
 
 

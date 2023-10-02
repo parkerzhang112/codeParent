@@ -34,8 +34,6 @@ public interface ZfRechargeService {
     ZfRecharge queryByMerchantOrderNo(String merchantOrderNo);
 
 
-    JSONObject create(RechareParams rechareParams);
-
     JSONObject query(QueryParams queryParams);
 
     ZfRecharge tryFindOrderByTrans(ZfTransRecord zfTransRecord, ZfCode zfCode);

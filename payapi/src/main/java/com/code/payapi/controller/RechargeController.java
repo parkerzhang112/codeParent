@@ -33,24 +33,6 @@ public class RechargeController {
     CommonService commonService;
 
     @ApiOperation("创建订单")
-    @PostMapping("/createxxxx")
-    @ResponseBody
-    public String create(@RequestBody RechareParams rechareParams) {
-        log.info("入款参数 订单号 {} 信息 {}", rechareParams.getMerchant_order_no(), rechareParams.toString());
-        ResponseResult responseResult = new ResponseResult();
-        try {
-            JSONObject jsonObject = zfRechargeService.create(rechareParams);
-            responseResult.setData(jsonObject);
-        } catch (BaseException e) {
-            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
-        } catch (Exception e) {
-            log.error("系统异常", e);
-            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
-        }
-        return responseResult.toJsonString();
-    }
-
-    @ApiOperation("创建订单")
     @PostMapping("/create")
     @ResponseBody
     public String createA(@RequestBody RechareParams rechareParams) {

@@ -7,6 +7,7 @@ import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.ZfChannel;
 import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.entity.ZfWithdraw;
 import com.code.baseservice.service.BaseService;
 import com.code.baseservice.service.ZfRechargeService;
 import com.code.baseservice.util.CommonUtil;
@@ -87,6 +88,42 @@ public class SanShiServiceImpl implements BaseService {
             throw new BaseException(ResultEnum.ERROR);
         }catch (BaseException e){
             log.error("请求异常 {} 订单号{}", e, zfRecharge.getOrderNo());
+            throw new BaseException(ResultEnum.ERROR);
+        }
+    }
+
+    @Override
+    public JSONObject create(ZfChannel zfChannel, ZfWithdraw zfWithdraw) {
+        log.info("开始创建三世支付订单 {}", zfWithdraw);
+        try {
+            log.info("单号 {} 开始请求 {}  参数 {}",zfWithdraw.getMerchantOrderNo(), domain + "/recharge/create", JSONObject.toJSONString(zfWithdraw));
+            String reponse = HttpClientUtil.doPostJson(domain + "/withdraw/create", JSONObject.toJSONString(zfWithdraw));
+            JSONObject jsonObject = JSONObject.parseObject(reponse);
+            log.info("单号 {} 请求结果 {}", zfWithdraw.getMerchantOrderNo(), reponse);
+            if(jsonObject.getInteger("code" ) == 200){
+                return jsonObject.getJSONObject("data");
+            }
+            throw new BaseException(ResultEnum.ERROR);
+        }catch (BaseException e){
+            log.error("请求异常 {} 订单号{}", e, zfWithdraw.getMerchantOrderNo());
+            throw new BaseException(ResultEnum.ERROR);
+        }
+    }
+
+    @Override
+    public JSONObject queryByWithdraw(ZfChannel zfChannel, ZfWithdraw zfWithdraw) {
+        log.info("开始请求查询三方支付订单 {}", zfWithdraw);
+        try {
+            log.info("单号 {} 开始请求 {}  参数 {}",zfWithdraw.getMerchantOrderNo(), domain + "/recharge/create", JSONObject.toJSONString(rechareParams1));
+            String reponse = HttpClientUtil.doPostJson(domain + "/withdraw/view", JSONObject.toJSONString(zfWithdraw));
+            JSONObject jsonObject = JSONObject.parseObject(reponse);
+            log.info("单号 {} 请求结果 {}", zfWithdraw.getMerchantOrderNo(), reponse);
+            if(jsonObject.getInteger("code" ) == 200){
+                return jsonObject;
+            }
+            throw new BaseException(ResultEnum.ERROR);
+        }catch (BaseException e){
+            log.error("请求异常 {} 订单号{}", e, zfWithdraw.getMerchantOrderNo());
             throw new BaseException(ResultEnum.ERROR);
         }
     }

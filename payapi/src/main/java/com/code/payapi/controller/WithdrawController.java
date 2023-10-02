@@ -50,7 +50,7 @@ public class WithdrawController {
         log.info("代付参数参数 订单号 {} 信息 {}", queryParams.getMerchant_order_no(), queryParams.toString());
         ResponseResult responseResult = new ResponseResult();
         try {
-            JSONObject jsonObject = zfWithdrawService.query(queryParams);
+            JSONObject jsonObject = zfWithdrawService.queryByWithdraw(queryParams);
             responseResult.setData(jsonObject);
         }catch (BaseException e){
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());

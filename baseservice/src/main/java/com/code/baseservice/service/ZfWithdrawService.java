@@ -8,8 +8,6 @@ import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfChannel;
 import com.code.baseservice.entity.ZfMerchant;
 import com.code.baseservice.entity.ZfWithdraw;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 /**
  * 提款订单表(ZfWithdraw)表服务接口
@@ -44,7 +42,7 @@ public interface ZfWithdrawService {
 
     ZfWithdraw tryFindOrderByTrans(TransParams transParams1);
 
-    void paidOrder(ZfWithdraw zfWithdraw);
+    void onPaidOrderThird(ZfWithdraw zfWithdraw);
 
     void confirmOrder(OperaOrderParams operaOrderParams);
 
@@ -68,4 +66,6 @@ public interface ZfWithdrawService {
     public ZfWithdraw createIssueOrder(TransferParams transParams, ZfMerchant xMerchant);
 
     void lock(OperaOrderParams operaOrderParams);
+
+    JSONObject queryByWithdraw(QueryParams queryParams);
 }

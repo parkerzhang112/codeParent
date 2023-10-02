@@ -6,6 +6,7 @@ import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.entity.ZfChannel;
 import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.entity.ZfWithdraw;
 import com.code.baseservice.service.BaseService;
 import com.code.baseservice.service.CommonService;
 import com.code.baseservice.service.ZfChannelService;
@@ -38,6 +39,18 @@ public class CommonServiceImpl implements CommonService {
     public JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge) {
         BaseService baseService = transToService(zfChannel.getThirdMerchantId());
         return  baseService.create(zfChannel, zfRecharge);
+    }
+
+    @Override
+    public JSONObject create(ZfChannel zfChannel, ZfWithdraw zfWithdraw) {
+        BaseService baseService = transToService(zfChannel.getThirdMerchantId());
+        return  baseService.create(zfChannel, zfWithdraw);
+    }
+
+    @Override
+    public JSONObject queryByWithdraw(ZfChannel zfChannel, ZfWithdraw zfWithdraw) {
+        BaseService baseService = transToService(zfChannel.getThirdMerchantId());
+        return  baseService.queryByWithdraw( zfChannel,  zfWithdraw);
     }
 
     @Override
