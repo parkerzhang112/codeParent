@@ -38,7 +38,7 @@ public class TransControllerTest extends PayapiApplicationTests {
         transParams.setCard_account(StringUtil.createRandomStr1(10));
         transParams.setCard_name(StringUtil.createRandomStr1(3));
         transParams.setCard_address(StringUtil.createRandomStr1(10));
-        transParams.setMerchant_order_no("dsadasdsaW1679713803244WwvNtvHDX");
+        transParams.setMerchant_order_no("dsadasdsaW16798203244WwvNtvHDX");
         transParams.setMerchant_id(10019);
         transParams.setCard_type("ICBC");
         transParams.setNotify_url("http://127.0.0.1");

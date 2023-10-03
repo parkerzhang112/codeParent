@@ -111,7 +111,9 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         ZfChannel zfChannel = selectOneCardByRobin(xChannels);
 
         ZfWithdraw zfWithdraw = createOrder(transParams, zfChannel, xMerchant);
-
+        String key = transParams.getMerchant_id() + "_" +transParams.getMerchant_order_no();
+        redisUtilService.set(key, 1);
+        redisUtilService.set("notice:admin:", 1,1200);
         //结束商户余额
         zfMerchantService.sumMerchantBalance(xMerchant.getMerchantId(), BigDecimal.ZERO.subtract(transParams.getPay_amount()).subtract(zfWithdraw.getChannelFee()));
         zfMerchantTransService.insert(new ZfMerchantTrans(zfWithdraw, xMerchant,TransTypeEnum.TRANSFER.getValue()));
