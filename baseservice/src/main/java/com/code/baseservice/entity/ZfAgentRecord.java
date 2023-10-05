@@ -79,6 +79,14 @@ public class ZfAgentRecord implements Serializable {
 
     }
 
+    public ZfAgentRecord(ZfWithdraw zfWithdraw) {
+        withdrawAmount = zfWithdraw.getPayAmount();
+        withdrawTimes  = 1;
+        income = BigDecimal.ZERO;
+        agentId = zfWithdraw.getAgentId();
+        recordDate  = DateUtil.format(new Date(), DateUtil.YYYY_MM_DD);
+    }
+
 
     public void buildAgentRecordBySunAgentSuccessAndParent(ZfAgent zfAgent, BigDecimal fee, ZfRecharge zfRecharge) {
         income  = fee;

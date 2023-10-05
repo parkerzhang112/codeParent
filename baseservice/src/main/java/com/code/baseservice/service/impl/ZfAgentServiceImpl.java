@@ -178,6 +178,7 @@ public class ZfAgentServiceImpl implements ZfAgentService {
                     zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().add(agentFee.subtract(fee)));
                     zfAgent1.setAcceptAmount((agentFee.subtract(fee)));
                 }
+                zfAgentRecordService.updateRecord(new ZfAgentRecord(zfWithdraw));
                 zfAgentTransService.insert(new ZfAgentTrans(zfWithdraw, zfAgent, agentFee.subtract(fee)));
                 long end  = System.currentTimeMillis();
                 if(start -end > 10000){
