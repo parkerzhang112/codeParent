@@ -39,7 +39,7 @@ public class RechargeController {
         log.info("入款参数 订单号 {} 信息 {}", rechareParams.getMerchant_order_no(), rechareParams.toString());
         ResponseResult responseResult = new ResponseResult();
         try {
-            JSONObject jsonObject = zfRechargeService.createA(rechareParams);
+            JSONObject jsonObject = zfRechargeService.create(rechareParams);
             responseResult.setData(jsonObject);
         } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());

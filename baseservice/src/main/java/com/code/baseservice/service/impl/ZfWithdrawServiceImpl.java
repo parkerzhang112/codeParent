@@ -194,6 +194,15 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
     public void cancelOrder(OperaOrderParams operaOrderParams) {
         //修改订单数据
         ZfWithdraw zfWithdraw = zfWithdrawDao.queryById(operaOrderParams.getOrderNo());
+        if(zfWithdraw == null){
+            throw  new BaseException(ResultEnum.ORDER_NO_EXIST);
+        }
+        zfWithdraw.setRemark(operaOrderParams.getCloseReason());
+
+        cancaleOrderByWithdraw(zfWithdraw);
+    }
+
+    private void cancaleOrderByWithdraw(ZfWithdraw zfWithdraw){
         if (zfWithdraw.getOrderStatus() > 1) {
             log.info("订单已处理 订单号 {}", zfWithdraw.getMerchantOrderNo());
             throw new BaseException(ResultEnum.ERROR);
@@ -202,11 +211,10 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
 //        if(zfTransRecords.size() == 1 && zfTransRecords.get(0).getTransType().equals(TransTypeEnum.TRANSFER.getValue())){
 //            throw new BaseException(ResultEnum.TRANS_EXIST_TRANSFER);
 //        }
-        if("交易失败".equals(operaOrderParams.getCloseReason())){
+        if("交易失败".equals(zfWithdraw.getRemark())){
             redisUtilService.set("refuseNameTrans"+zfWithdraw.getCardName(), 3600*24);
         }
         ZfMerchant xMerchant  = zfMerchantService.queryById(zfWithdraw.getMerchantId());
-        zfWithdraw.setRemark(operaOrderParams.getCloseReason());
         zfWithdraw.setOrderStatus(3);
         zfWithdraw.setAgentId(0);
         if(zfWithdraw.getParentOrderNo().equals("") &&
@@ -363,6 +371,8 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
 
     @Override
     public JSONObject queryByWithdraw( QueryParams queryParams) {
+        ZfMerchant zfMerchant = zfMerchantService.queryById(Integer.valueOf(queryParams.getMerchant_Id()));
+        zfMerchantService.verifSign(queryParams, zfMerchant);
         ZfWithdraw zfWithdraw = zfWithdrawDao.queryByParams(queryParams.getMerchant_order_no(), Integer.valueOf(queryParams.getMerchant_Id()) );
         if(zfWithdraw == null){
             new BaseException(ResultEnum.ORDER_NO_EXIST);
@@ -373,9 +383,13 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         }
         JSONObject jsonObject =   commonService.queryByWithdraw(zfChannel,zfWithdraw);
         if("200".equals(jsonObject.getString("code"))){
-            onPaidOrderThird(zfWithdraw);
+            if(jsonObject.getInteger("order_status") == 2){
+                onPaidOrderThird(zfWithdraw);
+            }else if(jsonObject.getInteger("order_status") == 3){
+                cancaleOrderByWithdraw(zfWithdraw);
+            }
         }
-        return jsonObject;
+        return buildViewResult(zfWithdraw, zfMerchant);
     }
 
 

@@ -17,4 +17,5 @@ public interface BaseService {
     JSONObject create(ZfChannel zfChannel, ZfWithdraw zfWithdraw);
 
     JSONObject queryByWithdraw(ZfChannel zfChannel, ZfWithdraw zfWithdraw);
+
 }

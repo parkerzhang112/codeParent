@@ -6,6 +6,7 @@ import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.TransferParams;
+import com.code.baseservice.service.CommonService;
 import com.code.baseservice.service.ZfWithdrawService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,9 @@ public class WithdrawController {
 
     @Autowired
     ZfWithdrawService zfWithdrawService;
+
+    @Autowired
+    CommonService commonService;
 
     @ApiOperation("创建订单")
     @PostMapping("/create")

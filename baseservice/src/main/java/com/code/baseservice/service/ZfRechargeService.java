@@ -54,7 +54,7 @@ public interface ZfRechargeService {
 
     void postName(Map<String, Object> map);
 
-    JSONObject createA(RechareParams rechareParams);
+    JSONObject create(RechareParams rechareParams);
 
     ZfRecharge queryByOrderNo(String merchant_order_no);
 }

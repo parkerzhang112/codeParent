@@ -1,7 +1,6 @@
 package com.code.baseservice.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.code.baseservice.base.constant.BankTypeConstans;
 import com.code.baseservice.base.constant.RedisConstant;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
@@ -21,7 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -98,7 +96,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     }
 
     @Override
-    public JSONObject createA(RechareParams rechareParams) {
+    public JSONObject create(RechareParams rechareParams) {
         //验证商户有效性
         ZfMerchant zfMerchant = zfMerchantService.vaildMerchant(rechareParams.getMerchant_id());
         //延签
