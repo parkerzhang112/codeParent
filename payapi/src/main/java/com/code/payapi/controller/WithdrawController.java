@@ -32,7 +32,7 @@ public class WithdrawController {
     @PostMapping("/create")
     @ResponseBody
     public String create(@RequestBody TransferParams TransParams) {
-        log.info("代付参数参数 订单号 {} 信息 {}", TransParams.getMerchant_order_no(), TransParams.toString());
+        log.info("代付入单参数 订单号 {} 信息 {}", TransParams.getMerchant_order_no(), TransParams.toString());
         ResponseResult responseResult = new ResponseResult();
         try {
             JSONObject jsonObject = zfWithdrawService.create(TransParams);

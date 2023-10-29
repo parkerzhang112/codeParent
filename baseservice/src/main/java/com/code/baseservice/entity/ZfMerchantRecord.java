@@ -24,7 +24,11 @@ public class ZfMerchantRecord implements Serializable {
     private BigDecimal rechargeAmount;
     
     private Integer rechargeTimes;
-    
+
+    private BigDecimal withdrawAmount;
+
+    private Integer withdrawTimes;
+
     private BigDecimal merchantFee;
 
     public ZfMerchantRecord(ZfRecharge zfRecharge) {
@@ -39,5 +43,12 @@ public class ZfMerchantRecord implements Serializable {
 
     }
 
+    public ZfMerchantRecord(ZfWithdraw zfWithdraw) {
+        merchantId = zfWithdraw.getMerchantId();
+        recordDate = DateUtil.format(new Date(), DateUtil.YYYY_MM_DD);
+        withdrawAmount = zfWithdraw.getPayAmount();
+        withdrawTimes = 1;
+        merchantFee  = zfWithdraw.getMerchantFee();
+    }
 }
 

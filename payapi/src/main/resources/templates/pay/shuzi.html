@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html data-dpr="1" style="font-size: 36px;">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width initial-scale=1.0 maximum-scale=1.0 user-scalable=yes">
+  <title></title>
+  <link rel="shortcut icon" href="./img/favicon.png" type="image/x-icon">
+  <link rel="apple-touch-icon" href="./img/favicon.png">
+  <script th:src="@{/js/jquery-1.8.3.min.js}"></script>
+  <script th:src="@{/js/flexible.js}"></script>
+</head>
+<style>
+  body{
+    font-family:'STHeiti','Microsoft YaHei',Helvetica,Arial,sans-serif;margin:0 auto;
+  }
+  #first {
+    margin: 0 auto;
+    max-width: 750px;
+    padding: 0.3rem 0.2rem;
+    background-color: #fafafe;
+  }
+  #first .header {
+    padding: 0.24rem 0;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 0.05rem 0.1rem rgba(65,71,85,0.09);
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+  }
+  #first .header input {
+    margin: 0 auto;
+    flex: 1;
+    height: .6rem;
+    border: 1px solid #e1e1e2;
+    border-radius: 0.05rem;
+    padding-left: 0.2rem;
+    color: gray;
+  }
+  .info {
+    padding: 0.2rem 0 0 0.1rem;
+    color: red;
+  }
+  .inputCls {
+    background: linear-gradient(to right, blue, #497ff6);
+    line-height: 1rem;
+    text-align: center;
+    color: #fff;
+    border-radius: .2rem;
+    margin-top: 0.4rem;
+    cursor: pointer;
+  }
+  .tip {
+    margin-top: 0.5rem;
+  }
+  .tip li {
+    color: #a7a7b0;
+    margin-top: 0.3rem;
+  }
+
+  #second {
+    margin: 0 auto;
+    max-width: 750px;
+    padding: 0.3rem 0.2rem;
+  }
+  #second .header {
+    text-align: center;
+    line-height: 0.7rem;
+  }
+  #second .header b {
+    color: blue;
+  }
+  #second .tip {
+    text-align: center;
+    line-height: 0.7rem;
+    letter-spacing: 2px;
+  }
+  #second .tip b {
+    color: blue;
+  }
+  .container {
+    padding: 0.5rem;
+    box-shadow: 0 0.05rem 0.1rem rgba(65,71,85,0.09);
+    margin: 0 auto;
+    max-width: 80%;
+    background-color: #fafafe;
+  }
+  .title {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+  }
+  .title u {
+    font-size: 0.7rem;
+    color: red;
+    padding: 0 0.3rem;
+    text-decoration: none;
+  }
+  .copy {
+    background-color: #1271ff;
+    padding: 0.2rem 0.5rem;
+    border-radius: .1rem;
+    color: #fff;
+    cursor: pointer;
+    line-height: 0.2rem;
+  }
+  .item li{
+    display: flex;
+    margin-top: 0.4rem;
+  }
+  .item li .name {
+    width: 20%;
+  }
+  .form {
+    flex: 1;
+  }
+  .form .copy {
+    padding: 0.1rem 0.5rem;
+  }
+  .show {
+    display: block;
+  }
+  .hide {
+    display: none;
+  }
+  .overlay {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.8);
+  }
+  .toast {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    padding: 20px;
+    background-color: #fff;
+  }
+  .toast-header {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 20px;
+  }
+  #time{
+    margin-top: 0.5rem;
+  }
+  .time{
+    margin: 0 auto;
+  }
+  html{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;font-size: 62.5%}
+  *{ margin:0; padding:0}
+  a{outline:none;text-decoration:none;}
+  a:hover{text-decoration:none;}
+  html{zoom:1;}
+  html *{outline:0;zoom:1;}
+  html button::-moz-focus-inner{border-color:transparent!important;}
+  body{overflow-x: hidden;}
+  body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}
+  fieldset,a img{border:0;}
+  address,caption,cite,code,dfn,em,th,var{font-style:normal;font-weight:normal;}
+  li{list-style:none;}
+  caption,th{text-align:left;}
+  h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}
+  q:before,q:after{content:'';}
+  input[type="submit"], input[type="reset"], input[type="button"], button{-webkit-appearance: none;}
+  em,i{font-style:normal;}
+
+  .clearfix:after {content: "."; display: block; height:0; clear:both; visibility: hidden;}
+  .clearfix { *zoom:1; }
+
+</style>
+
+<body style="font-size: 12px;">
+
+<div id="second">
+
+  <div class="header">
+    下载<b>数字人民币App</b>复制转账信息支付，成功率<b>99%</b>！<br />
+  </div>
+  <div class="tip">
+    付款，请勿重复支付或修改金额，否则一律自己承担！
+  </div>
+  <p id="time" style="    font-size: 37px;color: red;text-align: center"></p>
+
+  <div class="container">
+
+    <div class="title">
+      <s>￥</s><u th:text="${xrecharge.payAmount}"></u><span class="copy" th:data-clipboard-text="${xrecharge.payAmount}">复制</span>
+    </div>
+
+    <div class="title">
+      <s>姓名</s><u id="pay-name"></u><span id="pay-name-copy" class="copy" data-clipboard-text="">复制</span>
+    </div>
+    <div class="title">
+      <s>账号</s><u id="account"></u><span id="account-copy" class="copy" data-clipboard-text="">复制</span>
+    </div>
+    <!-- 弹窗提示 -->
+  </div>
+  <div class="overlay" id="overlay">
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <strong class="mr-auto">提示</strong>
+        </button>
+      </div>
+      <div class="toast-body">支付超时，请重新下单。</div>
+    </div>
+  </div>
+
+  <div class="tip">
+    不按<b>显示金额</b>付款不到账！
+  </div>
+</div>
+<script>
+  var h5Copy = document.querySelectorAll('.copy');
+  for (var ll = 0; ll < h5Copy.length; ll++) {
+    h5Copy[ll].index = ll;
+    h5Copy[ll].addEventListener('click', function () {
+      var cur = h5Copy[this.index].getAttribute('data-clipboard-text');
+      copyFn(cur)
+    })
+  }
+  function copyFn (val) {
+    // 创建输入框
+    var textarea = document.createElement('textarea');
+    document.body.appendChild(textarea);
+    // 隐藏此输入框
+    textarea.style.position = 'absolute';
+    textarea.style.clip = 'rect(0 0 0 0)';
+    // 赋值
+    textarea.value = val;
+    // 选中
+    textarea.select();
+    // 复制
+    document.execCommand('copy', true);
+  }
+</script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+  var oSpan = document.getElementById('time');
+  let orderno = "[[${xrecharge.orderNo}]]";
+  stringTime = '';
+  function getDate() {
+    if(stringTime == ''){
+      return;
+    }
+    var oDate = new Date();//获取日期对象
+    var oldTime = oDate.getTime();//现在距离1970年的毫秒数
+    var newDate = new Date(stringTime);
+    var newTime = newDate.getTime();//2019年距离1970年的毫秒数
+    var second = Math.floor((newTime - oldTime) / 1000);//未来时间距离现在的秒数
+    second = second % 86400;//余数代表剩下的秒数；
+    second %= 3600; //余数代表 剩下的秒数；
+    var minute = Math.floor(second / 60);
+    if(minute < 0){
+      var str = '<span class="time">订单已过期</span>'
+      oSpan.innerHTML = str;
+    }else {
+      second %= 60;
+      var str = tow(minute) + '<span class="time">分钟</span>'
+              + tow(second) + '<span class="time">秒</span>';
+      oSpan.innerHTML = str;
+    }
+
+  }
+  var inputname = prompt("请输入姓名，极速到账", "");
+  if (inputname != null && inputname.length != 0){
+    axios.post("/recharge/order/updateName",
+            {
+              "name":inputname, "orderNo":orderno
+            })
+            .then(function (response) {
+
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+  }
+  // 获取基本信息
+  function getBaseInfo() {
+    axios
+            .get(
+                    "/recharge/order/getOrder/"+orderno
+            )
+            .then(function (response) {
+              console.log("请求的数据：", response);
+              let result = response.data;
+
+              if (result.code !== 200) {
+                console.log("请求失败！");
+                return;
+              }
+              // 拿到数据
+              let {
+                order_status,
+                order_no,
+                url = "",
+                pay_amount = 0,
+              } = result.data;
+              if (order_status == 0) {
+                // 0 的时候继续加载 - 轮询
+                stringTime = result.data.time;
+
+              } else if (order_status == 1) {
+                // 1 数据加载成功
+                // document.getElementById("tips_4").style.display = "none";
+                var account = document.getElementById("account");
+                account.innerHTML = result.data.trans_account;
+                var account = document.getElementById("pay-name");
+                account.innerHTML= result.data.trans_name;
+                document.getElementById("pay-name-copy").setAttribute("data-clipboard-text", result.data.trans_name); // 图片地址
+                document.getElementById("account-copy").setAttribute ("data-clipboard-text", result.data.trans_account); // 图片地址
+
+                stringTime = result.data.time;
+              } else if (order_status == 3) {
+                document.getElementsByClassName("container")[0].style.display = "none";
+                // 3 订单支付失败
+                document.getElementsByClassName("toast-body")[0].innerText =
+                        "支付超时，请重新下单。！";
+                document.getElementById("overlay").style.display = "block";
+
+                clearTimer();
+              } else if (order_status == 4 || order_status == 2) {
+                document.getElementsByClassName("container")[0].style.display = "none";
+                console.log("状态=", result.data);
+                // 3 订单超时
+                document.getElementsByClassName("toast-body")[0].innerText =
+                        "支付成功，请重新下单。";
+                document.getElementById("overlay").style.display = "block";
+                clearTimer();
+              }
+
+
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+  }
+  getBaseInfo();
+  function getDate() {
+    if(stringTime == ''){
+      return;
+    }
+    var oDate = new Date();//获取日期对象
+    var oldTime = oDate.getTime();//现在距离1970年的毫秒数
+    var newDate = new Date(stringTime);
+    var newTime = newDate.getTime();//2019年距离1970年的毫秒数
+    var second = Math.floor((newTime - oldTime) / 1000);//未来时间距离现在的秒数
+    second = second % 86400;//余数代表剩下的秒数；
+    second %= 3600; //余数代表 剩下的秒数；
+    var minute = Math.floor(second / 60);
+    if(minute < 0){
+      var str = '<span class="time">订单已过期</span>'
+      oSpan.innerHTML = str;
+    }else {
+      second %= 60;
+      var str = tow(minute) + '<span class="time">分钟</span>'
+              + tow(second) + '<span class="time">秒</span>';
+      oSpan.innerHTML = str;
+    }
+
+  }
+  function tow(n) {
+    return n >= 0 && n < 10 ? '0' + n : '' + n;
+  }
+
+  pollinMode()
+  timer1 = setInterval(() => {
+    getDate();
+  },1000);
+  // 轮询
+  function pollinMode() {
+    timer = setInterval(() => {
+      getBaseInfo();
+  },3000);
+  }
+
+  // 清除定时器
+  function clearTimer() {
+    if (!timer) return;
+    clearInterval(timer);
+    timer = null;
+  }
+
+
+
+
+</script>
+</body>
+</html>

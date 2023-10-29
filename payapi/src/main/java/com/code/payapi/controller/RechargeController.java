@@ -8,7 +8,6 @@ import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.ZfRecharge;
-import com.code.baseservice.service.CommonService;
 import com.code.baseservice.service.ZfRechargeService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;

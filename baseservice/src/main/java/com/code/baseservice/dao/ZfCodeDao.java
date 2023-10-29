@@ -1,10 +1,8 @@
 package com.code.baseservice.dao;
 
-import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfWithdraw;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,7 +23,7 @@ public interface ZfCodeDao {
      */
     ZfCode queryById(Integer codeId);
 
-    List<ZfCode> selectCodeByChannelAndParams(@Param("channel_ids") List<Integer> ids, @Param("pay_amount")BigDecimal payAmount);
+    List<ZfCode> selectCodeByChannelAndParams(@Param("channel_ids") List<Integer> ids, @Param("pay_amount")BigDecimal payAmount, @Param("code_type") Integer codeType);
 
     ZfCode selectCardByTrans(ZfWithdraw zfWithdraw);
 

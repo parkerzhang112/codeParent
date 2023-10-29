@@ -111,7 +111,9 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         ZfChannel zfChannel = selectOneCardByRobin(xChannels);
 
         ZfWithdraw zfWithdraw = createOrder(transParams, zfChannel, xMerchant);
-
+        String key = transParams.getMerchant_id() + "_" +transParams.getMerchant_order_no();
+        redisUtilService.set(key, 1);
+        redisUtilService.set("notice:admin:", 1,1200);
         //结束商户余额
         zfMerchantService.sumMerchantBalance(xMerchant.getMerchantId(), BigDecimal.ZERO.subtract(transParams.getPay_amount()).subtract(zfWithdraw.getChannelFee()));
         zfMerchantTransService.insert(new ZfMerchantTrans(zfWithdraw, xMerchant,TransTypeEnum.TRANSFER.getValue()));
@@ -242,9 +244,10 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
                 }
                 zfWithdraw.setOrderStatus(2);
                 zfWithdrawDao.updatePaidOrder(zfWithdraw);
-
                 //订单通知
                 notify(zfWithdraw);
+                //更新日报
+                zfMerchantRecordService.updateRecord(new ZfMerchantRecord(zfWithdraw));
                 if(zfWithdraw.getPayAmount().compareTo(zfWithdraw.getPaidAmount()) != 0){
                     //商户余额计算
                     log.info("出款金额不一致 订单号 {}", zfWithdraw.getMerchantOrderNo());
@@ -253,7 +256,9 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         }catch (Exception e) {
             log.error("订单号 {} 系统异常", zfWithdraw.getMerchantOrderNo(), e);
         }finally {
-            redisUtilService.unlock(redisKey);
+            if(rLock.isLocked() && rLock.isHeldByCurrentThread()){
+                rLock.unlock();
+            }
         }
     }
 

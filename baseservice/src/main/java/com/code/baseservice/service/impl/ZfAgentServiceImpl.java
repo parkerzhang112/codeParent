@@ -1,6 +1,7 @@
 package com.code.baseservice.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.base.constant.PayTypeRateConstans;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.enums.TransTypeEnum;
 import com.code.baseservice.base.exception.BaseException;
@@ -178,6 +179,7 @@ public class ZfAgentServiceImpl implements ZfAgentService {
                     zfAgent.setAcceptAmount(zfAgent.getAcceptAmount().add(agentFee.subtract(fee)));
                     zfAgent1.setAcceptAmount((agentFee.subtract(fee)));
                 }
+                zfAgentRecordService.updateRecord(new ZfAgentRecord(zfWithdraw));
                 zfAgentTransService.insert(new ZfAgentTrans(zfWithdraw, zfAgent, agentFee.subtract(fee)));
                 long end  = System.currentTimeMillis();
                 if(start -end > 10000){
@@ -229,7 +231,7 @@ public class ZfAgentServiceImpl implements ZfAgentService {
                 }
                 ZfAgent updateAgent  = new ZfAgent();
                 updateAgent.setAgentId(zfAgent.getAgentId());
-                BigDecimal agentFee =  sumAgentFee(zfRecharge.getPaidAmount(), zfAgent.getRate());
+                BigDecimal agentFee =  sumAgentFee(zfRecharge, zfAgent.getRate());
                 if(agentFee.compareTo(BigDecimal.ZERO) < 0 ){
                     log.info("代理费率设置错误 {}", zfAgent);
                     return;
@@ -448,7 +450,7 @@ public class ZfAgentServiceImpl implements ZfAgentService {
 
 
 
-    public BigDecimal sumAgentFee(BigDecimal paidAmount, String rate) {
+    public BigDecimal sumAgentFee(ZfRecharge zfRecharge, String rate) {
         try{
             if(Strings.isEmpty(rate)){
                 return  BigDecimal.ZERO;
@@ -456,8 +458,9 @@ public class ZfAgentServiceImpl implements ZfAgentService {
             JSONObject jsonObject = JSONObject.parseObject(rate);
             if(jsonObject.containsKey("recharge")){
                 JSONObject rechargeRate = jsonObject.getJSONObject("recharge");
-                 String rate_type_key  =  betweenAmount.compareTo(paidAmount) > 0 ?"s_rate_type" : "rate_type";
-                String rate_value_key  =  betweenAmount.compareTo(paidAmount) > 0 ?"s_rate_value" : "rate_value";
+                String rate_prex = PayTypeRateConstans.getRateString(zfRecharge.getPayType());
+                String rate_type_key = "rate_type" + rate_prex;
+                String rate_value_key = "rate_value" + rate_prex;
                 if(!Strings.isEmpty(rechargeRate.getString(rate_type_key))&& !Strings.isEmpty(rechargeRate.getString(rate_type_key))){
                     Integer rate_type = rechargeRate.getInteger(rate_type_key);
                     Double rate_value = rechargeRate.getDoubleValue(rate_value_key);
@@ -465,7 +468,7 @@ public class ZfAgentServiceImpl implements ZfAgentService {
                         return BigDecimal.valueOf(rate_value);
                     }else{
                         BigDecimal rate1 = BigDecimal.valueOf(rate_value).divide(new BigDecimal("100"));
-                        return paidAmount.multiply(rate1);
+                        return zfRecharge.getPaidAmount().multiply(rate1);
                     }
                 }
             }
