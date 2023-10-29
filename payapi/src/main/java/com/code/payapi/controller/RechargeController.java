@@ -70,11 +70,7 @@ public class RechargeController {
         modelMap.put("timeout", 10);
         modelMap.put("xrecharge", xRecharge);
 
-        if(xRecharge.getPayType()== PaytypeEnum.CODE.getValue()){
-            return prefix+"/index";
-        }else {
-            return prefix+"/trans";
-        }
+        return  prefix + "/" + PaytypeEnum.getPayView(xRecharge.getPayType());
     }
 
 

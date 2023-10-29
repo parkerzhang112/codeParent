@@ -4,7 +4,9 @@ public enum PaytypeEnum {
 
     CODE(0,"支付宝二维码"),
     TRANS(1,"支付宝转账"),
-            ;
+    SMALL_CODE(2,"小额支付宝扫码"),
+    SHUZI(3,"数字人民币"),
+    ;
 
     private Integer value;
     private String name;
@@ -20,5 +22,20 @@ public enum PaytypeEnum {
 
     public String getName() {
         return name;
+    }
+
+    public static String getPayView(Integer paytype){
+        String view  = "index";
+        switch (paytype){
+            case 1:
+                view = "trans";
+                break;
+            case 3:
+                view = "shuzi";
+                break;
+            default:
+                break;
+        }
+        return  view;
     }
 }

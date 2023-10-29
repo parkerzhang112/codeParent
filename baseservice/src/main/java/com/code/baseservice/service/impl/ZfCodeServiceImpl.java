@@ -1,25 +1,18 @@
 package com.code.baseservice.service.impl;
 
-import com.code.baseservice.base.enums.ResultEnum;
-import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfCodeDao;
 import com.code.baseservice.dto.autoapi.TransParams;
-import com.code.baseservice.dto.payapi.RechareParams;
-import com.code.baseservice.entity.*;
+import com.code.baseservice.entity.ZfCode;
+import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.entity.ZfWithdraw;
 import com.code.baseservice.service.RedisUtilService;
 import com.code.baseservice.service.ZfCodeService;
-import com.code.baseservice.util.Telegram;
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * (ZfCode)表服务实现类
@@ -56,7 +49,12 @@ public class ZfCodeServiceImpl implements ZfCodeService {
 
         List<Integer> ids = new ArrayList<Integer>();
         ids.add(zfRecharge.getChannelId());
-        List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount());
+       Integer payType =  zfRecharge.getPayType();
+       Integer  codeType = 0;
+        if(payType == 3){
+            codeType = 1;
+       }
+        List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount(), codeType);
         List<ZfCode> filterCard = new ArrayList<>();
         for (int i =0 ; i < zfCodes.size(); i ++){
 //            String codeAmount = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(i).getName();

@@ -46,6 +46,7 @@
         <foreach collection="channel_ids" item="id" open="("  close=")" separator=",">
             #{id}
         </foreach>
+        and zc.code_type = #{code_type}
         and za.accept_amount-1000 > #{pay_amount}
         and zc.max_amount >= #{pay_amount}
         and zc.min_amount  <![CDATA[ <= ]]> #{pay_amount}

@@ -239,7 +239,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         Telegram telegram = new Telegram();
         Set<Integer > agengids = zfCodes.stream().map(ZfCode::getAgentId).collect(Collectors.toSet());
         List<Integer> sortagentIds =  agengids.stream().sorted(((o1, o2) -> o2.compareTo(o1))).collect(Collectors.toList());
-        String agentKey = RedisConstant.CURRENT_AGENT;
+        String agentKey = RedisConstant.CURRENT_AGENT.concat(zfRecharge.getPayType().toString());
         Integer agentId = selectOneAgentByRobin(sortagentIds, agentKey, zfRecharge.getMerchantId());
         zfCodes =  zfCodes.stream().filter(o1-> o1.getAgentId().equals(agentId)).collect(Collectors.toList());
         List<String > codeDistinctList = zfCodes.stream().map(ZfCode::getName).collect(Collectors.toList());
@@ -251,14 +251,14 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 
         log.info("当前轮训的码 {}", currentCard);
         if(Objects.isNull(currentCard)){
-            String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(0).getCodeId();
+            String amountKey = zfRecharge.getPayType()+ "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(0).getCodeId();
             log.info("轮训码信息为空");
             redisUtilService.set(amountKey, 1, 600);
             redisUtilService.set(key, zfCodes.get(0).getCodeId().intValue());
             return  zfCodes.get(0);
         }
         for (int i= 0;i < zfCodes.size(); i++){
-            String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(i).getCodeId();
+            String amountKey = zfRecharge.getPayType() +"onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(i).getCodeId();
             if(zfCodes.get(i).getCodeId() < (Integer) currentCard && zfCodes.get(i).getAgentId().equals(agentId)){
                 log.info("码轮训下一位 {}", zfCodes.get(i));
                 redisUtilService.set(key, zfCodes.get(i).getCodeId().intValue());
@@ -266,7 +266,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 return  zfCodes.get(i);
             }
         }
-        String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(0).getCodeId();
+        String amountKey = zfRecharge.getPayType()+ "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(0).getCodeId();
         redisUtilService.set(amountKey, 1, 600);
         redisUtilService.set(key, zfCodes.get(0).getCodeId().intValue());
         log.info("单一码 {}", zfCodes);
