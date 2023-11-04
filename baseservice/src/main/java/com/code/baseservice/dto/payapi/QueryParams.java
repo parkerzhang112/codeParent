@@ -23,6 +23,10 @@ public class QueryParams {
     @NonNull
     private String merchant_Id;
 
+    @JsonProperty("status")
+    @NonNull
+    private String status;
+
     @JsonProperty("sign")
     @NonNull
     private String  sign;

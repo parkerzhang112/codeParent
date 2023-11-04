@@ -1,7 +1,6 @@
 package com.code.baseservice.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.entity.ZfChannel;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfWithdraw;
@@ -12,7 +11,7 @@ public interface CommonService {
 
 
 
-    JSONObject notify(QueryParams queryParams);
+    String notify(String channelCode,Map<String, Object> map);
 
 
     JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge);

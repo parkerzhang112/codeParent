@@ -3,7 +3,6 @@ package com.code.baseservice.thirdService;
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
-import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.entity.ZfChannel;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfWithdraw;
@@ -24,6 +23,10 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     private SanShiServiceImpl sanShiService;
 
+
+
+    @Autowired
+    private XiNiuHuaFeiServiceImpl xiNiuHuaFeiService;
     @Autowired
     private ZfChannelService zfChannelService;
 
@@ -32,6 +35,19 @@ public class CommonServiceImpl implements CommonService {
         switch (zfChannel.getChannelCode()){
             case "SANSHI":
                 return sanShiService;
+            case "XiNiuHuaFei":
+                return xiNiuHuaFeiService;
+            default:
+                throw new BaseException(ResultEnum.ERROR);
+        }
+    }
+
+    public BaseService transToServiceByNotify(String channelCode){
+        switch (channelCode){
+            case "SANSHI":
+                return sanShiService;
+            case "XiNiuHuaFei":
+                return xiNiuHuaFeiService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
@@ -55,9 +71,10 @@ public class CommonServiceImpl implements CommonService {
         return  baseService.queryByWithdraw( zfChannel,  zfWithdraw);
     }
 
+
     @Override
-    public JSONObject notify(QueryParams queryParams) {
-        BaseService baseService = transToService(queryParams.getMerchant_Id());
-        return  baseService.notify(queryParams);
+    public String notify(String channelCode, Map<String, Object> map) {
+        BaseService baseService = transToServiceByNotify(channelCode);
+        return  baseService.notify(map);
     }
 }

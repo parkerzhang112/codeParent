@@ -357,7 +357,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             //更新日报
             zfMerchantRecordService.updateRecord(new ZfMerchantRecord(zfRecharge));
         } catch (Exception e) {
-            log.error("订单异常 {} {}", zfRecharge.getMerchantOrderNo(), e.getStackTrace());
+            log.error("订单异常 {} {}", zfRecharge.getMerchantOrderNo(), e);
             throw new RuntimeException(e);
         }
         notify(zfRecharge);

@@ -8,6 +8,7 @@ import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.service.CommonService;
 import com.code.baseservice.service.ZfRechargeService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -117,6 +118,29 @@ public class RechargeController {
         return responseResult.toJsonString();
     }
 
+//    /**
+//     * 下游商户进行订单通知
+//     *
+//     * @param queryParams
+//     * @return
+//     */
+//    @ApiOperation("查询订单")
+//    @PostMapping("/notify")
+//    @ResponseBody
+//    public String notify(@RequestBody QueryParams queryParams) {
+//        ResponseResult responseResult = new ResponseResult();
+//        try {
+//            JSONObject jsonObject = commonService.notify(queryParams);
+//            responseResult.setData(jsonObject);
+//        } catch (BaseException e) {
+//            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+//        } catch (Exception e) {
+//            log.error("系统异常 {}", e);
+//            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+//        }
+//        return responseResult.toJsonString();
+//    }
+
     /**
      * 下游商户进行订单通知
      *
@@ -124,13 +148,14 @@ public class RechargeController {
      * @return
      */
     @ApiOperation("查询订单")
-    @PostMapping("/notify")
+    @PostMapping("/notify/{channelCode}")
     @ResponseBody
-    public String notify(@RequestBody QueryParams queryParams) {
+    public String notify(@PathVariable("channelCode") String channelCode, @RequestParam  Map<String, Object> map) {
         ResponseResult responseResult = new ResponseResult();
+
         try {
-            JSONObject jsonObject = commonService.notify(queryParams);
-            responseResult.setData(jsonObject);
+            String jsonObject = commonService.notify(channelCode, map);
+            return jsonObject;
         } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
         } catch (Exception e) {
@@ -139,5 +164,4 @@ public class RechargeController {
         }
         return responseResult.toJsonString();
     }
-
 }

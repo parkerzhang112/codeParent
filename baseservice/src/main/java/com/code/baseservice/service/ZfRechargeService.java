@@ -26,10 +26,10 @@ public interface ZfRechargeService {
     /**
      * 通过ID查询单条数据
      *
-     * @param merchantOrderNo 主键
+     * @param orderNo 主键
      * @return 实例对象
      */
-    ZfRecharge queryById(String merchantOrderNo);
+    ZfRecharge queryById(String orderNo);
 
     ZfRecharge queryByMerchantOrderNo(String merchantOrderNo);
 

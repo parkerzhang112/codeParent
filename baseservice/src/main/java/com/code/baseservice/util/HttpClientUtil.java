@@ -146,7 +146,7 @@ public class HttpClientUtil {
         }
         return resultString;
     }
-    
+
     public static String doPost(String url) {
             return doPost(url, null);
         }

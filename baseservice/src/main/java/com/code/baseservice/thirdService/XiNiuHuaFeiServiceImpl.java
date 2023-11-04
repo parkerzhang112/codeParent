@@ -18,13 +18,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
 @Slf4j
-@Service("SanShiService")
-public class SanShiServiceImpl implements BaseService {
+@Service("XiNiuHuaFei")
+public class XiNiuHuaFeiServiceImpl implements BaseService {
 
 
     @Value("${app.viewurl:}")
@@ -33,31 +34,34 @@ public class SanShiServiceImpl implements BaseService {
     @Autowired
     private ZfRechargeService zfRechargeService;
 
-    private String domain = "http://qw520.top";
+    private String domain = "http://34.150.25.159/api/order";
 
 
     @Override
-    public String notify(Map<String,Object> map) {
-       return  "success";
-//        JSONObject jsonObject = new JSONObject();
-//        try{
-//            ZfRecharge zfRecharge = zfRechargeService.queryByOrderNo(queryParams.getMerchant_order_no());
-//            log.info("确认订单 订单号 {}", zfRecharge.getMerchantOrderNo());
-//            if (zfRecharge.getOrderStatus() ==2 ) {
-//                log.info("订单已处理 订单号 {}", zfRecharge.getMerchantOrderNo());
-//                throw new BaseException(ResultEnum.ERROR);
-//            }
-//            zfRecharge.setOrderStatus(2);
-//            zfRecharge.setPaidAmount(zfRecharge.getPayAmount());
-//            zfRechargeService.paidOrder(zfRecharge);
-//            jsonObject.put("code", 200);
-//            jsonObject.put("msg","订单成功");
-//        }catch (Exception e){
-//            jsonObject.put("code", 1);
-//            jsonObject.put("msg","失败");
-//            log.error("系统异常 {} {}", queryParams.getMerchant_order_no(), e);
-//        }
-//        return jsonObject;
+    public String notify(Map<String, Object> queryParams) {
+        JSONObject jsonObject = new JSONObject();
+        try{
+            log.info("犀牛开始回调。回调信息  {} ", queryParams);
+            if(queryParams.get("callbacks").equals("CODE_SUCCESS")){
+                ZfRecharge zfRecharge = zfRechargeService.queryById(queryParams.get("out_trade_no").toString());
+                if(zfRecharge.getPayAmount().compareTo(new BigDecimal(queryParams.get("total").toString())) != 0){
+                    log.info("订单回调失败。订单金额不一致 订单信息 {} ",zfRecharge);
+                }
+                zfRecharge.setOrderStatus(2);
+                zfRecharge.setPaidAmount(zfRecharge.getPayAmount());
+                zfRechargeService.paidOrder(zfRecharge);
+                jsonObject.put("code", 200);
+                jsonObject.put("msg","订单成功");
+                return "success";
+            }
+        }catch (Exception e){
+            jsonObject.put("code", 1);
+            jsonObject.put("msg","失败");
+            log.info("订单回调失败,异常原因 {} ",e.getStackTrace());
+            return  "error";
+        }
+        return  "error";
+
     }
 
     @Override
@@ -67,25 +71,35 @@ public class SanShiServiceImpl implements BaseService {
         rechareParams1.setMerchant_order_no(zfRecharge.getOrderNo());
         rechareParams1.setMerchant_id(zfChannel.getThirdMerchantId());
         rechareParams1.setPay_amount(zfRecharge.getPayAmount());
-        rechareParams1.setNotify_url(viewUrl+"/recharge/notify");
+        rechareParams1.setNotify_url(viewUrl+"/recharge/notify"+zfChannel.getChannelCode());
         rechareParams1.setRemark(StringUtil.createRandomStr1(3));
-        TreeMap<String, Object> map = new TreeMap<>();
-        map.put("merchant_id", zfChannel.getThirdMerchantId());
-        map.put("merchant_order_no", zfRecharge.getOrderNo());
-        map.put("pay_amount", zfRecharge.getPayAmount());
-        map.put("notify_url", viewUrl+"/recharge/notify");
-        String sign_str = new CommonUtil().getSign(map);
+        Map<String, String> map = new TreeMap<>();
+        map.put("is_code","1");
+        map.put("mch_id", zfChannel.getThirdMerchantId());
+        map.put("out_trade_no", zfRecharge.getOrderNo());
+        map.put("timestamp", String.valueOf(Math.floor(System.currentTimeMillis()/1000)));
+        map.put("total", zfRecharge.getPayAmount().toBigInteger().toString());
+        map.put("type", "9006");
+        map.put("notify_url", viewUrl+"/recharge/notify/"+zfChannel.getChannelCode());
+        String sign_str = new CommonUtil().getSignByMap(map);
         sign_str = sign_str.concat("key="+zfChannel.getThirdMerchantPrivateKey());
         log.info("签名字符串: {}", sign_str);
         String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
         rechareParams1.setSign(sign);
+        map.put("sign", sign);
+
         try {
             log.info("单号 {} 开始请求 {}  参数 {}",zfRecharge.getMerchantOrderNo(), domain + "/recharge/create", JSONObject.toJSONString(rechareParams1));
-            String reponse = HttpClientUtil.doPostJson(domain + "/recharge/create", JSONObject.toJSONString(rechareParams1));
+            String reponse = HttpClientUtil.doPost(domain , map);
             JSONObject jsonObject = JSONObject.parseObject(reponse);
             log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), reponse);
-            if(jsonObject.getInteger("code" ) == 200){
-                return jsonObject.getJSONObject("data");
+            if(jsonObject.getInteger("status" ) == 10000){
+                TreeMap<String, Object> map1 = new TreeMap<>();
+                map1.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
+                map1.put("order_no", zfRecharge.getOrderNo());
+                map1.put("pay_amount", zfRecharge.getPayAmount());
+                map1.put("payurl", jsonObject.getJSONObject("data" ).getString("h5_url"));
+                return new JSONObject(map1);
             }
             throw new BaseException(ResultEnum.ERROR);
         }catch (BaseException e){
