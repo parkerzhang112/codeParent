@@ -507,11 +507,11 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     @Override
     public JSONObject getOrderStatus(String orderno) {
         TreeMap<String, Object>  map = new TreeMap<>();
-        RLock rLockOrder = redisUtilService.lock("recharge:order" + orderno);
+        log.info("开始查询订单 {}",orderno);
+        RLock rLockOrder = redissonClient.getLock("recharge:order" + orderno);
         try {
                 //查单码
                 ZfRecharge zfRecharge = queryById(orderno);
-                log.info("开始查询订单 {}",zfRecharge.getMerchantOrderNo());
                 map.put("order_no", zfRecharge.getMerchantOrderNo());
                 map.put("pay_amount", zfRecharge.getPayAmount());
                 map.put("time",DateUtil.format1(new Date(zfRecharge.getCreateTime().getTime() + 300000), DateUtil.YYYY_MM_DD_HH_MM_SS1) );
