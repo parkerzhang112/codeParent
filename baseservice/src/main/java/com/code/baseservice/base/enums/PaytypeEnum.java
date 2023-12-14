@@ -33,6 +33,8 @@ public enum PaytypeEnum {
             case 3:
                 view = "shuzi";
                 break;
+            case 4:
+                view = "yunshanfu";
             default:
                 break;
         }

@@ -112,7 +112,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 //        List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfChannels, rechareParams, zfMerchant);
         //轮码
 //        ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfMerchant, rechareParams);
-        commonService.request(zfChannel, rechareParams);
+//        commonService.request(zfChannel, rechareParams);
         //入单
         ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
 
@@ -140,7 +140,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         map.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
         map.put("order_no", zfRecharge.getOrderNo());
         map.put("pay_amount", zfRecharge.getPayAmount());
-        map.put("payurl", viewUrl+"/recharge/order/"+zfRecharge.getOrderNo());
+        String url = StringUtils.isNotEmpty(zfMerchant.getDomain()) ? zfMerchant.getDomain() : viewUrl;
+        map.put("payurl", url+"/recharge/order/"+zfRecharge.getOrderNo());
         String sign_str = new CommonUtil().getSign(map);
         sign_str = sign_str.concat("key=".concat(zfMerchant.getKey()));
         String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
@@ -172,6 +173,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             xRecharge.setOrderNo(orderNo);
             xRecharge.setPayType(zfChannel.getPayType());
             xRecharge.setChannelId(zfChannel.getChannelId());
+            if(zfChannel.getPayType().equals(4)){
+                xRecharge.setRemark("恭喜"+StringUtil.createRandomStr1(3));
+            }
 //            xRecharge.setCodeId(zfCode.getCodeId());
 //            xRecharge.setAgentId(zfCode.getAgentId());
             zfRechargeDao.insert(xRecharge);
@@ -243,7 +247,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         Integer agentId = selectOneAgentByRobin(sortagentIds, agentKey, zfRecharge.getMerchantId());
         zfCodes =  zfCodes.stream().filter(o1-> o1.getAgentId().equals(agentId)).collect(Collectors.toList());
         List<String > codeDistinctList = zfCodes.stream().map(ZfCode::getName).collect(Collectors.toList());
-        telegram.sendWarrnSmsMessage(zfRecharge, "存款出码", String.join("-", codeDistinctList));
+//        telegram.sendWarrnSmsMessage(zfRecharge, "存款出码", String.join("-", codeDistinctList));
         String amountBettwen = getAmountBettwen(zfRecharge);
         String key =  agentId + "_" +amountBettwen+RedisConstant.CURRENT_CODE;
         Object currentCard  =  redisUtilService.get(key);
@@ -507,6 +511,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         try {
                 //查单码
                 ZfRecharge zfRecharge = queryById(orderno);
+                log.info("开始查询订单 {}",zfRecharge.getMerchantOrderNo());
                 map.put("order_no", zfRecharge.getMerchantOrderNo());
                 map.put("pay_amount", zfRecharge.getPayAmount());
                 map.put("time",DateUtil.format1(new Date(zfRecharge.getCreateTime().getTime() + 300000), DateUtil.YYYY_MM_DD_HH_MM_SS1) );
@@ -521,6 +526,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                         map.put("payurl", zfCode.getImage());
                         map.put("trans_account", zfCode.getAccount());
                         map.put("trans_name", zfCode.getName());
+                        map.put("remark", zfRecharge.getRemark());
+
                     }
                     map.put("order_status", zfRecharge.getOrderStatus());
                     return new JSONObject(map);
@@ -550,6 +557,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                     map.put("order_status", 1);
                     map.put("trans_account", zfCode.getAccount());
                     map.put("trans_name", zfCode.getName());
+                    map.put("remark", zfRecharge.getRemark());
+
                     map.put("payurl", zfCode.getImage());
                     return new JSONObject(map);
                 }else {
@@ -558,7 +567,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 }
             //返回订单信息
         }catch (Exception e){
-            log.error("查码异常 {}", e.getStackTrace());
+            log.error("查码异常 ", e.getStackTrace());
             return new JSONObject(map);
         }finally {
             if(rLockOrder.isLocked() && rLockOrder.isHeldByCurrentThread()){

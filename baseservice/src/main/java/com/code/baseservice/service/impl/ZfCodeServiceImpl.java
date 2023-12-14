@@ -51,9 +51,18 @@ public class ZfCodeServiceImpl implements ZfCodeService {
         ids.add(zfRecharge.getChannelId());
        Integer payType =  zfRecharge.getPayType();
        Integer  codeType = 0;
+        //数字
         if(payType == 3){
             codeType = 1;
-       }
+        }
+        //云闪付
+        if(payType == 4 || payType == 5){
+            codeType = 2;
+        }
+        //微信
+        if(payType == 6 || payType == 7){
+            codeType = 3;
+        }
         List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount(), codeType);
         List<ZfCode> filterCard = new ArrayList<>();
         for (int i =0 ; i < zfCodes.size(); i ++){
