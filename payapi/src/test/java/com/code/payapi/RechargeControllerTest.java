@@ -16,6 +16,7 @@ import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.service.payments.h5.H5Service;
 import com.wechat.pay.java.service.payments.h5.model.*;
+import com.wechat.pay.java.service.payments.nativepay.NativePayService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -655,4 +656,35 @@ public class RechargeControllerTest extends PayapiApplicationTests {
 
     }
 
+
+    @Test
+    public void testNative() {
+
+        // 使用自动更新平台证书的RSA配置
+        // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
+        Config config =
+                new RSAAutoCertificateConfig.Builder()
+                        .merchantId(merchantId)
+                        .privateKeyFromPath(privateKeyPath)
+                        .merchantSerialNumber(merchantSerialNumber)
+                        .apiV3Key(apiV3Key)
+                        .build();
+        // 构建service
+        NativePayService service = new NativePayService.Builder().config(config).build();
+        // request.setXxx(val)设置所需参数，具体参数可见Request定义
+        com.wechat.pay.java.service.payments.nativepay.model.PrepayRequest request = new com.wechat.pay.java.service.payments.nativepay.model.PrepayRequest();
+        com.wechat.pay.java.service.payments.nativepay.model.Amount amount = new com.wechat.pay.java.service.payments.nativepay.model.Amount();
+        amount.setTotal(1);
+        request.setAmount(amount);
+        request.setAppid("wxffd35c4ffcff261f");
+        request.setMchid("1662836710");
+        request.setDescription("测试商品标题");
+        request.setNotifyUrl("https://notify_url");
+        request.setOutTradeNo("out_trade_no_003");
+        // 调用下单方法，得到应答
+        com.wechat.pay.java.service.payments.nativepay.model.PrepayResponse response = service.prepay(request);
+        // 使用微信扫描 code_url 对应的二维码，即可体验Native支付
+        System.out.println(response.getCodeUrl());
+
+    }
 }

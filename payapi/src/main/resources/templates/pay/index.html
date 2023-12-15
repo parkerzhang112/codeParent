@@ -109,7 +109,63 @@
     function tow(n) {
       return n >= 0 && n < 10 ? '0' + n : '' + n;
     }
+    // 获取基本信息
+    function getBaseInfo() {
+      axios
+              .get(
+                      "/recharge/order/getOrder/"+orderno
+              )
+              .then(function (response) {
+                console.log("请求的数据：", response);
+                let result = response.data;
 
+                if (result.code !== 200) {
+                  console.log("请求失败！");
+                  return;
+                }
+                // 拿到数据
+                let {
+                  order_status,
+                  order_no,
+                  url = "",
+                  pay_amount = 0,
+                } = result.data;
+                if (order_status == 0) {
+                  // 0 的时候继续加载 - 轮询
+                  stringTime = result.data.time;
+
+                } else if (order_status == 1) {
+                  // 1 数据加载成功
+                  document.getElementById("tips_4").style.display = "none";
+                  document.getElementsByClassName("qrcode")[0].style.display = "block"; // 图片地址
+
+                  document.getElementById("qrcode").src = result.data.payurl; // 图片地址
+                  stringTime = result.data.time;
+                } else if (order_status == 3) {
+                  document.getElementById("tips_4").style.display = "none";
+                  // 3 订单支付失败
+                  document.getElementsByClassName("toast-body")[0].innerText =
+                          "支付超时，请重新下单。！";
+                  document.getElementById("overlay").style.display = "block";
+
+                  clearTimer();
+                } else if (order_status == 4 || order_status == 2) {
+                  document.getElementById("tips_4").style.display = "none";
+                  console.log("状态=", result.data);
+                  // 3 订单超时
+                  document.getElementsByClassName("toast-body")[0].innerText =
+                          "支付成功，请重新下单。";
+                  document.getElementById("overlay").style.display = "block";
+                  clearTimer();
+                }
+
+
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+    }
+    getBaseInfo();
     stringTime = '';
     function getDate() {
       if(stringTime == ''){
@@ -147,63 +203,7 @@
                 console.log(error);
               });
     }
-    // 获取基本信息
-    function getBaseInfo() {
-      axios
-        .get(
-          "/recharge/order/getOrder/"+orderno
-        )
-        .then(function (response) {
-          console.log("请求的数据：", response);
-          let result = response.data;
 
-          if (result.code !== 200) {
-            console.log("请求失败！");
-            return;
-          }
-          // 拿到数据
-          let {
-            order_status,
-            order_no,
-            url = "",
-            pay_amount = 0,
-          } = result.data;
-          if (order_status == 0) {
-            // 0 的时候继续加载 - 轮询
-            stringTime = result.data.time;
-
-          } else if (order_status == 1) {
-            // 1 数据加载成功
-            document.getElementById("tips_4").style.display = "none";
-            document.getElementsByClassName("qrcode")[0].style.display = "block"; // 图片地址
-
-            document.getElementById("qrcode").src = result.data.payurl; // 图片地址
-            stringTime = result.data.time;
-          } else if (order_status == 3) {
-            document.getElementById("tips_4").style.display = "none";
-            // 3 订单支付失败
-            document.getElementsByClassName("toast-body")[0].innerText =
-              "支付超时，请重新下单。！";
-            document.getElementById("overlay").style.display = "block";
-
-            clearTimer();
-          } else if (order_status == 4 || order_status == 2) {
-            document.getElementById("tips_4").style.display = "none";
-            console.log("状态=", result.data);
-            // 3 订单超时
-            document.getElementsByClassName("toast-body")[0].innerText =
-              "支付成功，请重新下单。";
-            document.getElementById("overlay").style.display = "block";
-            clearTimer();
-          }
-
-
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-    }
-    getBaseInfo();
     pollinMode()
     timer1 = setInterval(() => {
       getDate();

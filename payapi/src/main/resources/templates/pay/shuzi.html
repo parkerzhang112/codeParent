@@ -270,6 +270,7 @@
     }
 
   }
+  getBaseInfo();
   var inputname = prompt("请输入姓名，极速到账", "");
   if (inputname != null && inputname.length != 0){
     axios.post("/recharge/order/updateName",
@@ -343,7 +344,6 @@
               console.log(error);
             });
   }
-  getBaseInfo();
   function getDate() {
     if(stringTime == ''){
       return;
