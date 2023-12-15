@@ -14,10 +14,8 @@ import com.code.baseservice.util.MD5Util;
 import com.code.baseservice.util.StringUtil;
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
-import com.wechat.pay.java.service.payments.nativepay.NativePayService;
-import com.wechat.pay.java.service.payments.nativepay.model.Amount;
-import com.wechat.pay.java.service.payments.nativepay.model.PrepayRequest;
-import com.wechat.pay.java.service.payments.nativepay.model.PrepayResponse;
+import com.wechat.pay.java.service.payments.h5.H5Service;
+import com.wechat.pay.java.service.payments.h5.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -629,21 +627,31 @@ public class RechargeControllerTest extends PayapiApplicationTests {
                         .apiV3Key(apiV3Key)
                         .build();
         // 构建service
-        NativePayService service = new NativePayService.Builder().config(config).build();
+        H5Service service = new H5Service.Builder().config(config).build();
         // request.setXxx(val)设置所需参数，具体参数可见Request定义
         PrepayRequest request = new PrepayRequest();
+        SceneInfo sceneInfo = new SceneInfo();
+        sceneInfo.setPayerClientIp("127.0.0.1");
+        sceneInfo.setDeviceId("013467007045764");
+        StoreInfo storeInfo = new StoreInfo();
+        storeInfo.setId("0001");
+        storeInfo.setName("腾讯大厦分店");
+        storeInfo.setAreaCode("440305");
+        storeInfo.setAddress("广东省深圳市南山区科技中一道10000号");
+        sceneInfo.setStoreInfo(storeInfo);
         Amount amount = new Amount();
         amount.setTotal(100);
         request.setAmount(amount);
-        request.setAppid("wxa9d9651ae******");
-        request.setMchid("190000****");
+        request.setAppid("wxffd35c4ffcff261f");
+        request.setMchid("1662836710");
         request.setDescription("测试商品标题");
         request.setNotifyUrl("https://notify_url");
         request.setOutTradeNo("out_trade_no_001");
+        request.setSceneInfo(sceneInfo);
         // 调用下单方法，得到应答
         PrepayResponse response = service.prepay(request);
         // 使用微信扫描 code_url 对应的二维码，即可体验Native支付
-        System.out.println(response.getCodeUrl());
+        System.out.println(response.getH5Url());
 
     }
 
