@@ -7,6 +7,9 @@
     <script th:src="@{/js/assets/index-abbd8c5f.js}"></script>
     <link  th:href="@{/js/assets/index-31d7946c.css}" rel="stylesheet"/>
 
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/jquery.qrcode.js}"></script>
+    <script th:src="@{/js/qrcode.js}"></script>
 
     <style lang="scss">
       body{
@@ -64,8 +67,6 @@
         padding-bottom: 20px;
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-abbd8c5f.js"></script>
-    <link rel="stylesheet" href="/assets/index-31d7946c.css">
   </head>
   <body style="text-align: center">
     <div class="container py-4 px-3 mx-auto">
@@ -84,8 +85,8 @@
 
       </div>
           <p id="tips_4">正在获取二维码...</p>
-      <div class="qrcode">
-        <img id="qrcode" width="220" height="220px" src="" />
+
+      <div class="qrcode"  width="220" height="220px">
       </div>
     </div>
 
@@ -138,8 +139,9 @@
                   // 1 数据加载成功
                   document.getElementById("tips_4").style.display = "none";
                   document.getElementsByClassName("qrcode")[0].style.display = "block"; // 图片地址
-
-                  document.getElementById("qrcode").src = result.data.payurl; // 图片地址
+                  if($('.qrcode').find("canvas").length == 0){
+                    $('.qrcode').qrcode(result.data.payurl);
+                  }
                   stringTime = result.data.time;
                 } else if (order_status == 3) {
                   document.getElementById("tips_4").style.display = "none";
@@ -189,19 +191,6 @@
         oSpan.innerHTML = str;
       }
 
-    }
-    var inputname = prompt("请输入姓名，极速到账", "");
-    if (inputname != null && inputname.length != 0){
-      axios.post("/recharge/order/updateName",
-              {
-                "name":inputname, "orderNo":orderno
-              })
-              .then(function (response) {
-
-              })
-              .catch(function (error) {
-                console.log(error);
-              });
     }
 
     pollinMode()

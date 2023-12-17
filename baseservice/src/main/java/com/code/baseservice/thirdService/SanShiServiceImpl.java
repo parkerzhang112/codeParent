@@ -37,7 +37,7 @@ public class SanShiServiceImpl implements BaseService {
 
 
     @Override
-    public String notify(Map<String,Object> map) {
+    public String notify(ZfRecharge zfRecharge,ZfChannel zfChannel, Map<String,Object> map) {
        return  "success";
 //        JSONObject jsonObject = new JSONObject();
 //        try{

@@ -23,10 +23,10 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     private SanShiServiceImpl sanShiService;
 
-
-
     @Autowired
-    private XiNiuHuaFeiServiceImpl xiNiuHuaFeiService;
+    private WxYsServiceImpl weixinService;
+
+
     @Autowired
     private ZfChannelService zfChannelService;
 
@@ -35,8 +35,8 @@ public class CommonServiceImpl implements CommonService {
         switch (zfChannel.getChannelCode()){
             case "SANSHI":
                 return sanShiService;
-            case "XiNiuHuaFei":
-                return xiNiuHuaFeiService;
+            case "WEIXINCODE":
+                return weixinService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
@@ -46,8 +46,8 @@ public class CommonServiceImpl implements CommonService {
         switch (channelCode){
             case "SANSHI":
                 return sanShiService;
-            case "XiNiuHuaFei":
-                return xiNiuHuaFeiService;
+            case "WEIXINCODE":
+                return weixinService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
@@ -73,8 +73,8 @@ public class CommonServiceImpl implements CommonService {
 
 
     @Override
-    public String notify(String channelCode, Map<String, Object> map) {
-        BaseService baseService = transToServiceByNotify(channelCode);
-        return  baseService.notify(map);
+    public String notify(ZfRecharge zfRecharge, ZfChannel zfChannel, Map<String, Object> map) {
+        BaseService baseService = transToServiceByNotify(zfChannel.getChannelCode());
+        return  baseService.notify(zfRecharge, zfChannel, map);
     }
 }

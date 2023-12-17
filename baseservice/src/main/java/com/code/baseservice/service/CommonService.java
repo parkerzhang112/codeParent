@@ -11,7 +11,7 @@ public interface CommonService {
 
 
 
-    String notify(String channelCode,Map<String, Object> map);
+    String notify(ZfRecharge zfRecharge,ZfChannel zfChannel,Map<String, Object> map);
 
 
     JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge);

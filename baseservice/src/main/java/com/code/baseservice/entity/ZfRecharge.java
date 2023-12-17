@@ -51,6 +51,8 @@ public class ZfRecharge implements Serializable {
 
     private Integer isThird;
 
+    private String payUrl;
+
     /**
      * 支付类型
      */

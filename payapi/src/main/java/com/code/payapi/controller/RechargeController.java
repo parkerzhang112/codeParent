@@ -7,17 +7,24 @@ import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
+import com.code.baseservice.entity.ZfChannel;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.service.CommonService;
+import com.code.baseservice.service.ZfChannelService;
 import com.code.baseservice.service.ZfRechargeService;
+import com.code.baseservice.util.AesUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLDecoder;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 @Slf4j
@@ -31,6 +38,12 @@ public class RechargeController {
 
     @Autowired
     CommonService commonService;
+
+    @Autowired
+    ZfChannelService zfChannelService;
+
+    @Autowired
+    RedissonClient redissonClient;
 
     @ApiOperation("创建订单")
     @PostMapping("/create")
@@ -57,7 +70,9 @@ public class RechargeController {
         modelMap.put("timeout", 10);
         modelMap.put("xrecharge", xRecharge);
 
-        if (xRecharge.getPayType() == PaytypeEnum.CODE.getValue()) {
+        if (xRecharge.getPayType() == PaytypeEnum.CODE.getValue()
+            || xRecharge.getPayType() == 8
+        ) {
             return prefix + "/index";
         } else {
             return prefix + "/trans";
@@ -148,14 +163,58 @@ public class RechargeController {
      * @return
      */
     @ApiOperation("查询订单")
-    @PostMapping("/notify/{channelCode}")
+    @PostMapping("/notify/{orderNo}")
     @ResponseBody
-    public String notify(@PathVariable("channelCode") String channelCode, @RequestParam  Map<String, Object> map) {
+    public String notify(@PathVariable("orderNo") String orderNo, @RequestParam  Map<String, Object> map) {
         ResponseResult responseResult = new ResponseResult();
 
         try {
-            String jsonObject = commonService.notify(channelCode, map);
-            return jsonObject;
+            String de = new AesUtil().decrypt(orderNo);
+            ZfRecharge zfRecharge = zfRechargeService.queryById(de);
+            if(zfRecharge != null){
+                ZfChannel zfChannel = zfChannelService.queryById(zfRecharge.getChannelId());
+                String jsonObject = commonService.notify(zfRecharge,zfChannel, map);
+                return jsonObject;
+            }
+
+        } catch (BaseException e) {
+            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+        } catch (Exception e) {
+            log.error("系统异常 {}", e);
+            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }
+        return responseResult.toJsonString();
+    }
+
+    /**
+     * 下游商户进行订单通知
+     *
+     * @param queryParams
+     * @return
+     */
+    @ApiOperation("查询订单")
+    @PostMapping("/json_notify/{orderNo}")
+    @ResponseBody
+    public String jsonNotify(@PathVariable("orderNo") String orderNo, @RequestBody  Map<String, Object> map) {
+        ResponseResult responseResult = new ResponseResult();
+        RLock rLock = redissonClient.getLock("recharge:order" + orderNo);
+        try {
+           if( rLock.tryLock(2, TimeUnit.SECONDS)){
+               String de = new AesUtil().decrypt(URLDecoder.decode(URLDecoder.decode(orderNo))) ;
+               ZfRecharge zfRecharge = zfRechargeService.queryById(de);
+               if(zfRecharge != null){
+                   if (zfRecharge.getOrderStatus() != 1 && zfRecharge.getOrderStatus() != 5) {
+                       log.info("订单已处理 订单号 {}", zfRecharge.getMerchantOrderNo());
+                       throw new BaseException(ResultEnum.ERROR);
+                   }
+                   ZfChannel zfChannel = zfChannelService.queryById(zfRecharge.getChannelId());
+                   String jsonObject = commonService.notify(zfRecharge,zfChannel, map);
+                   return jsonObject;
+               }
+           }else {
+               log.error("单号 {} 获取锁失败", orderNo);
+           }
+
         } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
         } catch (Exception e) {

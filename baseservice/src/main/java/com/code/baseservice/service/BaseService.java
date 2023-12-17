@@ -10,7 +10,7 @@ import java.util.Map;
 public interface BaseService {
 
 
-    String notify(Map<String, Object> map);
+    String notify(ZfRecharge zfRecharge, ZfChannel zfChannel,Map<String, Object> map);
 
 
     JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge);
