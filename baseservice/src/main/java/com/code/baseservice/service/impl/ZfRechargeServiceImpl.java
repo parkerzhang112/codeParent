@@ -520,6 +520,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                     map.put("order_status", 3);
                     return new JSONObject(map);
                 }
+            if(rLockOrder.tryLock(2,5, TimeUnit.SECONDS)){
+
                 if(!zfRecharge.getOrderStatus().equals(0)){
                     if(zfRecharge.getOrderStatus().equals(1)){
                         ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
@@ -539,7 +541,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                     map.put("order_status", 0);
                     return new JSONObject(map);
                 }
-                if(rLockOrder.tryLock(2,5, TimeUnit.SECONDS)){
                     ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfRecharge);
                     if(zfCode == null){
                         map.put("order_status", 0);
