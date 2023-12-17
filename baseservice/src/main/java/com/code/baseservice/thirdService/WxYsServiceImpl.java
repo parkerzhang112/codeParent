@@ -8,12 +8,10 @@ import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfWithdraw;
 import com.code.baseservice.service.BaseService;
 import com.code.baseservice.service.ZfRechargeService;
-import com.code.baseservice.util.AesUtil;
 import com.code.baseservice.util.HttpClientUtil;
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.exception.ValidationException;
-import com.wechat.pay.java.core.http.UrlEncoder;
 import com.wechat.pay.java.service.payments.nativepay.NativePayService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,14 +78,7 @@ public class WxYsServiceImpl implements BaseService {
         request.setAppid(appid);
         request.setMchid(ms.get(0));
         request.setDescription("测试商品标题");
-        String en =  "";
-        try {
-             en =  UrlEncoder.urlEncode( UrlEncoder.urlEncode((new AesUtil()).encrypt(zfRecharge.getOrderNo())));
-
-        }catch (Exception e){
-            log.error("加解密异常");
-        }
-        request.setNotifyUrl( "https://bjy6688.top/recharge/json_notify/"+ en);
+        request.setNotifyUrl( "https://bjy6688.top/recharge/json_notify/"+ zfRecharge.getOrderNo());
         request.setOutTradeNo(zfRecharge.getOrderNo());
         // 调用下单方法，得到应答et
 

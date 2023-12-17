@@ -33,7 +33,7 @@ public class AesUtil {
     	String securityKey24 = "Skesj(eE%32sLOapA9e2snEw";
     	String securityKey32 = "Skesj(eE%32sLOapA9e2snEwEeopsWui";
     	String iv = "1234567890123456";
-    	String plainText = "DD202312171042119MFAq";
+    	String plainText = "DD20231217112107orN3K";
         AesUtil aes = new AesUtil();
         System.out.println("原始数据"+ plainText);
         String cipherText = UrlEncoder.urlEncode( UrlEncoder.urlEncode(aes.encrypt(plainText)));//����java��AES/CBC/NoPadding����

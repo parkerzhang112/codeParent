@@ -22,7 +22,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URLDecoder;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -200,8 +199,7 @@ public class RechargeController {
         RLock rLock = redissonClient.getLock("recharge:order" + orderNo);
         try {
            if( rLock.tryLock(2, TimeUnit.SECONDS)){
-               String de = new AesUtil().decrypt(URLDecoder.decode(URLDecoder.decode(orderNo))) ;
-               ZfRecharge zfRecharge = zfRechargeService.queryById(de);
+               ZfRecharge zfRecharge = zfRechargeService.queryById(orderNo);
                if(zfRecharge != null){
                    if (zfRecharge.getOrderStatus() != 1 && zfRecharge.getOrderStatus() != 5) {
                        log.info("订单已处理 订单号 {}", zfRecharge.getMerchantOrderNo());
@@ -220,6 +218,10 @@ public class RechargeController {
         } catch (Exception e) {
             log.error("系统异常 {}", e);
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }finally {
+            if(rLock.isLocked() && rLock.isHeldByCurrentThread()){
+                rLock.unlock();
+            }
         }
         return responseResult.toJsonString();
     }
