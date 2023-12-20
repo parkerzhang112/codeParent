@@ -18,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 @Slf4j
 @Service("WeixinService")
@@ -55,6 +52,19 @@ public class WxYsServiceImpl implements BaseService {
             return  "error";
     }
 
+    public static String getGoodName(int price){
+        Map<Integer, String> map = new HashMap<>();
+        map.put(300, "【主播集训课】全方位解析定位及技巧");
+        map.put(200, "【运营集训课】直播间分工及职责");
+        map.put(100, "【投手集训课】初级数据分析");
+        map.put(50, "【产品集训课】选品排品逻辑");
+        map.put(30, "【服装品类】参考直播话术");
+        if(map.containsKey(price)){
+            return  map.get(price);
+        }
+        return  null;
+    }
+
     @Override
     public JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge) {
 
@@ -77,7 +87,11 @@ public class WxYsServiceImpl implements BaseService {
         request.setAmount(amount);
         request.setAppid(appid);
         request.setMchid(ms.get(0));
-        request.setDescription("测试商品标题");
+        String goodName = getGoodName(zfRecharge.getPayAmount().intValue());
+        if(goodName == null){
+            return null;
+        }
+        request.setDescription(goodName);
         request.setNotifyUrl( "https://bjy6688.top/recharge/json_notify/"+ zfRecharge.getOrderNo());
         request.setOutTradeNo(zfRecharge.getOrderNo());
         // 调用下单方法，得到应答et
@@ -86,6 +100,7 @@ public class WxYsServiceImpl implements BaseService {
             log.info("单号 {} 开始请求 {}  参数 {}",zfRecharge.getMerchantOrderNo(), domain + "/recharge/create", JSONObject.toJSONString(zfRecharge));
             com.wechat.pay.java.service.payments.nativepay.model.PrepayResponse response = service.prepay(request);
             if(response.getCodeUrl() != null){
+                log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), response.toString());
                 TreeMap<String, Object> map1 = new TreeMap<>();
                 map1.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
                 map1.put("order_no", zfRecharge.getOrderNo());

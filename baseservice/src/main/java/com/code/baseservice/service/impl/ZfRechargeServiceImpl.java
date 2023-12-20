@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -501,6 +500,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     public JSONObject getOrderStatus(String orderno) {
         TreeMap<String, Object>  map = new TreeMap<>();
         RLock rLockOrder = redissonClient.getLock("recharge:order" + orderno);
+        log.info("开始获取二维码 {}", orderno);
         try {
                 //查单码
                 ZfRecharge zfRecharge = queryById(orderno);
@@ -508,7 +508,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 map.put("pay_amount", zfRecharge.getPayAmount());
                 map.put("time",DateUtil.format1(new Date(zfRecharge.getCreateTime().getTime() + 300000), DateUtil.YYYY_MM_DD_HH_MM_SS1) );
                 //检查订单状态 超时，
-                if(new Date().getTime() - zfRecharge.getCreateTime().getTime()  > 300000){
+                if(new Date().getTime() - zfRecharge.getCreateTime().getTime()  > 600000){
                     map.put("order_status", 3);
                     return new JSONObject(map);
                 }
@@ -520,28 +520,24 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                     return new JSONObject(map);
                 }
                 ZfChannel zfChannel  = zfChannelService.queryById(zfRecharge.getChannelId());
-                if(rLockOrder.tryLock(2,5, TimeUnit.SECONDS)){
-                    JSONObject jsonObject =  commonService.create(zfChannel, zfRecharge);
-                    if(jsonObject == null){
-                        map.put("order_status", 0);
-                        return new JSONObject(map);
-                    }
-                    zfRecharge.setPayUrl(jsonObject.getString("payurl"));
-                    zfRecharge.setCreateTime(new Date());
-                    zfRecharge.setOrderStatus(1);
-                    zfRechargeDao.update(zfRecharge);
-                    //增加已收额度
-                    //更新订单信息
-                    map.put("order_status", 1);
-                    map.put("payurl", zfRecharge.getPayUrl());
-                    return new JSONObject(map);
-                }else {
+                JSONObject jsonObject =  commonService.create(zfChannel, zfRecharge);
+                if(jsonObject == null){
                     map.put("order_status", 0);
                     return new JSONObject(map);
                 }
+                zfRecharge.setPayUrl(jsonObject.getString("payurl"));
+                zfRecharge.setCreateTime(new Date());
+                zfRecharge.setOrderStatus(1);
+                zfRechargeDao.update(zfRecharge);
+                //增加已收额度
+                //更新订单信息
+                map.put("order_status", 1);
+                map.put("payurl", zfRecharge.getPayUrl());
+                return new JSONObject(map);
+
             //返回订单信息
         }catch (Exception e){
-            log.error("创建订单异常 {}", e.getStackTrace());
+            log.error("创建订单异常 ", e);
             return new JSONObject(map);
         }finally {
             if(rLockOrder.isLocked() && rLockOrder.isHeldByCurrentThread()){

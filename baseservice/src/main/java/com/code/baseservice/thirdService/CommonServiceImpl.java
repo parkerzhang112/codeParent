@@ -30,9 +30,8 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     private ZfChannelService zfChannelService;
 
-    public BaseService transToService(String thirdMerchantId){
-        ZfChannel zfChannel = zfChannelService.queryByMerchantId(thirdMerchantId);
-        switch (zfChannel.getChannelCode()){
+    public BaseService transToService(String channelCode){
+        switch (channelCode){
             case "SANSHI":
                 return sanShiService;
             case "WEIXINCODE":
@@ -55,19 +54,19 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge) {
-        BaseService baseService = transToService(zfChannel.getThirdMerchantId());
+        BaseService baseService = transToService(zfChannel.getChannelCode());
         return  baseService.create(zfChannel, zfRecharge);
     }
 
     @Override
     public JSONObject create(ZfChannel zfChannel, ZfWithdraw zfWithdraw) {
-        BaseService baseService = transToService(zfChannel.getThirdMerchantId());
+        BaseService baseService = transToService(zfChannel.getChannelCode());
         return  baseService.create(zfChannel, zfWithdraw);
     }
 
     @Override
     public JSONObject queryByWithdraw(ZfChannel zfChannel, ZfWithdraw zfWithdraw) {
-        BaseService baseService = transToService(zfChannel.getThirdMerchantId());
+        BaseService baseService = transToService(zfChannel.getChannelCode());
         return  baseService.queryByWithdraw( zfChannel,  zfWithdraw);
     }
 
