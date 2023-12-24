@@ -486,6 +486,38 @@ public class RechargeControllerTest extends PayapiApplicationTests {
     }
 
     @Test
+    public void testCreateCard(){
+        log.info("开始执行");
+        ZfMerchant xMerchant = zfMerchantService.queryById(10019);
+        RechareParams rechareParams = new RechareParams();
+        rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
+        rechareParams.setMerchant_id(10019);
+        rechareParams.setName("张三");
+        Random random = new Random();
+        int amount = random.nextInt(107);
+        rechareParams.setPay_amount(new BigDecimal("146"));
+        rechareParams.setNotify_url("http://127.0.0.1:8081/test/notify");
+        rechareParams.setRemark(StringUtil.createRandomStr1(3));
+        TreeMap<String, Object> map = new TreeMap<>();
+        map.put("merchant_id", rechareParams.getMerchant_id());
+        map.put("merchant_order_no", rechareParams.getMerchant_order_no());
+        map.put("pay_amount", rechareParams.getPay_amount());
+        map.put("notify_url", rechareParams.getNotify_url());
+        String sign_str = new CommonUtil().getSign(map);
+        sign_str = sign_str.concat("key=".concat(xMerchant.getKey()));
+        log.info("签名字符串: {}", sign_str);
+        String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
+        rechareParams.setSign(sign);
+        log.info("还在执行");
+        try {
+            JSONObject jsonObject = zfRechargeService.createCard(rechareParams);
+            System.out.print("创建订单测试单元结果" + jsonObject);
+        }catch (BaseException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
     public void testCreateHttp() {
         ZfMerchant xMerchant = zfMerchantService.queryById(88945);
         RechareParams rechareParams = new RechareParams();

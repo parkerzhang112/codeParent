@@ -121,6 +121,61 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     }
 
     @Override
+    public JSONObject createCard(RechareParams rechareParams) {
+        //验证商户有效性
+        ZfMerchant zfMerchant = zfMerchantService.vaildMerchant(rechareParams.getMerchant_id());
+        //延签
+        vaildSign(rechareParams, zfMerchant);
+        //去重
+        vaildRepeat(rechareParams);
+        //查渠道
+        ZfChannel zfChannel =  zfChannelService.queryChannelByParams(rechareParams);
+
+        //入单
+        ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
+        //没有分配码，则尝试分配
+        List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfRecharge);
+        //没有找到二维码，则继续等待
+        if(zfCodes.size() == 0){
+            throw  new BaseException(ResultEnum.ERROR);
+        }
+        ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfRecharge);
+        if(zfCode == null){
+            throw  new BaseException(ResultEnum.ERROR);
+        }
+        zfRecharge.setAgentId(zfCode.getAgentId());
+        zfRecharge.setCodeId(zfCode.getCodeId());
+        zfRecharge.setCreateTime(new Date());
+        zfRecharge.setOrderStatus(1);
+        zfRechargeDao.update(zfRecharge);
+        //增加已收额度
+        redisUtilService.set("notice:agent:" + zfCode.getAgentId(), 1,1200);
+        zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
+        //返回
+        return buildReusltCard(zfMerchant,zfRecharge, zfCode);
+    }
+
+    private JSONObject buildReusltCard(ZfMerchant zfMerchant, ZfRecharge zfRecharge, ZfCode zfCode) {
+        List<String> infos = Arrays.asList(zfCode.getAccount().split("\\|"));
+        TreeMap<String, Object>  map = new TreeMap<>();
+        map.put("bank_card_name", zfCode.getName());
+        map.put("bank_card_num", infos.get(0));
+        map.put("bank_card_type", infos.get(1));
+
+        map.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
+        map.put("order_no", zfRecharge.getOrderNo());
+        map.put("pay_amount", zfRecharge.getPayAmount());
+
+        String sign_str = new CommonUtil().getSign(map);
+        sign_str = sign_str.concat("key=".concat(zfMerchant.getKey()));
+        String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
+        log.info("订单号 {}  签名字符串 {} ", zfRecharge.getOrderNo(), sign_str);
+        map.put("sign", sign);
+        return new JSONObject(map);
+
+    }
+
+    @Override
     public JSONObject createA(RechareParams rechareParams) {
         //验证商户有效性
         ZfMerchant zfMerchant = zfMerchantService.vaildMerchant(rechareParams.getMerchant_id());
@@ -176,6 +231,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             if(zfChannel.getPayType().equals(4)){
                 xRecharge.setRemark("恭喜"+StringUtil.createRandomStr1(3));
             }
+            xRecharge.setPayName(rechareParams.getName());
 //            xRecharge.setCodeId(zfCode.getCodeId());
 //            xRecharge.setAgentId(zfCode.getAgentId());
             zfRechargeDao.insert(xRecharge);

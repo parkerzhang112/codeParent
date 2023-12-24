@@ -159,6 +159,9 @@
         <if test="remark != null">
             remark ,
         </if>
+        <if test="payName != null">
+            pay_name ,
+        </if>
         </trim>
         values
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -195,6 +198,9 @@
         </if>
         <if test="remark != null">
             #{remark},
+        </if>
+        <if test="payName != null">
+            #{payName},
         </if>
         </trim>
     </insert>

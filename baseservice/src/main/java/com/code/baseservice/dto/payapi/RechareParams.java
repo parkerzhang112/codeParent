@@ -1,6 +1,5 @@
 package com.code.baseservice.dto.payapi;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +18,10 @@ public class RechareParams {
     @JsonProperty("merchant_id")
     @NonNull
     private Integer merchant_id;
+
+    @JsonProperty("name")
+    @NonNull
+    private String name;
 
 
     @JsonProperty("pay_amount")

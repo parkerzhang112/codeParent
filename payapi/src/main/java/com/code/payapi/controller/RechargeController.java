@@ -47,6 +47,24 @@ public class RechargeController {
     }
 
     @ApiOperation("创建订单")
+    @PostMapping("/createCard")
+    @ResponseBody
+    public String createCard(@RequestBody RechareParams rechareParams) {
+        log.info("入款参数 订单号 {} 信息 {}", rechareParams.getMerchant_order_no(), rechareParams.toString());
+        ResponseResult responseResult = new ResponseResult();
+        try {
+            JSONObject jsonObject = zfRechargeService.createCard(rechareParams);
+            responseResult.setData(jsonObject);
+        }catch (BaseException e){
+            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+        }catch (Exception e){
+            log.error("系统异常", e);
+            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }
+        return responseResult.toJsonString();
+    }
+
+    @ApiOperation("创建订单")
     @PostMapping("/create_a")
     @ResponseBody
     public String createA(@RequestBody RechareParams rechareParams) {

@@ -63,6 +63,10 @@ public class ZfCodeServiceImpl implements ZfCodeService {
         if(payType == 6 || payType == 7){
             codeType = 3;
         }
+        //微信
+        if(payType == 9){
+            codeType = 4;
+        }
         List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount(), codeType);
         List<ZfCode> filterCard = new ArrayList<>();
         for (int i =0 ; i < zfCodes.size(); i ++){
