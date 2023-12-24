@@ -576,6 +576,16 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                     map.put("order_status", 3);
                     return new JSONObject(map);
                 }
+            String isExist = "get:code:" + zfRecharge.getOrderNo();
+            if(redisUtilService.hasKey(isExist)){
+                ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
+                map.put("payurl", zfCode.getImage());
+                map.put("trans_account", zfCode.getAccount());
+                map.put("trans_name", zfCode.getName());
+                map.put("remark", zfRecharge.getRemark());
+                map.put("order_status", 1);
+                return new JSONObject(map);
+            }
             if(rLockOrder.tryLock(2,5, TimeUnit.SECONDS)){
 
                 if(!zfRecharge.getOrderStatus().equals(0)){
@@ -585,7 +595,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                         map.put("trans_account", zfCode.getAccount());
                         map.put("trans_name", zfCode.getName());
                         map.put("remark", zfRecharge.getRemark());
-
                     }
                     map.put("order_status", zfRecharge.getOrderStatus());
                     return new JSONObject(map);
@@ -602,6 +611,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                         map.put("order_status", 0);
                         return new JSONObject(map);
                     }
+                    redisUtilService.set(isExist, 1,1200);
                     zfRecharge.setAgentId(zfCode.getAgentId());
                     zfRecharge.setCodeId(zfCode.getCodeId());
                     zfRecharge.setCreateTime(new Date());
@@ -615,7 +625,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                     map.put("trans_account", zfCode.getAccount());
                     map.put("trans_name", zfCode.getName());
                     map.put("remark", zfRecharge.getRemark());
-
                     map.put("payurl", zfCode.getImage());
                     return new JSONObject(map);
                 }else {
