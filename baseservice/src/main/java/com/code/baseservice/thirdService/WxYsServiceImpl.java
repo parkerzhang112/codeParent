@@ -85,7 +85,7 @@ public class WxYsServiceImpl implements BaseService {
         com.wechat.pay.java.service.payments.nativepay.model.Amount amount = new com.wechat.pay.java.service.payments.nativepay.model.Amount();
         amount.setTotal(zfRecharge.getPayAmount().intValue() * 100);
         request.setAmount(amount);
-        request.setAppid(appid);
+        request.setAppid(ms.get(2));
         request.setMchid(ms.get(0));
         String goodName = getGoodName(zfRecharge.getPayAmount().intValue());
         if(goodName == null){
