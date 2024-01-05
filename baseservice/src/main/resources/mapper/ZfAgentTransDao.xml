@@ -100,6 +100,12 @@
         Limit 1
     </select>
 
+
+    <select id="queryAddTransBySubNear" resultMap="ZfAgentTransMap">
+        select *
+        from zf_agent_trans
+        where merchant_order_no = #{merchantOrderNo}   and create_time   &lt;= DATE_SUB(now(), INTERVAL 10 MINUTE);
+    </select>
     <insert id="insert" keyProperty="agentId" useGeneratedKeys="true">
         insert into zf_agent_trans
         <trim prefix="(" suffix=")" suffixOverrides=",">

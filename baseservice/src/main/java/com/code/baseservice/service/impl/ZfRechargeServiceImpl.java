@@ -72,6 +72,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     @Autowired
     private CommonService commonService;
 
+    @Autowired
+    private ZfAgentTransService zfAgentTransService;
+
     @Override
     public List<ZfRecharge> queryByLimit(int page, int pagenum) {
         ZfRecharge zfRecharge =  new ZfRecharge();
@@ -493,10 +496,16 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 zfRecharge.setRemark(operaOrderParams.getCloseReason());
                 zfRecharge.setUpdateTime(new Date());
                 zfRecharge.setOrderStatus(5);
-                if(zfRecharge.getCodeId() != null && zfRecharge.getCodeId() != 0){
+                if(zfRecharge.getAgentId() != null && zfRecharge.getAgentId() != 0){
                     String amountKey = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfRecharge.getCodeId();
                     redisUtilService.del(amountKey);
                     zfAgentService.updateAgentCreditAmount(zfRecharge, zfRecharge.getAgentId());
+                }else {
+                    List<ZfAgentTrans> zfAgentTrans = zfAgentTransService.queryAddTransBySubNear(zfRecharge.getMerchantOrderNo());
+                    if(zfAgentTrans.size() == 1){
+                        log.info("订单无二维码。仍然有流水，进行回滚 {}", zfAgentTrans);
+                        zfAgentService.updateAgentCreditAmount(zfRecharge, zfAgentTrans.get(0).getAgentId());
+                    }
                 }
                 zfRechargeDao.update(zfRecharge);
 //            } else{
@@ -612,11 +621,15 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                         return new JSONObject(map);
                     }
                     redisUtilService.set(isExist, 1,1200);
+                    zfRecharge.setMerchantOrderNo(zfRecharge.getMerchantOrderNo());
                     zfRecharge.setAgentId(zfCode.getAgentId());
                     zfRecharge.setCodeId(zfCode.getCodeId());
-                    zfRecharge.setCreateTime(new Date());
+                    zfRecharge.setUpdateTime(new Date());
                     zfRecharge.setOrderStatus(1);
-                    zfRechargeDao.update(zfRecharge);
+                    int r = zfRechargeDao.updateProcess(zfRecharge);
+                    if(r == 0){
+                        log.error("订单更新失败 ", zfRecharge);
+                    }
                     //增加已收额度
                     redisUtilService.set("notice:agent:" + zfCode.getAgentId(), 1,1200);
                     zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
@@ -633,7 +646,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 }
             //返回订单信息
         }catch (Exception e){
-            log.error("查码异常 ", e.getStackTrace());
+            log.error("查码异常 ", e);
             return new JSONObject(map);
         }finally {
             if(rLockOrder.isLocked() && rLockOrder.isHeldByCurrentThread()){

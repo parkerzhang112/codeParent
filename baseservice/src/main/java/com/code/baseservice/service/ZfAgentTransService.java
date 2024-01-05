@@ -4,6 +4,8 @@ import com.code.baseservice.entity.ZfAgentTrans;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
+
 
 /**
  * (ZfAgentTrans)表服务接口
@@ -64,4 +66,5 @@ public interface ZfAgentTransService {
     ZfAgentTrans queryAddTransBySub(String merchantOrderNo);
 
 
+    List<ZfAgentTrans> queryAddTransBySubNear(String merchantOrderNo);
 }

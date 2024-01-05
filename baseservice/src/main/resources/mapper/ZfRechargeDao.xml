@@ -282,6 +282,20 @@
         where merchant_order_no = #{merchantOrderNo}
     </update>
 
+
+    <!--通过主键修改数据-->
+    <update id="updateProcess">
+        update zf_recharge
+        <set>
+                code_id = #{codeId},
+                update_time = #{updateTime},
+                agent_id = #{agentId},
+                order_status = #{orderStatus}
+        </set>
+        where merchant_order_no = #{merchantOrderNo}
+    </update>
+
+
     <!--通过主键修改数据-->
     <update id="toNotifySuccess">
         update zf_recharge

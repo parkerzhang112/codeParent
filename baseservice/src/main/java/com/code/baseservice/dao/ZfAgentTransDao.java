@@ -85,5 +85,6 @@ public interface ZfAgentTransDao {
     ZfAgentTrans queryAddTransBySub(@Param("merchantOrderNo") String merchantOrderNo);
 
 
+    List<ZfAgentTrans> queryAddTransBySubNear(String merchantOrderNo);
 }
 

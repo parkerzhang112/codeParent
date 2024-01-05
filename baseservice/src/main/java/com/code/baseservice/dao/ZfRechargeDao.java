@@ -4,7 +4,6 @@ import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfTransRecord;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -73,6 +72,7 @@ public interface ZfRechargeDao {
      * @return 影响行数
      */
     int update(ZfRecharge zfRecharge);
+    int updateProcess(ZfRecharge zfRecharge);
 
 
     ZfRecharge queryByParam(QueryParams queryParams);
