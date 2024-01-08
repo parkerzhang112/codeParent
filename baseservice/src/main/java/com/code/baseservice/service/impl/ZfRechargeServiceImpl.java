@@ -339,8 +339,14 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     private String getAmountBettwen(ZfRecharge zfRecharge) {
         if(zfRecharge.getPayAmount().compareTo(new BigDecimal("5000")) > 0){
             return  "5001_20000";
+        }else if(zfRecharge.getPayAmount().compareTo(new BigDecimal("3000")) > 0 &&
+                zfRecharge.getPayAmount().compareTo(new BigDecimal("5000")) <= 0 ) {
+            return "3000_5000";
+        }else if(zfRecharge.getPayAmount().compareTo(new BigDecimal("800")) > 0 &&
+                zfRecharge.getPayAmount().compareTo(new BigDecimal("3000")) <= 0){
+            return "800_3000";
         }else {
-            return "800_5000";
+            return "1_800";
         }
     }
 
