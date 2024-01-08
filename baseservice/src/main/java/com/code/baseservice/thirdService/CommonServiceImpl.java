@@ -26,6 +26,9 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     private WxYsServiceImpl weixinService;
 
+    @Autowired
+    private AFeiDfServiceImpl aFeiDfService;
+
 
     @Autowired
     private ZfChannelService zfChannelService;
@@ -36,6 +39,8 @@ public class CommonServiceImpl implements CommonService {
                 return sanShiService;
             case "WEIXINCODE":
                 return weixinService;
+            case "AFEIDF":
+                return aFeiDfService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
@@ -47,6 +52,8 @@ public class CommonServiceImpl implements CommonService {
                 return sanShiService;
             case "WEIXINCODE":
                 return weixinService;
+            case "AFEIDF":
+                return aFeiDfService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
@@ -76,4 +83,6 @@ public class CommonServiceImpl implements CommonService {
         BaseService baseService = transToServiceByNotify(zfChannel.getChannelCode());
         return  baseService.notify(zfRecharge, zfChannel, map);
     }
+
+
 }

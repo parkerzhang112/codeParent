@@ -64,5 +64,4 @@ public class WithdrawController {
         }
         return responseResult.toJsonString();
     }
-
 }

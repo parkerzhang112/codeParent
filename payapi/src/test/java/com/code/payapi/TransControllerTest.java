@@ -34,10 +34,10 @@ public class TransControllerTest extends PayapiApplicationTests {
         TransferParams transParams = new TransferParams();
         ZfMerchant xMerchant = zfMerchantService.queryById(10019);
         transParams.setOrder_type(1);
-        transParams.setCard_account(StringUtil.createRandomStr1(10));
-        transParams.setCard_name(StringUtil.createRandomStr1(3));
-        transParams.setCard_address(StringUtil.createRandomStr1(10));
-        transParams.setMerchant_order_no("22312343243");
+        transParams.setCard_account("123131424");
+        transParams.setCard_name("杨壮");
+        transParams.setCard_address("江苏");
+        transParams.setMerchant_order_no("2131233");
         transParams.setMerchant_id(10019);
         transParams.setCard_type("ICBC");
         transParams.setNotify_url("http://127.0.0.1");
@@ -76,7 +76,7 @@ public class TransControllerTest extends PayapiApplicationTests {
         QueryParams queryParams = new QueryParams();
         ZfMerchant xMerchant = zfMerchantService.queryById(10019);
         queryParams.setMerchant_Id(xMerchant.getMerchantId().toString());
-        queryParams.setMerchant_order_no("dsadasdsaW1679713803244WwvNtvHDX");
+        queryParams.setMerchant_order_no("2131233");
         TreeMap<String, Object> map = new TreeMap<>();
         map.put("merchant_id", queryParams.getMerchant_Id());
         map.put("merchant_order_no", queryParams.getMerchant_order_no());
@@ -87,7 +87,7 @@ public class TransControllerTest extends PayapiApplicationTests {
         queryParams.setSign(sign);
         ResponseResult responseResult = new ResponseResult();
         try {
-            JSONObject jsonObject = zfWithdrawService.query(queryParams);
+            JSONObject jsonObject = zfWithdrawService.queryByWithdraw(queryParams);
             responseResult.setData(jsonObject);
         }catch (BaseException e){
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
