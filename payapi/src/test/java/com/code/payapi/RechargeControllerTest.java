@@ -518,6 +518,40 @@ public class RechargeControllerTest extends PayapiApplicationTests {
     }
 
     @Test
+    public void testCreateCardHttp() {
+        ZfMerchant xMerchant = zfMerchantService.queryById(88945);
+        RechareParams rechareParams = new RechareParams();
+        rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
+        rechareParams.setMerchant_id(895468);
+        Random random = new Random();
+        int amount = random.nextInt(1002);
+        rechareParams.setPay_amount(new BigDecimal("1146"));
+        rechareParams.setNotify_url("http://127.0.0.1:8081/test/notify");
+        rechareParams.setRemark(StringUtil.createRandomStr1(3));
+        rechareParams.setName("张三");
+        TreeMap<String, Object> map = new TreeMap<>();
+        map.put("merchant_id", rechareParams.getMerchant_id());
+
+        map.put("merchant_order_no", rechareParams.getMerchant_order_no());
+        map.put("pay_amount", rechareParams.getPay_amount());
+        map.put("notify_url", rechareParams.getNotify_url());
+        String sign_str = new CommonUtil().getSign(map);
+        map.put("name", "张三");
+
+        sign_str = sign_str.concat("key=HT3L4bScfvy2kbBReb9dzfu9xV8KbRq4");
+        log.info("签名字符串: {}", sign_str);
+        String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
+        rechareParams.setSign(sign);
+        try {
+            String reponse = HttpClientUtil.doPostJson("http://xshdd.cn/recharge/createCard", JSONObject.toJSONString(rechareParams));
+            JSONObject jsonObject = JSONObject.parseObject(reponse);
+            System.out.print("创建订单测试单元结果" + jsonObject);
+        }catch (BaseException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
     public void testCreateHttp() {
         ZfMerchant xMerchant = zfMerchantService.queryById(88945);
         RechareParams rechareParams = new RechareParams();

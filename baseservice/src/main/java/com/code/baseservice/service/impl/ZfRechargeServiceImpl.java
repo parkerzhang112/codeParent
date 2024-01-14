@@ -164,7 +164,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         map.put("bank_card_name", zfCode.getName());
         map.put("bank_card_num", infos.get(0));
         map.put("bank_card_type", infos.get(1));
-
+        map.put("bank_address", infos.get(2));
         map.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
         map.put("order_no", zfRecharge.getOrderNo());
         map.put("pay_amount", zfRecharge.getPayAmount());

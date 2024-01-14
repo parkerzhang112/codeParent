@@ -102,7 +102,7 @@ public class TransControllerTest extends PayapiApplicationTests {
         log.info("签名字符串 {}", encod_str);
         String sign = MD5Util.getMD5Str(encod_str).toUpperCase();
         transParams.setSign(sign);
-        String r = HttpClientUtil.doPostJson("http://qw520.top/withdraw/create", JSONObject.toJSONString(transParams));
+        String r = HttpClientUtil.doPostJson("http://xsg.top/withdraw/create", JSONObject.toJSONString(transParams));
 //        JSONObject jsonObject = xTransferService.create(transParams);
         System.out.println(r);
     }

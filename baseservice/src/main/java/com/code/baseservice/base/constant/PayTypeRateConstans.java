@@ -15,6 +15,7 @@ public class PayTypeRateConstans {
         map.put(5, "_yunshanfu");
         map.put(6, "_s_weixin");
         map.put(7, "_weixin");
+        map.put(9, "_card");
 
 
         if(code == 2){
