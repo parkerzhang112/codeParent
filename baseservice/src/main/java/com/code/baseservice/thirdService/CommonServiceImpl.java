@@ -28,6 +28,8 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     private AFeiDfServiceImpl aFeiDfService;
+    @Autowired
+    private CaiShangServiceImpl caiShangService;
 
 
     @Autowired
@@ -41,6 +43,8 @@ public class CommonServiceImpl implements CommonService {
                 return weixinService;
             case "AFEIDF":
                 return aFeiDfService;
+            case "CAISHANG":
+                return caiShangService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
@@ -54,6 +58,8 @@ public class CommonServiceImpl implements CommonService {
                 return weixinService;
             case "AFEIDF":
                 return aFeiDfService;
+            case "CAISHANG":
+                return caiShangService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
