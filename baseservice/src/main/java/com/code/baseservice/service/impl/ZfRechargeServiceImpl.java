@@ -111,6 +111,10 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         vaildRepeat(rechareParams);
         //查渠道
         ZfChannel zfChannel =  zfChannelService.queryChannelByParams(rechareParams);
+        if(zfChannel.getIsThird() == 1){
+            String response =  HttpClientUtil.doPostJson("http://xshdd.cn/recharge/create", JSONObject.toJSONString(rechareParams));
+            return JSONObject.parseObject(response);
+        }
         //查码
 //        List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfChannels, rechareParams, zfMerchant);
         //轮码

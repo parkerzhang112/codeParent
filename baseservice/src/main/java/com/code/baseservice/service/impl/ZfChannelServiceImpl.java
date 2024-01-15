@@ -50,8 +50,8 @@ public class ZfChannelServiceImpl implements ZfChannelService {
             throw new BaseException(ResultEnum.NO_CHANNEL);
         }
         log.info("渠道查询结果 订单号 {}", rechareParams.getMerchant_order_no(), channels);
-
-        return channels.get(0);
+       return channels.get((int) (Math.random() * channels.size()));
+//        return channels.get(0);
     }
 
     @Override
