@@ -73,7 +73,7 @@ public class CaiShangServiceImpl implements BaseService {
         map.put("payer", "张三");
         map.put("postscript", "");
         map.put("useCounter", true);
-        map.put("notify_url", "https://bjy6688.top/recharge/json_notify/"+ zfRecharge.getOrderNo());
+        map.put("notify_url", "http://fsed135.top/recharge/json_notify/"+ zfRecharge.getOrderNo());
         map.put("label", "");
         map.put("nonce", StringUtil.createRandomStr1(4));
         map.put("timestamp", new Date().getTime());
