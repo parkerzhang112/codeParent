@@ -35,26 +35,23 @@ public class CaiShangServiceImpl implements BaseService {
 
     @Override
     public String notify(ZfRecharge zfRecharge,ZfChannel zfChannel, Map<String,Object> map) {
-       return  "success";
-//        JSONObject jsonObject = new JSONObject();
-//        try{
-//            ZfRecharge zfRecharge = zfRechargeService.queryByOrderNo(queryParams.getMerchant_order_no());
-//            log.info("确认订单 订单号 {}", zfRecharge.getMerchantOrderNo());
-//            if (zfRecharge.getOrderStatus() ==2 ) {
-//                log.info("订单已处理 订单号 {}", zfRecharge.getMerchantOrderNo());
-//                throw new BaseException(ResultEnum.ERROR);
-//            }
-//            zfRecharge.setOrderStatus(2);
-//            zfRecharge.setPaidAmount(zfRecharge.getPayAmount());
-//            zfRechargeService.paidOrder(zfRecharge);
-//            jsonObject.put("code", 200);
-//            jsonObject.put("msg","订单成功");
-//        }catch (Exception e){
-//            jsonObject.put("code", 1);
-//            jsonObject.put("msg","失败");
-//            log.error("系统异常 {} {}", queryParams.getMerchant_order_no(), e);
-//        }
-//        return jsonObject;
+        log.info("彩商通知 {}", map.toString());
+        AesUtil aesUtil = new AesUtil();
+        String decryptData  = aesUtil.decryptBy(map.get("data").toString(), zfChannel.getThirdMerchantPrivateKey());
+        log.info("彩商通知 解析内容 {}", decryptData);
+        JSONObject jsonObject = JSONObject.parseObject(decryptData);
+        if(jsonObject.getString("orderId").equals(zfRecharge.getOrderNo())){
+            zfRecharge.setOrderStatus(2);
+            zfRecharge.setPaidAmount(zfRecharge.getPayAmount());
+            zfRechargeService.paidOrder(zfRecharge);
+            JSONObject rJ  = new JSONObject();
+            rJ.put("code", 0);
+            return  rJ.toString();
+        }
+        JSONObject rJ  = new JSONObject();
+        rJ.put("code", 1);
+        return  rJ.toString();
+
     }
 
 
