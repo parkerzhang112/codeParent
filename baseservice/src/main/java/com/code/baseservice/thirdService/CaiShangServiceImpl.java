@@ -40,7 +40,7 @@ public class CaiShangServiceImpl implements BaseService {
         String decryptData  = aesUtil.decryptBy(map.get("data").toString(), zfChannel.getThirdMerchantPrivateKey());
         log.info("彩商通知 解析内容 {}", decryptData);
         JSONObject jsonObject = JSONObject.parseObject(decryptData);
-        if(jsonObject.getString("orderId").equals(zfRecharge.getOrderNo())){
+        if(jsonObject.getString("orderId").equals(zfRecharge.getOrderNo()) && jsonObject.getInteger("status").equals(0)){
             zfRecharge.setOrderStatus(2);
             zfRecharge.setPaidAmount(zfRecharge.getPayAmount());
             zfRechargeService.paidOrder(zfRecharge);
@@ -70,7 +70,7 @@ public class CaiShangServiceImpl implements BaseService {
         map.put("payer", "张三");
         map.put("postscript", "");
         map.put("useCounter", true);
-        map.put("notify_url", "http://fsed135.top/recharge/json_notify/"+ zfRecharge.getOrderNo());
+        map.put("notifyUrl", "http://afd7895.cn/recharge/json_notify/"+ zfRecharge.getOrderNo());
         map.put("label", "");
         map.put("nonce", StringUtil.createRandomStr1(4));
         map.put("timestamp", new Date().getTime());

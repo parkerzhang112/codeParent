@@ -101,7 +101,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         //延签
         vaildSign(rechareParams, zfMerchant);
         //去重
-        vaildRepeat(rechareParams);
+//        vaildRepeat(rechareParams);
         //查渠道
         ZfChannel zfChannel = zfChannelService.queryChannelByParams(rechareParams);
         //入单

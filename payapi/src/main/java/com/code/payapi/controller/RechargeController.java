@@ -195,6 +195,7 @@ public class RechargeController {
     @PostMapping("/json_notify/{orderNo}")
     @ResponseBody
     public String jsonNotify(@PathVariable("orderNo") String orderNo, @RequestBody  Map<String, Object> map) {
+        log.info("收到通知 {}", map);
         ResponseResult responseResult = new ResponseResult();
         RLock rLock = redissonClient.getLock("recharge:order" + orderNo);
         try {
