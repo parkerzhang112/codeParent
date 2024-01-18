@@ -67,7 +67,7 @@ public class CaiShangServiceImpl implements BaseService {
         map.put("account", "");
         map.put("amount", zfRecharge.getPayAmount().setScale(2).floatValue());
         map.put("payWith", 2);
-        map.put("payer", "张三");
+        map.put("payer", StringUtil.createRandomStr1(4));
         map.put("postscript", "");
         map.put("useCounter", true);
         map.put("notifyUrl", "http://afd7895.cn/recharge/json_notify/"+ zfRecharge.getOrderNo());
