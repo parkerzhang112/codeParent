@@ -41,7 +41,7 @@
         select
           *
         from zf_channel
-        where merchant_id = #{merchant_id}
+        where FIND_IN_SET(#{merchant_id}, merchant_id)
         and min_amount <![CDATA[ <= ]]> #{pay_amount}
         and max_amount <![CDATA[ >= ]]>  #{pay_amount}
         and channel_status = 1
@@ -54,7 +54,7 @@
         select
           *
         from zf_channel
-        where merchant_id = #{merchant_id}
+        where FIND_IN_SET(#{merchant_id}, merchant_id)
         and min_amount <![CDATA[ <= ]]> #{pay_amount}
         and max_amount <![CDATA[ >= ]]>  #{pay_amount}
         and channel_status = 1
