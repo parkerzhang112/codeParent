@@ -6,16 +6,21 @@ import com.code.baseservice.base.enums.CommonStatusEnum;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfMerchantDao;
+import com.code.baseservice.dto.XChannelRate;
 import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import com.code.baseservice.dto.payapi.MerchantParams;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.*;
-import com.code.baseservice.service.*;
+import com.code.baseservice.service.RedisUtilService;
+import com.code.baseservice.service.ZfMerchantService;
+import com.code.baseservice.service.ZfMerchantTransService;
+import com.code.baseservice.service.ZfWithdrawService;
 import com.code.baseservice.util.CommonUtil;
 import com.code.baseservice.util.MD5Util;
 import com.code.baseservice.util.Telegram;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -166,6 +171,26 @@ public class ZfMerchantServiceImpl implements ZfMerchantService {
         sumMerchantBalance(zfMerchant.getMerchantId(), BigDecimal.ZERO.subtract(transParams.getPay_amount()).subtract(xTransfer.getChannelFee()));
         zfMerchantTransService.insert(new ZfMerchantTrans(xTransfer, zfMerchant, 0));
         redisUtilService.leftPushAll("trans_size", transParams.getMerchant_order_no());
+    }
+
+    @Override
+    public BigDecimal sumMerchantFee(BigDecimal paidAmount, ZfMerchant xMerchant) {
+        try {
+            if (Strings.isEmpty(xMerchant.getMerchantRate())) {
+                return BigDecimal.ZERO;
+            }
+            XChannelRate xChannelRate = JSONObject.parseObject(xMerchant.getMerchantRate(), XChannelRate.class);
+            if (xChannelRate.getRate_type() == 0) {
+                return BigDecimal.valueOf(xChannelRate.getRate_value());
+            } else {
+                BigDecimal rate = BigDecimal.valueOf(xChannelRate.getRate_value()).divide(new BigDecimal("100"));
+                return paidAmount.multiply(rate);
+            }
+
+        } catch (Exception e) {
+            log.error("手续费计算异常", e);
+        }
+        return BigDecimal.ZERO;
     }
 
     private JSONObject buildReuslt(ZfMerchant zfMerchant) {

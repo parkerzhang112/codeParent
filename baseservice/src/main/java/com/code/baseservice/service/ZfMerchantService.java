@@ -8,8 +8,6 @@ import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfAgent;
 import com.code.baseservice.entity.ZfMerchant;
 import com.code.baseservice.entity.ZfRecharge;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 
@@ -47,4 +45,6 @@ public interface ZfMerchantService {
     void operatBalance(OperaBalanceParams operaBalanceParams);
 
     void issue(TransferParams transParams);
+
+    BigDecimal sumMerchantFee(BigDecimal paidAmount, ZfMerchant xMerchant);
 }
