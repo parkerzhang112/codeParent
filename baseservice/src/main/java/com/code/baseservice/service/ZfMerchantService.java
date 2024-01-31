@@ -45,4 +45,6 @@ public interface ZfMerchantService {
     void operatBalance(OperaBalanceParams operaBalanceParams);
 
     void issue(TransferParams transParams);
+
+    BigDecimal sumMerchantFee(BigDecimal paidAmount, ZfMerchant xMerchant);
 }

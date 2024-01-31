@@ -31,5 +31,7 @@ public class ZfMerchant implements Serializable {
 
     private BigDecimal creditAmount;
 
+    private String merchantRate;
+
 }
 

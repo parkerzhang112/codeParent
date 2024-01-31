@@ -54,6 +54,10 @@ public class CaiShangServiceImpl implements BaseService {
 
     }
 
+    public static void main(String[] args) {
+        Integer a = new Integer(1111);
+        System.out.println(a.equals(1111));
+    }
 
     @Override
     public JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge) {
@@ -87,7 +91,12 @@ public class CaiShangServiceImpl implements BaseService {
         requeustJson.put("data", encreptData);
         try {
             log.info("单号 {} 开始请求 {}  参数 {}",zfRecharge.getMerchantOrderNo(),"https://biz.ib23u.com/api/biz/place_deposit_order", JSONObject.toJSONString(requeustJson));
-            String reponse = HttpClientUtil.doPostJson("https://biz.ib23u.com/api/biz/place_deposit_order", JSONObject.toJSONString(requeustJson));
+            String reponse = "";
+            if(zfRecharge.getChannelId().equals(26)){
+                reponse = HttpClientUtil.doPostJson("https://biz.ib23u.com/api/biz/place_deposit_order", JSONObject.toJSONString(requeustJson));
+            }else {
+                reponse = HttpClientUtil.doPostJson("https://9ec2518d.zhaocai202403.xyz/api/biz/place_deposit_order", JSONObject.toJSONString(requeustJson));
+            }
             log.info("请求返回数据 {}", reponse);
             String decrypt = aesUtil.decryptBy(reponse, zfChannel.getThirdMerchantPrivateKey());
             log.info("解密返回数据 {}", decrypt);

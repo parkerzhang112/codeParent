@@ -344,7 +344,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 return;
             }
             //计算会员手续费
-            BigDecimal fee = zfChannelService.sumChannelFee(zfRecharge.getPaidAmount(), xChannel);
+            BigDecimal fee = zfMerchantService.sumMerchantFee(zfRecharge.getPaidAmount(),xMerchant);
             zfRecharge.setMerchantFee(fee);
             zfRechargeDao.update(zfRecharge);
             if (zfRecharge.getIsThird() == 0) {
@@ -560,8 +560,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             log.info("订单完成时 查询渠道不存在 {}", zfRecharge.getMerchantId());
             return;
         }
+        ZfMerchant zfMerchant = zfMerchantService.queryById(zfRecharge.getMerchantId());
+        BigDecimal fee = zfMerchantService.sumMerchantFee(zfRecharge.getPaidAmount(),zfMerchant);
         //计算会员手续费
-        BigDecimal fee = zfChannelService.sumChannelFee(zfRecharge.getPaidAmount(), xChannel);
         zfRecharge.setMerchantFee(fee);
         zfRechargeDao.update(zfRecharge);
         zfAgentService.updateAgentFee(zfRecharge, zfAgent.getAgentId(), BigDecimal.ZERO);
