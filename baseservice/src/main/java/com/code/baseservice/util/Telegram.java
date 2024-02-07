@@ -2,6 +2,7 @@ package com.code.baseservice.util;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.dto.AgentConfig;
+import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,10 +27,30 @@ public class Telegram {
             stringBuilder.append("预警原因："+notice + " \n");
             stringBuilder.append("商户：" + zfRecharge.getRemark()+"\n");
             stringBuilder.append("金额：" + zfRecharge.getPayAmount()+"\n");
-            String url = "https://api.telegram.org/bot5569136092:AAGhxaVuxYlKmy2uqZP9RBbCh0PlBCmDJsI/sendMessage";
+            String url = "https://api.telegram.org/bot6431542163:AAGa41xGC44flApg5K_oV8todOOEscK1uFc/sendMessage";
             Map<String, Object> map = new HashMap<>();
             map.put("chat_id", chatId);
             map.put("c", stringBuilder.toString());
+            sendMesaage(map, url);
+        }catch (Exception e){
+            log.error("纸飞机发送消息异常 {}", e.getStackTrace());
+        }
+    }
+
+
+    public void sendWarrnThirdMessage(RechareParams rechareParams, ZfChannel zfChannel, String notice) {
+        try {
+            String chatId= "-4128575462";
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("【短信消息预警】\n");
+            stringBuilder.append("预警原因："+notice + " \n");
+            stringBuilder.append("商户：" + zfChannel.getChannelName()+"\n");
+            stringBuilder.append("金额：" + rechareParams.getPay_amount()+"\n");
+            stringBuilder.append("单号：" + rechareParams.getMerchant_order_no()+"\n");
+            String url = "https://api.telegram.org/bot6431542163:AAGa41xGC44flApg5K_oV8todOOEscK1uFc/sendMessage";
+            Map<String, Object> map = new HashMap<>();
+            map.put("chat_id", chatId);
+            map.put("text", stringBuilder.toString());
             sendMesaage(map, url);
         }catch (Exception e){
             log.error("纸飞机发送消息异常 {}", e.getStackTrace());

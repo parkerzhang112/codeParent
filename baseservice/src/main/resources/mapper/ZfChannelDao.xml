@@ -4,7 +4,7 @@
 
     <resultMap type="com.code.baseservice.entity.ZfChannel" id="ZfChannelMap">
         <result property="channelId" column="channel_id" />
-        <result property="channelName" column=" channel_name" />
+        <result property="channelName" column="channel_name" />
         <result property="channelType" column="channel_type" />
         <result property="channelRate" column="channel_rate" />
         <result property="channelStatus" column="channel_status" />

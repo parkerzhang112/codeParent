@@ -111,15 +111,14 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         vaildRepeat(rechareParams);
         //查渠道
         ZfChannel zfChannel =  zfChannelService.queryChannelByParams(rechareParams);
-
-
+        Telegram telegram =new Telegram();
         log.info("查询的渠道信息 {}", zfChannel);
         if(zfChannel.getIsThird().equals(1)){
             String response =  HttpClientUtil.doPostJson("http://afd7895.cn/recharge/create", JSONObject.toJSONString(rechareParams));
-
             log.info("三方渠道 {} 请求返回 {}", rechareParams.getMerchant_order_no(), response);
             JSONObject  jsonObject = JSONObject.parseObject(response);
             if(!jsonObject.getInteger("code").equals(200)){
+                telegram.sendWarrnThirdMessage(rechareParams,zfChannel, jsonObject.getString("msg"));
                 throw  new BaseException(ResultEnum.ERROR);
             }
             return JSONObject.parseObject(response).getJSONObject("data");
@@ -127,10 +126,10 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(rechareParams, zfChannel);
             if(zfCodes.size() == 0){
                 String response =  HttpClientUtil.doPostJson("http://afd7895.cn/recharge/create", JSONObject.toJSONString(rechareParams));
-
                 log.info("三方渠道 {} 请求返回 {}", rechareParams.getMerchant_order_no(), response);
                 JSONObject  jsonObject = JSONObject.parseObject(response);
                 if(!jsonObject.getInteger("code").equals(200)){
+                    telegram.sendWarrnThirdMessage(rechareParams,zfChannel, jsonObject.getString("msg"));
                     throw  new BaseException(ResultEnum.ERROR);
                 }
                 return JSONObject.parseObject(response).getJSONObject("data");
