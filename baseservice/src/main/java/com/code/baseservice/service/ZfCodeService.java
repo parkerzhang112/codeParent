@@ -2,9 +2,10 @@ package com.code.baseservice.service;
 
 import com.code.baseservice.dto.autoapi.TransParams;
 import com.code.baseservice.dto.payapi.RechareParams;
-import com.code.baseservice.entity.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import com.code.baseservice.entity.ZfChannel;
+import com.code.baseservice.entity.ZfCode;
+import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.entity.ZfWithdraw;
 
 import java.util.List;
 
@@ -28,6 +29,9 @@ public interface ZfCodeService {
 
 
     List<ZfCode> queryCodeByParamAndChannel(ZfRecharge zfRecharge);
+
+    List<ZfCode> queryCodeByParamAndChannel(RechareParams rechareParams, ZfChannel zfChannel);
+
 
     ZfCode selectCardByTrans(ZfWithdraw zfWithdraw);
 

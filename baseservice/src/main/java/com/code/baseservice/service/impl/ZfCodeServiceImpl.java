@@ -2,6 +2,8 @@ package com.code.baseservice.service.impl;
 
 import com.code.baseservice.dao.ZfCodeDao;
 import com.code.baseservice.dto.autoapi.TransParams;
+import com.code.baseservice.dto.payapi.RechareParams;
+import com.code.baseservice.entity.ZfChannel;
 import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfWithdraw;
@@ -79,6 +81,39 @@ public class ZfCodeServiceImpl implements ZfCodeService {
         if(filterCard.size() == 0){
 
 //            throw  new BaseException(ResultEnum.NO_CODE);
+            return  filterCard;
+        }
+        return filterCard;
+    }
+
+    @Override
+    public List<ZfCode> queryCodeByParamAndChannel(RechareParams rechareParams, ZfChannel zfChannel) {
+        List<Integer> ids = new ArrayList<Integer>();
+        ids.add(zfChannel.getChannelId());
+        Integer payType =  zfChannel.getPayType();
+        Integer  codeType = 0;
+        //数字
+        if(payType == 3){
+            codeType = 1;
+        }
+        //云闪付
+        if(payType == 4 || payType == 5){
+            codeType = 2;
+        }
+        //微信
+        if(payType == 6 || payType == 7){
+            codeType = 3;
+        }
+        //微信
+        if(payType == 9){
+            codeType = 4;
+        }
+        List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, rechareParams.getPay_amount(), codeType);
+        List<ZfCode> filterCard = new ArrayList<>();
+        for (int i =0 ; i < zfCodes.size(); i ++){
+            filterCard.add(zfCodes.get(i));
+        }
+        if(filterCard.size() == 0){
             return  filterCard;
         }
         return filterCard;
