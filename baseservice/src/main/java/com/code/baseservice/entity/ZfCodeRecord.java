@@ -30,6 +30,7 @@ public class ZfCodeRecord implements Serializable {
     private Integer agentId;
 
 
+
     public ZfCodeRecord(ZfRecharge zfRecharge) {
         codeId  = zfRecharge.getCodeId();
         recordDate = DateUtil.format(new Date(), DateUtil.YYYY_MM_DD);

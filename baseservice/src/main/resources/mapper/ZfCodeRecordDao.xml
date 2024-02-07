@@ -152,6 +152,9 @@
             <if test="fee != null">
                 fee = #{fee},
             </if>
+            <if test="rechargeTimesTotal != null">
+                recharge_times_total = recharge_times_total + 1,
+            </if>
         </set>
         where code_id = #{codeId}
         and record_date= #{recordDate}

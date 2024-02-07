@@ -75,8 +75,8 @@
 
     <!--新增所有列-->
     <insert id="insert" keyProperty="channelId" useGeneratedKeys="true">
-        insert into zf_channel_record(channel_id,record_date,merchant_id,recharge_amount, channe_fee, channel_name)
-        values (#{channelId},#{recordDate}, #{merchantId},#{rechargeAmount}, #{channelFee}, #{channelName})
+        insert into zf_channel_record(channel_id,record_date,merchant_id,recharge_amount, channe_fee, channel_name, recharge_times_total)
+        values (#{channelId},#{recordDate}, #{merchantId},#{rechargeAmount}, #{channelFee}, #{channelName}, #{rechargeTimesTotal})
     </insert>
 
     <insert id="insertBatch" keyProperty="channelId" useGeneratedKeys="true">
@@ -106,6 +106,12 @@
             <if test="rechargeAmount != null">
                 recharge_amount = recharge_amount+#{rechargeAmount},
             </if>
+            <if test="rechargeTimes != null">
+                recharge_times = recharge_times + 1,
+            </if>
+            <if test="rechargeTimesTotal != null">
+                recharge_times_total = recharge_times_total + 1,
+            </if>
             <if test="channelFee != null">
                 channe_fee = channe_fee + #{channelFee},
             </if>
@@ -122,9 +128,15 @@
             <if test="rechargeAmount != null">
                 recharge_amount = recharge_amount + #{rechargeAmount},
             </if>
-             recharge_times = recharge_times + 1,
+
             <if test="channelFee != null">
                 channe_fee = channe_fee + #{channelFee},
+            </if>
+            <if test="rechargeTimes != null">
+                recharge_times = recharge_times + 1,
+            </if>
+            <if test="rechargeTimesTotal != null">
+                recharge_times_total = recharge_times_total + 1,
             </if>
         </set>
         where channel_id = #{channelId}

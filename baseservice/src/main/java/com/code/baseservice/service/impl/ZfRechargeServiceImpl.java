@@ -70,6 +70,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     @Autowired
     private CommonService commonService;
 
+    @Autowired
+    private ZfChannelRecordService zfChannelRecordService;
+
     @Override
     public List<ZfRecharge> queryByLimit(int page, int pagenum) {
         ZfRecharge zfRecharge = new ZfRecharge();
@@ -116,6 +119,15 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             }else {
                  jsonObject = buildReuslt(zfMerchant, zfRecharge);
             }
+            ZfChannelRecord zfChannelRecord = new ZfChannelRecord();
+            zfChannelRecord.setRechargeTimesTotal(1);
+            zfChannelRecord.setChannelId(zfRecharge.getChannelId());
+            zfChannelRecord.setRecordDate(DateUtil.format(new Date(), DateUtil.YYYY_MM_DD));
+            zfChannelRecord.setMerchantId(zfRecharge.getMerchantId());
+            zfChannelRecord.setRechargeAmount(BigDecimal.ZERO);
+            zfChannelRecord.setChannelFee(BigDecimal.ZERO);
+            zfChannelRecord.setChannelName(zfChannel.getChannelName());
+            zfChannelRecordService.update(zfChannelRecord);
             return jsonObject;
         } catch (Exception e) {
             log.error("订单：{} 下单异常：", rechareParams.getMerchant_order_no(), e);
