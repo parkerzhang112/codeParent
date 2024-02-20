@@ -12,7 +12,6 @@ import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.service.CommonService;
 import com.code.baseservice.service.ZfChannelService;
 import com.code.baseservice.service.ZfRechargeService;
-import com.code.baseservice.util.AesUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -168,8 +167,7 @@ public class RechargeController {
         ResponseResult responseResult = new ResponseResult();
 
         try {
-            String de = new AesUtil().decrypt(orderNo);
-            ZfRecharge zfRecharge = zfRechargeService.queryById(de);
+            ZfRecharge zfRecharge = zfRechargeService.queryById(orderNo);
             if(zfRecharge != null){
                 ZfChannel zfChannel = zfChannelService.queryById(zfRecharge.getChannelId());
                 String jsonObject = commonService.notify(zfRecharge,zfChannel, map);

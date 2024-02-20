@@ -36,6 +36,9 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     private ZfChannelService zfChannelService;
 
+    @Autowired
+    private ZhaoCaiServiceImpl zhaoCaiService;
+
     public BaseService transToService(String channelCode){
         switch (channelCode){
             case "SANSHI":
@@ -48,6 +51,8 @@ public class CommonServiceImpl implements CommonService {
                 return caiShangService;
             case "HuiHuang":
                 return huiHuangService;
+            case "ZhaoCai":
+                return zhaoCaiService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
@@ -65,6 +70,8 @@ public class CommonServiceImpl implements CommonService {
                 return caiShangService;
             case "HuiHuang":
                 return huiHuangService;
+            case "ZhaoCai":
+                return zhaoCaiService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
