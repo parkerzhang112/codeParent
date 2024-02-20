@@ -522,7 +522,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
         ZfMerchant xMerchant = zfMerchantService.queryById(88945);
         RechareParams rechareParams = new RechareParams();
         rechareParams.setMerchant_order_no(StringUtil.createRandomStr1(20));
-        rechareParams.setMerchant_id(3);
+        rechareParams.setMerchant_id(895470);
         Random random = new Random();
         int amount = random.nextInt(1002);
         rechareParams.setPay_amount(new BigDecimal("1146"));
@@ -538,12 +538,12 @@ public class RechargeControllerTest extends PayapiApplicationTests {
         String sign_str = new CommonUtil().getSign(map);
         map.put("name", "张三");
 
-        sign_str = sign_str.concat("key=HT3L4bScfvy2kbBReb9dzfu9xV8KbRq4");
+        sign_str = sign_str.concat("key=WeIkZGUbDwWeGx5ELOre6zDDtHrgDAlD");
         log.info("签名字符串: {}", sign_str);
         String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
         rechareParams.setSign(sign);
         try {
-            String reponse = HttpClientUtil.doPostJson("http://xshdd.cn/recharge/createCard", JSONObject.toJSONString(rechareParams));
+            String reponse = HttpClientUtil.doPostJson("http://junbokk.top/recharge/createCard", JSONObject.toJSONString(rechareParams));
             JSONObject jsonObject = JSONObject.parseObject(reponse);
             System.out.print("创建订单测试单元结果" + jsonObject);
         }catch (BaseException e){
