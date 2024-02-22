@@ -64,7 +64,7 @@ public class HuiHuangServiceImpl implements BaseService {
         map.put("recvid", zfChannel.getThirdMerchantId());
         map.put("orderid", zfRecharge.getOrderNo());
         map.put("amount", zfRecharge.getPayAmount().setScale(2));
-        map.put("paychannelid", "601");
+        map.put("paychannelid", zfChannel.getThirdMerchantPublicKey().isEmpty() ? "601":zfChannel.getThirdMerchantPublicKey());
         map.put("notifyurl", "http://afd7895.cn/recharge/json_notify/"+ zfRecharge.getOrderNo());
         map.put("returnurl", "http://afd7895.cn/recharge/json_notify/"+ zfRecharge.getOrderNo());
         map.put("note", "");
