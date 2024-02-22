@@ -4,8 +4,6 @@ import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfChannel;
 import lombok.NonNull;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,7 +26,7 @@ public interface ZfChannelService {
     ZfChannel queryById(Integer channelId);
 
 
-    ZfChannel queryChannelByParams(RechareParams rechareParams);
+    List<ZfChannel> queryChannelByParams(RechareParams rechareParams);
 
     void sumMerchantBalance(Integer merchantId, BigDecimal subtract);
 

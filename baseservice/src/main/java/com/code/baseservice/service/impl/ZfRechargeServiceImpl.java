@@ -110,7 +110,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         //去重
         vaildRepeat(rechareParams);
         //查渠道
-        ZfChannel zfChannel =  zfChannelService.queryChannelByParams(rechareParams);
+        List<ZfChannel> channels =  zfChannelService.queryChannelByParams(rechareParams);
+        ZfChannel zfChannel =  channels.get((int) (Math.random() * channels.size()));
+        Integer isHaveCode = 1;
         Telegram telegram =new Telegram();
         log.info("查询的渠道信息 {}", zfChannel);
         if(zfChannel.getIsThird().equals(1)){
@@ -124,7 +126,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             return JSONObject.parseObject(response).getJSONObject("data");
         }else {
             List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(rechareParams, zfChannel);
-            if(zfCodes.size() == 0){
+            if(zfCodes.size() == 0 && channels.size() >1){
                 String response =  HttpClientUtil.doPostJson("http://afd7895.cn/recharge/create", JSONObject.toJSONString(rechareParams));
                 log.info("三方渠道 {} 请求返回 {}", rechareParams.getMerchant_order_no(), response);
                 JSONObject  jsonObject = JSONObject.parseObject(response);
@@ -133,7 +135,10 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                     throw  new BaseException(ResultEnum.ERROR);
                 }
                 return JSONObject.parseObject(response).getJSONObject("data");
+            }else if(channels.size() == 1 && zfCodes.size() == 0){
+                isHaveCode = 0;
             }
+
         }
         //查码
 //        List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfChannels, rechareParams, zfMerchant);
@@ -144,7 +149,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
 
         //返回
-        return buildReuslt(zfMerchant,zfRecharge);
+        JSONObject jsonObject =  buildReuslt(zfMerchant,zfRecharge);
+        jsonObject.put("have_code", isHaveCode);
+        return jsonObject;
     }
 
     @Override
@@ -156,8 +163,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         //去重
         vaildRepeat(rechareParams);
         //查渠道
-        ZfChannel zfChannel =  zfChannelService.queryChannelByParams(rechareParams);
-
+//        ZfChannel zfChannel =  zfChannelService.queryChannelByParams(rechareParams);
+        List<ZfChannel> channels =  zfChannelService.queryChannelByParams(rechareParams);
+        ZfChannel zfChannel =  channels.get((int) (Math.random() * channels.size()));
         //入单
         ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
         //没有分配码，则尝试分配
@@ -211,7 +219,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         //去重
         vaildRepeat(rechareParams);
         //查渠道
-        ZfChannel zfChannel =  zfChannelService.queryChannelByParams(rechareParams);
+//        ZfChannel zfChannel =  zfChannelService.queryChannelByParams(rechareParams);
+        List<ZfChannel> channels =  zfChannelService.queryChannelByParams(rechareParams);
+        ZfChannel zfChannel =  channels.get((int) (Math.random() * channels.size()));
         //入单
         ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
         return  commonService.request(zfChannel, rechareParams);
