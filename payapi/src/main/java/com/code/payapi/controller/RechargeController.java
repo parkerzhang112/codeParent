@@ -43,6 +43,7 @@ public class RechargeController {
             log.error("系统异常", e);
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
         }
+        log.info("订单号  {} 接口返回 {}", rechareParams.getMerchant_order_no(),responseResult.toJsonString());
         return responseResult.toJsonString();
     }
 

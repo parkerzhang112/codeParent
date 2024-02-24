@@ -283,6 +283,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         if(zfAgents.contains(335)){
             return 335;
         }
+        if(zfAgents.contains(674)){
+            return 674;
+        }
         Object currentAgent  =  redisUtilService.get(key);
         if(currentAgent == null){
             redisUtilService.set(key, zfAgents.get(0).intValue());
