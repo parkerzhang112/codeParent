@@ -155,7 +155,8 @@
                   document.getElementById("tips_4").style.display = "none";
                   document.getElementsByClassName("qrcode")[0].style.display = "block"; // 图片地址
                   if($('.qrcode').find("canvas").length == 0){
-                    $('.qrcode').qrcode(result.data.payurl);
+                      $('.qrcode').qrcode(result.data.payurl);
+                    $(".qrocde").dow
                     $(".pay_url").text(result.data.payurl);
                   }
                   stringTime = result.data.time;

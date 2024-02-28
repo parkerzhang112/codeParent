@@ -14,6 +14,7 @@ import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.exception.ValidationException;
 import com.wechat.pay.java.service.payments.nativepay.NativePayService;
+import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,7 +57,7 @@ public class WxYsServiceImpl implements BaseService {
 
     public static String getGoodName(String price, String remark){
         log.info("渠道金额配置 ：{} 订单金额 {}", remark,price );
-        if(StringUtils.isNotEmpty(remark)){
+        if(!StringUtil.isBlank(remark)){
             JSONObject jsonObject = JSONObject.parseObject(remark);
             if(StringUtils.isNotEmpty(jsonObject.getString(price))){
                 return jsonObject.getString(price);

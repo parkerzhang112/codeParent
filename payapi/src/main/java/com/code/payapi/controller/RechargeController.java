@@ -72,7 +72,8 @@ public class RechargeController {
             || xRecharge.getPayType() == 8
         ) {
             return prefix + "/index";
-        } else {
+//        } else if(xRecharge.getPayType() == 8) {
+        }else {
             return prefix + "/trans";
         }
     }
