@@ -5,6 +5,7 @@ import com.code.baseservice.base.enums.TransTypeEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.backapi.OperaOrderParams;
+import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfTransRecord;
 import com.code.baseservice.entity.ZfWithdraw;
@@ -174,6 +175,22 @@ public class OrderController {
         return responseResult.toJsonString();
     }
 
+
+    //派单
+    @RequestMapping("issue")
+    @ResponseBody
+    public String issue(@RequestBody TransferParams transferParams) {
+        ResponseResult responseResult = new ResponseResult();
+        try {
+//            zfWithdrawService.lock(operaOrderParams);
+        } catch (BaseException e) {
+            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+        } catch (Exception e) {
+            log.error("手动补分 系统异常", e);
+            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }
+        return responseResult.toJsonString();
+    }
 
 
 }
