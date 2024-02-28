@@ -161,19 +161,19 @@
                   stringTime = result.data.time;
                 } else if (order_status == 3) {
                   document.getElementById("tips_4").style.display = "none";
-                  // 3 订单支付失败
-                  document.getElementsByClassName("toast-body")[0].innerText =
-                          "支付超时，请重新下单。！";
-                  document.getElementById("overlay").style.display = "block";
+                  // // 3 订单支付失败
+                  // document.getElementsByClassName("toast-body")[0].innerText =
+                  //         "支付超时，请重新下单。！";
+                  // document.getElementById("overlay").style.display = "block";
 
                   clearTimer();
                 } else if (order_status == 4 || order_status == 2) {
-                  document.getElementById("tips_4").style.display = "none";
-                  console.log("状态=", result.data);
-                  // 3 订单超时
-                  document.getElementsByClassName("toast-body")[0].innerText =
-                          "支付成功，请重新下单。";
-                  document.getElementById("overlay").style.display = "block";
+                  // document.getElementById("tips_4").style.display = "none";
+                  // console.log("状态=", result.data);
+                  // // 3 订单超时
+                  // document.getElementsByClassName("toast-body")[0].innerText =
+                  //         "支付成功，请重新下单。";
+                  // document.getElementById("overlay").style.display = "block";
                   clearTimer();
                 }
 

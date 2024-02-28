@@ -63,5 +63,7 @@ public class ZfChannel implements Serializable {
 
     private BigDecimal thirdMerchantChannelRate;
 
+    private String remark;
+
 }
 

@@ -539,10 +539,10 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 map.put("pay_amount", zfRecharge.getPayAmount());
                 map.put("time",DateUtil.format1(new Date(zfRecharge.getCreateTime().getTime() + 300000), DateUtil.YYYY_MM_DD_HH_MM_SS1) );
                 //检查订单状态 超时，
-                if(new Date().getTime() - zfRecharge.getCreateTime().getTime()  > 600000){
-                    map.put("order_status", 3);
-                    return new JSONObject(map);
-                }
+//                if(new Date().getTime() - zfRecharge.getCreateTime().getTime()  > 600000){
+//                    map.put("order_status", 3);
+//                    return new JSONObject(map);
+//                }
                 if(!zfRecharge.getOrderStatus().equals(0)){
                     if(zfRecharge.getOrderStatus().equals(1)){
                         map.put("payurl", zfRecharge.getPayUrl());

@@ -13,7 +13,10 @@ import com.code.baseservice.util.StringUtils;
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.exception.ValidationException;
-import com.wechat.pay.java.service.payments.nativepay.NativePayService;
+import com.wechat.pay.java.service.payments.jsapi.JsapiService;
+import com.wechat.pay.java.service.payments.jsapi.model.PrepayRequest;
+import com.wechat.pay.java.service.payments.jsapi.model.PrepayResponse;
+import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,8 +26,8 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Slf4j
-@Service("WeixinService")
-public class WxYsServiceImpl implements BaseService {
+@Service("WxYsXCXService")
+public class WxYsXCXServiceImpl implements BaseService {
 
 
     @Value("${app.viewurl:}")
@@ -33,9 +36,9 @@ public class WxYsServiceImpl implements BaseService {
     @Autowired
     private ZfRechargeService zfRechargeService;
 
-    private String domain = "http://34.150.25.159/api/order";
+    public static JsapiService service;
 
-    private String appid = "wxffd35c4ffcff261f";
+    private String domain = "http://34.150.25.159/api/order";
 
     @Override
     public String notify(ZfRecharge zfRecharge,  ZfChannel zfChannel, Map<String, Object> queryParams) {
@@ -56,7 +59,7 @@ public class WxYsServiceImpl implements BaseService {
 
     public static String getGoodName(String price, String remark){
         log.info("渠道金额配置 ：{} 订单金额 {}", remark,price );
-        if(StringUtils.isNotEmpty(remark)){
+        if(!StringUtil.isBlank(remark)){
             JSONObject jsonObject = JSONObject.parseObject(remark);
             if(StringUtils.isNotEmpty(jsonObject.getString(price))){
                 return jsonObject.getString(price);
@@ -102,15 +105,15 @@ public class WxYsServiceImpl implements BaseService {
         Config config =
                 new RSAAutoCertificateConfig.Builder()
                         .merchantId(ms.get(0))
+                        // 使用 com.wechat.pay.java.core.util 中的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
                         .privateKeyFromPath(zfChannel.getThirdMerchantPrivateKey())
                         .merchantSerialNumber(ms.get(1))
                         .apiV3Key(zfChannel.getThirdMerchantPublicKey())
                         .build();
-        // 构建service
-        NativePayService service = new NativePayService.Builder().config(config).build();
-        // request.setXxx(val)设置所需参数，具体参数可见Request定义
-        com.wechat.pay.java.service.payments.nativepay.model.PrepayRequest request = new com.wechat.pay.java.service.payments.nativepay.model.PrepayRequest();
-        com.wechat.pay.java.service.payments.nativepay.model.Amount amount = new com.wechat.pay.java.service.payments.nativepay.model.Amount();
+
+        service = new JsapiService.Builder().config(config).build();
+        PrepayRequest request = new PrepayRequest();
+        com.wechat.pay.java.service.payments.jsapi.model.Amount amount = new com.wechat.pay.java.service.payments.jsapi.model.Amount();
         amount.setTotal(zfRecharge.getPayAmount().intValue() * 100);
         request.setAmount(amount);
         request.setAppid(ms.get(2));
@@ -122,18 +125,18 @@ public class WxYsServiceImpl implements BaseService {
         request.setDescription(goodName);
         request.setNotifyUrl( "https://bjy6688.top/recharge/json_notify/"+ zfRecharge.getOrderNo());
         request.setOutTradeNo(zfRecharge.getOrderNo());
-        // 调用下单方法，得到应答et
-
+        // 调用request.setXxx(val)设置所需参数，具体参数可见Request定义
+        // 调用接口
         try {
             log.info("单号 {} 开始请求 {}  参数 {}",zfRecharge.getMerchantOrderNo(), domain + "/recharge/create", JSONObject.toJSONString(request));
-            com.wechat.pay.java.service.payments.nativepay.model.PrepayResponse response = service.prepay(request);
-            if(response.getCodeUrl() != null){
+            PrepayResponse response = service.prepay(request);
+            if(response.getPrepayId() != null){
                 log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), response.toString());
                 TreeMap<String, Object> map1 = new TreeMap<>();
                 map1.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
                 map1.put("order_no", zfRecharge.getOrderNo());
                 map1.put("pay_amount", zfRecharge.getPayAmount());
-                map1.put("payurl", response.getCodeUrl());
+                map1.put("payurl", response.getPrepayId());
                 return new JSONObject(map1);
             }else {
                 log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), response.toString());

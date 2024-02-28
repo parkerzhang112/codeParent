@@ -17,6 +17,7 @@
         <result property="thirdMerchantChannelRate" column="third_merchant_channel_rate" />
         <result property="channelBalance" column="channel_balance" />
         <result property="channelCode" column="channel_code" />
+        <result property="remark" column="remark" />
 
     </resultMap>
     <update id="updateChannelFee">

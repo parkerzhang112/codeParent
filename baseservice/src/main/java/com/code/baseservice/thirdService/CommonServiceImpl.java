@@ -27,6 +27,9 @@ public class CommonServiceImpl implements CommonService {
     private WxYsServiceImpl weixinService;
 
     @Autowired
+    private WxYsXCXServiceImpl wxYsXCXService;
+
+    @Autowired
     private AFeiDfServiceImpl aFeiDfService;
     @Autowired
     private CaiShangServiceImpl caiShangService;
@@ -38,6 +41,9 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     private ZhaoCaiServiceImpl zhaoCaiService;
+
+    @Autowired
+    private PaoPaoServiceImpl paoPaoService;
 
     public BaseService transToService(String channelCode){
         switch (channelCode){
@@ -53,6 +59,10 @@ public class CommonServiceImpl implements CommonService {
                 return huiHuangService;
             case "ZhaoCai":
                 return zhaoCaiService;
+            case "PaoPao":
+                return paoPaoService;
+            case "XiaoChenXu":
+                return wxYsXCXService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
@@ -72,6 +82,10 @@ public class CommonServiceImpl implements CommonService {
                 return huiHuangService;
             case "ZhaoCai":
                 return zhaoCaiService;
+            case "PaoPao":
+                return paoPaoService;
+            case "XiaoChenXu":
+                return wxYsXCXService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
