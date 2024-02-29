@@ -345,6 +345,12 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 
     public void paidOrder(ZfRecharge zfRecharge) {
         try {
+            ZfRecharge zfRecharge1 = zfRechargeDao.queryById(zfRecharge.getOrderNo());
+            log.info("确认订单 订单号 {}", zfRecharge.getMerchantOrderNo());
+            if (zfRecharge1.getOrderStatus() != 1 && zfRecharge1.getOrderStatus() != 5) {
+                log.info("订单已处理 订单号 {}", zfRecharge1.getMerchantOrderNo());
+                throw new BaseException(ResultEnum.ERROR);
+            }
             ZfMerchant xMerchant = zfMerchantService.queryById(zfRecharge.getMerchantId());
             if (xMerchant == null) {
                 log.info("订单完成时 查询商户不存在 {}", zfRecharge.getMerchantId());
