@@ -12,6 +12,7 @@ import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.service.CommonService;
 import com.code.baseservice.service.ZfChannelService;
 import com.code.baseservice.service.ZfRechargeService;
+import com.code.baseservice.thirdService.WxYsXCXServiceImpl;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -43,6 +44,9 @@ public class RechargeController {
     @Autowired
     RedissonClient redissonClient;
 
+    @Autowired
+    WxYsXCXServiceImpl wxYsXCXService;
+
     @ApiOperation("创建订单")
     @PostMapping("/create")
     @ResponseBody
@@ -67,7 +71,11 @@ public class RechargeController {
         ZfRecharge xRecharge = zfRechargeService.queryById(orderno);
         modelMap.put("timeout", 10);
         modelMap.put("xrecharge", xRecharge);
-
+        ZfChannel zfChannel = zfChannelService.queryById(xRecharge.getChannelId());
+        if(zfChannel.getChannelCode().equals("XiaoChenXu"))
+        {
+            return prefix + "/auto";
+        }
         if (xRecharge.getPayType() == PaytypeEnum.CODE.getValue()
             || xRecharge.getPayType() == 8
         ) {
@@ -91,6 +99,7 @@ public class RechargeController {
         } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
         } catch (Exception e) {
+            log.error("系统异常 {} ", orderno , e);
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
         }
         return responseResult.toJsonString();
@@ -122,6 +131,30 @@ public class RechargeController {
         ResponseResult responseResult = new ResponseResult();
         try {
             JSONObject jsonObject = zfRechargeService.query(queryParams);
+            responseResult.setData(jsonObject);
+        } catch (BaseException e) {
+            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+        } catch (Exception e) {
+            log.error("系统异常 {}", e);
+            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }
+        return responseResult.toJsonString();
+    }
+
+    @PostMapping("/getPrePayId")
+    @ResponseBody
+    public String getPrePayId(@RequestBody QueryParams queryParams) {
+        log.info("请求参数 {}", queryParams.toString());
+        ResponseResult responseResult = new ResponseResult();
+        try {
+            ZfRecharge zfRecharge = zfRechargeService.queryById(queryParams.getOrder_no());
+            ZfChannel zfChannel = zfChannelService.queryById(zfRecharge.getChannelId());
+            //填充openid进支付名称
+            zfRecharge.setPayName(queryParams.getOpenId());
+            JSONObject openId = wxYsXCXService.getOpenId(zfChannel, zfRecharge);
+            zfRecharge.setPayName(openId.getString("openid"));
+            JSONObject jsonObject =   wxYsXCXService.createPrePayId(zfChannel, zfRecharge);
+            log.info("支付参数加密返回 {}", jsonObject.toJSONString());
             responseResult.setData(jsonObject);
         } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());

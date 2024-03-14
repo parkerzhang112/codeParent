@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>支付</title>
+    <script th:src="@{/js/assets/index-abbd8c5f.js}"></script>
+    <link  th:href="@{/js/assets/index-31d7946c.css}" rel="stylesheet"/>
+
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/jquery.qrcode.js}"></script>
+    <script th:src="@{/js/qrcode.js}"></script>
+    <script th:src="@{/js/axios.min.js}"></script>
+
+    <style lang="scss">
+      body{
+        text-align: center;
+      }
+      .order-id > label {
+        color: #666;
+      }
+      .order-id > span {
+        color: rgb(227, 160, 79);
+      }
+      .tips_1 {
+        padding-top: 10px;
+        color: #666;
+      }
+      .tips_2 {
+        font-size: 16px;
+        color: rgb(230, 60, 60);
+      }
+      .tips_2 > strong {
+        font-size: 22px;
+        padding: 0 8px;
+        color: black;
+      }
+      .tips_3 {
+        color: rgb(230, 60, 60);
+      }
+
+      body {
+        position: relative;
+      }
+      .overlay {
+        display: none;
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.8);
+      }
+      .qrcode{
+        display: none;
+      }
+      .toast {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+        padding: 20px;
+        background-color: #fff;
+      }
+      .toast-header {
+        display: flex;
+        justify-content: space-between;
+        padding-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body style="text-align: center">
+    <div class="container py-4 px-3 mx-auto">
+      <p id="time" style="    font-size: 37px;color: red;"></p>
+      <div class="order-id">
+        <label>订单号：<span id="order" th:text="${xrecharge.orderNo}"></span></label>
+<!--        <span id="orderId">0</span>-->
+      </div>
+
+    <!-- 弹窗提示 -->
+    <div class="overlay" id="overlay">
+      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="mr-auto">提示</strong>
+          </button>
+        </div>
+        <div class="toast-body">支付超时，请重新下单。</div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    let timer = null;
+    let orderno = "[[${xrecharge.orderNo}]]";
+    var oSpan = document.getElementById('time');
+    function tow(n) {
+      return n >= 0 && n < 10 ? '0' + n : '' + n;
+    }
+
+    function copyText  () {
+      val  = $(".pay_url").text()
+       textArea = document.createElement('textArea')
+      textArea.value = val
+      document.body.appendChild(textArea)
+
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+      alert("复制成功")
+    }
+    // 获取基本信息
+    function getBaseInfo() {
+      axios
+              .get(
+                      "/recharge/order/getOrder/"+orderno
+              )
+              .then(function (response) {
+                console.log("请求的数据：", response);
+                let result = response.data;
+
+                if (result.code !== 200) {
+                  console.log("请求失败！");
+                  return;
+                }
+                // 拿到数据
+                let {
+                  order_status,
+                  order_no,
+                  url = "",
+                  pay_amount = 0,
+                } = result.data;
+                if (order_status == 0) {
+                  // 0 的时候继续加载 - 轮询
+                  stringTime = result.data.time;
+
+                } else if (order_status == 1) {
+                  // 1 数据加载成功
+                  window.location.href= result.data.payurl
+                } else if (order_status == 3) {
+                  document.getElementById("tips_4").style.display = "none";
+                  // // 3 订单支付失败
+                  // document.getElementsByClassName("toast-body")[0].innerText =
+                  //         "支付超时，请重新下单。！";
+                  // document.getElementById("overlay").style.display = "block";
+
+                  clearTimer();
+                } else if (order_status == 4 || order_status == 2) {
+                  // document.getElementById("tips_4").style.display = "none";
+                  // console.log("状态=", result.data);
+                  // // 3 订单超时
+                  // document.getElementsByClassName("toast-body")[0].innerText =
+                  //         "支付成功，请重新下单。";
+                  // document.getElementById("overlay").style.display = "block";
+                  clearTimer();
+                }
+
+
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+    }
+    getBaseInfo();
+    stringTime = '';
+    function getDate() {
+      if(stringTime == ''){
+        return;
+      }
+      var oDate = new Date();//获取日期对象
+      var oldTime = oDate.getTime();//现在距离1970年的毫秒数
+      var newDate = new Date(stringTime);
+      var newTime = newDate.getTime();//2019年距离1970年的毫秒数
+      var second = Math.floor((newTime - oldTime) / 1000);//未来时间距离现在的秒数
+      second = second % 86400;//余数代表剩下的秒数；
+      second %= 3600; //余数代表 剩下的秒数；
+      var minute = Math.floor(second / 60);
+      if(minute < 0){
+        var str = '<span class="time">订单已过期</span>'
+        oSpan.innerHTML = str;
+      }else {
+        second %= 60;
+        var str = tow(minute) + '<span class="time">分钟</span>'
+                + tow(second) + '<span class="time">秒</span>';
+        oSpan.innerHTML = str;
+      }
+
+    }
+
+    pollinMode()
+    timer1 = setInterval(() => {
+      getDate();
+    },1000);
+    // 轮询
+    function pollinMode() {
+      timer = setInterval(() => {
+        getBaseInfo();
+      },15000);
+    }
+
+    // 清除定时器
+    function clearTimer() {
+      if (!timer) return;
+      clearInterval(timer);
+      timer = null;
+    }
+
+    // // 关闭弹框
+    // var closeButton = document.getElementById("closeButton");
+    //
+    // closeButton.onclick = function () {
+    //   document.getElementById("overlay").style.display = "none";
+    // };
+    function handleLose() {
+      console.log("关闭弹框");
+
+      //   document.getElementById("closeButton").addEventListener(
+      //     "click",
+      //     function () {
+      //       document.getElementById("overlay").style.display = "none";
+      //     },
+      //     true
+      //   );
+    }
+
+    /**
+     *  一、开发调试阶段（先安装node，下载直接运行，地址：https://nodejs.org/en/download）
+     *      1.进入项目文件夹，打开命令分别运行一下命令
+     *      npm install
+     *      npm run dev
+     *
+     * 二、上线
+     *      1.运行一下命令
+     *      npm run build
+     *      2.拿到打包好的文件 dist 放在 nginx 服务器上
+     *
+     *
+     * **/
+  </script>
+</html>

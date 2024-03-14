@@ -66,6 +66,7 @@ public class ZfChannelRecord implements Serializable {
         rechargeAmount = zfWithdraw.getPayAmount();
         rechargeTimes = 1;
         channelFee = channlFee;
+        rechargeTimesTotal = 1;
     }
 }
 

@@ -129,7 +129,7 @@ public class WxYsServiceImpl implements BaseService {
             log.info("单号 {} 开始请求 {}  参数 {}",zfRecharge.getMerchantOrderNo(), domain + "/recharge/create", JSONObject.toJSONString(request));
             com.wechat.pay.java.service.payments.nativepay.model.PrepayResponse response = service.prepay(request);
             if(response.getCodeUrl() != null){
-                log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), response.toString());
+                log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), response.getCodeUrl());
                 TreeMap<String, Object> map1 = new TreeMap<>();
                 map1.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
                 map1.put("order_no", zfRecharge.getOrderNo());

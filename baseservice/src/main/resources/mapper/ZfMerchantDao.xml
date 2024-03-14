@@ -10,6 +10,7 @@
         <result property="remark" column="remark" />
         <result property="key" column="md5_key" />
         <result property="creditAmount" column="credit_amount" />
+        <result property="domain" column="domain" />
         <result property="merchantRate" column="merchant_rate" />
 
     </resultMap>
@@ -17,7 +18,7 @@
     <!--查询单个-->
     <select id="queryById" resultMap="ZfMerchantMap">
         select
-          merchant_id, balance, status, merchant_code, remark, md5_key, credit_amount,merchant_rate
+          merchant_id, balance,`domain`, status, merchant_code, remark, md5_key, credit_amount,merchant_rate
         from zf_merchant
         where merchant_id = #{merchantId}
     </select>

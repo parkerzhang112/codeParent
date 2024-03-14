@@ -33,5 +33,7 @@ public class ZfMerchant implements Serializable {
 
     private String merchantRate;
 
+
+    private String domain;
 }
 

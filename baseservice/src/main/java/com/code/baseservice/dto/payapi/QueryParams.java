@@ -11,11 +11,10 @@ import lombok.NonNull;
 
 public class QueryParams {
     @JsonProperty("merchant_order_no")
-    @JsonAlias(value = {"xsh_order_no", "order_number", "order", "order_no"})
     @NonNull
     private String merchant_order_no;
 
-    @JsonAlias(value = {"s_order_no"})
+    @JsonAlias(value = {"order_no"})
     @NonNull
     private String order_no;
 
@@ -30,4 +29,7 @@ public class QueryParams {
     @JsonProperty("sign")
     @NonNull
     private String  sign;
+
+    @JsonProperty("openId")
+    private String openId;
 }

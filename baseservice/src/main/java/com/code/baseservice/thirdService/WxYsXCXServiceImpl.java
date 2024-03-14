@@ -13,9 +13,10 @@ import com.code.baseservice.util.StringUtils;
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.exception.ValidationException;
-import com.wechat.pay.java.service.payments.jsapi.JsapiService;
+import com.wechat.pay.java.service.payments.jsapi.JsapiServiceExtension;
+import com.wechat.pay.java.service.payments.jsapi.model.Payer;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayRequest;
-import com.wechat.pay.java.service.payments.jsapi.model.PrepayResponse;
+import com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse;
 import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ import java.util.*;
 @Service("WxYsXCXService")
 public class WxYsXCXServiceImpl implements BaseService {
 
+    private String appid = "wx13bda2bc99c3998d";
+
+    private String appsecrect = "88dba6659e43eab4e895f8c6a661aa31";
 
     @Value("${app.viewurl:}")
     private String viewUrl;
@@ -36,7 +40,7 @@ public class WxYsXCXServiceImpl implements BaseService {
     @Autowired
     private ZfRechargeService zfRechargeService;
 
-    public static JsapiService service;
+    public static JsapiServiceExtension  service;
 
     private String domain = "http://34.150.25.159/api/order";
 
@@ -50,11 +54,11 @@ public class WxYsXCXServiceImpl implements BaseService {
                 zfRechargeService.paidOrder(zfRecharge);
                 return "success";
             }
-            } catch (ValidationException e) {
-                log.info("订单回调失败,异常原因 {} ",e.getStackTrace());
-                // 签名验证失败，返回 401 UNAUTHORIZED 状态码
-            }
-            return  "error";
+        } catch (ValidationException e) {
+            log.info("订单回调失败,异常原因 {} ",e.getStackTrace());
+            // 签名验证失败，返回 401 UNAUTHORIZED 状态码
+        }
+        return  "error";
     }
 
     public static String getGoodName(String price, String remark){
@@ -98,7 +102,38 @@ public class WxYsXCXServiceImpl implements BaseService {
 
     @Override
     public JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge) {
+        try {
+            String respone =  HttpClientUtil.doGet("https://api.weixin.qq.com/cgi-bin/token?appid="+this.appid+"&secret="+this.appsecrect+"&grant_type=client_credential");
+            JSONObject  jsopObject = JSONObject.parseObject(respone);
+            String accessToken = jsopObject.getString("access_token");
+            JSONObject params = new JSONObject();
+            params.put("is_expire", true);
+            params.put("expire_type", 1);
+            params.put("expire_interval", 30);
+            JSONObject jumpWxa = new JSONObject();
+            jumpWxa.put("path", "pages/goods/pay/pay");
+            jumpWxa.put("query", "query="+zfRecharge.getOrderNo());
+            jumpWxa.put("env_version", "release");
+            params.put("jump_wxa", jumpWxa);
+            log.info("单号 {}  参数 {}",zfRecharge.getMerchantOrderNo(), JSONObject.toJSONString(params));
+            String getUrlRespone = HttpClientUtil.doPostJson("https://api.weixin.qq.com/wxa/generatescheme?access_token="+accessToken, params.toJSONString());
+            JSONObject getUrlResponeJson = JSONObject.parseObject(getUrlRespone);
+            if(getUrlResponeJson.getInteger("errcode") == 0){
+                log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), getUrlRespone);
+                TreeMap<String, Object> map1 = new TreeMap<>();
+                map1.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
+                map1.put("order_no", zfRecharge.getOrderNo());
+                map1.put("pay_amount", zfRecharge.getPayAmount());
+                map1.put("payurl", getUrlResponeJson.getString("openlink"));
+                return new JSONObject(map1);
+            }
+        }catch (Exception e){
+            log.error("请求异常  订单号{}", zfRecharge.getOrderNo(), e);
+        }
+        return null;
+    }
 
+    public JSONObject createPrePayId(ZfChannel zfChannel, ZfRecharge zfRecharge){
         // 使用自动更新平台证书的RSA配置
         // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
         List<String> ms = Arrays.asList(zfChannel.getThirdMerchantId().split("\\|"));
@@ -110,13 +145,15 @@ public class WxYsXCXServiceImpl implements BaseService {
                         .merchantSerialNumber(ms.get(1))
                         .apiV3Key(zfChannel.getThirdMerchantPublicKey())
                         .build();
-
-        service = new JsapiService.Builder().config(config).build();
+        service = new JsapiServiceExtension.Builder().config(config).build();
         PrepayRequest request = new PrepayRequest();
         com.wechat.pay.java.service.payments.jsapi.model.Amount amount = new com.wechat.pay.java.service.payments.jsapi.model.Amount();
         amount.setTotal(zfRecharge.getPayAmount().intValue() * 100);
         request.setAmount(amount);
-        request.setAppid(ms.get(2));
+        request.setAppid(this.appid);
+        Payer payer =  new Payer();
+        payer.setOpenid(zfRecharge.getPayName());
+        request.setPayer(payer);
         request.setMchid(ms.get(0));
         String goodName = getGoodName(zfRecharge.getPayAmount().setScale(0).toString(), zfChannel.getRemark());
         if(goodName == null){
@@ -129,14 +166,16 @@ public class WxYsXCXServiceImpl implements BaseService {
         // 调用接口
         try {
             log.info("单号 {} 开始请求 {}  参数 {}",zfRecharge.getMerchantOrderNo(), domain + "/recharge/create", JSONObject.toJSONString(request));
-            PrepayResponse response = service.prepay(request);
-            if(response.getPrepayId() != null){
+            PrepayWithRequestPaymentResponse response = service.prepayWithRequestPayment(request);
+            if(response.getAppId() != null){
                 log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), response.toString());
                 TreeMap<String, Object> map1 = new TreeMap<>();
-                map1.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
-                map1.put("order_no", zfRecharge.getOrderNo());
-                map1.put("pay_amount", zfRecharge.getPayAmount());
-                map1.put("payurl", response.getPrepayId());
+                map1.put("appId", response.getAppId());
+                map1.put("timeStamp", response.getTimeStamp());
+                map1.put("nonceStr", response.getNonceStr());
+                map1.put("package", response.getPackageVal());
+                map1.put("signType", response.getSignType());
+                map1.put("paySign", response.getPaySign());
                 return new JSONObject(map1);
             }else {
                 log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), response.toString());
@@ -145,6 +184,19 @@ public class WxYsXCXServiceImpl implements BaseService {
         }catch (BaseException e){
             log.error("请求异常 {} 订单号{}", e, zfRecharge.getOrderNo());
             return  null;
+        }
+    }
+
+    public JSONObject getOpenId(ZfChannel zfChannel, ZfRecharge zfRecharge){
+        try{
+            String url = "https://api.weixin.qq.com/sns/jscode2session?appid="+this.appid+"&secret="+this.appsecrect+"&js_code="+zfRecharge.getPayName()+"&grant_type=authorization_code";
+            String res = HttpClientUtil.doGet(url);
+            log.info("获取open id {}", res);
+            JSONObject jsonObject = JSONObject.parseObject(res);
+            return jsonObject;
+        }catch (Exception e){
+            log.error("获取openid  异常 ", e);
+            return new JSONObject();
         }
     }
 

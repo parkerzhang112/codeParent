@@ -112,10 +112,16 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 
         try {
             JSONObject jsonObject;
-            if(!zfChannel.getPayType().equals(8)){
+            if(zfChannel.getPayType() != 8){
                  jsonObject = commonService.create(zfChannel, zfRecharge);
-                zfRecharge.setOrderStatus(1);
-                zfRechargeDao.update(zfRecharge);
+                 log.info("单号 {} 三方请求的结果 {}", zfRecharge.getMerchantOrderNo(),jsonObject.toJSONString());
+                if(null != jsonObject.getString("payurl")){
+                    zfRecharge.setPayUrl(jsonObject.getString("payurl"));
+                }
+                 zfRecharge.setOrderStatus(1);
+                int r = zfRechargeDao.update(zfRecharge);
+                log.info("单号 {} 订单更新结果  {}", zfRecharge.getMerchantOrderNo(),  r);
+
             }else {
                  jsonObject = buildReuslt(zfMerchant, zfRecharge);
             }
@@ -148,7 +154,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         map.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
         map.put("order_no", zfRecharge.getOrderNo());
         map.put("pay_amount", zfRecharge.getPayAmount());
-        map.put("payurl", viewUrl + "/recharge/order/" + zfRecharge.getOrderNo());
+        map.put("payurl", zfMerchant.getDomain() + "/recharge/order/" + zfRecharge.getOrderNo());
         String sign_str = new CommonUtil().getSign(map);
         sign_str = sign_str.concat("key=".concat(zfMerchant.getKey()));
         String sign = MD5Util.getMD5Str(sign_str).toUpperCase();
