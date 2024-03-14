@@ -338,6 +338,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 
         Telegram telegram = new Telegram();
         Set<Integer > agengids = zfCodes.stream().map(ZfCode::getAgentId).collect(Collectors.toSet());
+        log.info("当前代理 {}", agengids);
         List<Integer> sortagentIds =  agengids.stream().sorted(((o1, o2) -> o2.compareTo(o1))).collect(Collectors.toList());
         String agentKey = RedisConstant.CURRENT_AGENT.concat(zfRecharge.getPayType().toString());
         Integer agentId = selectOneAgentByRobin(sortagentIds, agentKey, zfRecharge.getMerchantId());

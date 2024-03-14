@@ -70,6 +70,7 @@ public class ZfCodeServiceImpl implements ZfCodeService {
             codeType = 4;
         }
         List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount(), codeType);
+
         List<ZfCode> filterCard = new ArrayList<>();
         for (int i =0 ; i < zfCodes.size(); i ++){
 //            String codeAmount = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(i).getName();

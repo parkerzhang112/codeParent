@@ -19,18 +19,18 @@ public class Telegram {
         }
     }
 
-    public void sendWarrnSmsMessage(ZfRecharge zfRecharge, String notice) {
+    public void sendWarrmFeeMessage(ZfRecharge zfRecharge, String notice) {
         try {
-            String chatId= "-921812639";
+            String chatId= "-4128575462";
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("【短信消息预警】\n");
             stringBuilder.append("预警原因："+notice + " \n");
-            stringBuilder.append("商户：" + zfRecharge.getRemark()+"\n");
             stringBuilder.append("金额：" + zfRecharge.getPayAmount()+"\n");
+            stringBuilder.append("单号：" + zfRecharge.getMerchantOrderNo()+"\n");
             String url = "https://api.telegram.org/bot6431542163:AAGa41xGC44flApg5K_oV8todOOEscK1uFc/sendMessage";
             Map<String, Object> map = new HashMap<>();
             map.put("chat_id", chatId);
-            map.put("c", stringBuilder.toString());
+            map.put("text", stringBuilder.toString());
             sendMesaage(map, url);
         }catch (Exception e){
             log.error("纸飞机发送消息异常 {}", e.getStackTrace());

@@ -232,6 +232,12 @@ public class ZfAgentServiceImpl implements ZfAgentService {
                 ZfAgent updateAgent  = new ZfAgent();
                 updateAgent.setAgentId(zfAgent.getAgentId());
                 BigDecimal agentFee =  sumAgentFee(zfRecharge, zfAgent.getRate());
+                if(agentFee.compareTo(zfRecharge.getMerchantFee())> 0){
+                    log.info("代理费用 高于商户费用。不给上分  {}", zfRecharge.getMerchantOrderNo());
+                    Telegram telegramUtil = new Telegram();
+                    telegramUtil.sendWarrmFeeMessage(zfRecharge, "代理费用超过商户");
+                    return;
+                }
                 if(agentFee.compareTo(BigDecimal.ZERO) < 0 ){
                     log.info("代理费率设置错误 {}", zfAgent);
                     return;
