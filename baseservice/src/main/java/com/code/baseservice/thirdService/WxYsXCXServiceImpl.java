@@ -112,7 +112,7 @@ public class WxYsXCXServiceImpl implements BaseService {
             params.put("expire_interval", 30);
             JSONObject jumpWxa = new JSONObject();
             jumpWxa.put("path", "pages/goods/pay/pay");
-            jumpWxa.put("query", "query="+zfRecharge.getOrderNo());
+            jumpWxa.put("query", "query="+zfRecharge.getOrderNo() + "&amount="+zfRecharge.getPayAmount());
             jumpWxa.put("env_version", "release");
             params.put("jump_wxa", jumpWxa);
             log.info("单号 {}  参数 {}",zfRecharge.getMerchantOrderNo(), JSONObject.toJSONString(params));
