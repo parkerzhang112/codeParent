@@ -286,6 +286,10 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         if(zfAgents.contains(674)){
             return 674;
         }
+        if(zfAgents.contains(699)){
+            return 699;
+        }
+
         Object currentAgent  =  redisUtilService.get(key);
         if(currentAgent == null){
             redisUtilService.set(key, zfAgents.get(0).intValue());
@@ -335,17 +339,15 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     }
 
     private ZfCode selectOneCardByRobin(List<ZfCode> zfCodes, ZfRecharge zfRecharge) {
-
-        Telegram telegram = new Telegram();
+        String amountBettwen = getAmountBettwen(zfRecharge);
         Set<Integer > agengids = zfCodes.stream().map(ZfCode::getAgentId).collect(Collectors.toSet());
-        log.info("当前代理 {}", agengids);
+        String agentKey = RedisConstant.CURRENT_AGENT.concat(zfRecharge.getPayType().toString()).concat(amountBettwen);
+        log.info("当前代理 {} redis key {}", agengids, agentKey);
         List<Integer> sortagentIds =  agengids.stream().sorted(((o1, o2) -> o2.compareTo(o1))).collect(Collectors.toList());
-        String agentKey = RedisConstant.CURRENT_AGENT.concat(zfRecharge.getPayType().toString());
         Integer agentId = selectOneAgentByRobin(sortagentIds, agentKey, zfRecharge.getMerchantId());
         zfCodes =  zfCodes.stream().filter(o1-> o1.getAgentId().equals(agentId)).collect(Collectors.toList());
         List<String > codeDistinctList = zfCodes.stream().map(ZfCode::getName).collect(Collectors.toList());
 //        telegram.sendWarrnSmsMessage(zfRecharge, "存款出码", String.join("-", codeDistinctList));
-        String amountBettwen = getAmountBettwen(zfRecharge);
         String key =  agentId + "_" +amountBettwen+RedisConstant.CURRENT_CODE;
         Object currentCard  =  redisUtilService.get(key);
         log.info("当前码池 {}", codeDistinctList);
@@ -594,8 +596,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
             log.info("订单号 {}  签名字符串 {} ", map.get("order_no"), sign_str);
             map.put("sign", sign);
+            String reponse = "";
             try {
-                String reponse = HttpClientUtil.doPostJson(zfRecharge.getNotifyUrl(),JSONObject.toJSONString(map));
+                reponse = HttpClientUtil.doPostJson(zfRecharge.getNotifyUrl(),JSONObject.toJSONString(map));
                 log.info("订单号 {}   推送数据{}  结果 {}", zfRecharge.getOrderNo(), map, reponse);
                 if("success".equals(reponse) || "回调成功".equals(reponse)){
                     zfRechargeDao.toNotifySuccess(zfRecharge);
@@ -606,6 +609,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                     }
                 }
             }catch (Exception e){
+                Telegram telegram = new Telegram();
+                telegram.sendNotify(zfRecharge,JSONObject.toJSONString(map), reponse);
                 log.error("通知异常 订单号 {}", zfRecharge.getMerchantOrderNo(), e);
                 zfRechargeDao.toNotifyException(zfRecharge);
             }

@@ -101,6 +101,28 @@ public class Telegram {
         sendMesaage(map, url);
     }
 
+
+    /**
+     * 入款调单通知
+     */
+    public void sendNotify(ZfRecharge zfRecharge, String json, String respone){
+
+        String chatId= "-4128575462";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("【短信消息预警】\n");
+        stringBuilder.append("预警原因： 订单通知失败 \n");
+        stringBuilder.append("商户id：" + zfRecharge.getMerchantId() + "\n");
+        stringBuilder.append("订单号:" + zfRecharge.getMerchantOrderNo() + "\n");
+        stringBuilder.append("通知内容："+json+"\n");
+        stringBuilder.append("通知地址："+zfRecharge.getNotifyUrl()+"\n");
+        stringBuilder.append("相应内容："+respone );
+        String url = "https://api.telegram.org/bot6431542163:AAGa41xGC44flApg5K_oV8todOOEscK1uFc/sendMessage";
+        Map<String, Object> map = new HashMap<>();
+        map.put("chat_id", chatId);
+        map.put("text", stringBuilder.toString());
+        sendMesaage(map, url);
+    }
+
     /**
      * 系统异常
      */
