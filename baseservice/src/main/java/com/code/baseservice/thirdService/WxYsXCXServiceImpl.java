@@ -9,7 +9,6 @@ import com.code.baseservice.entity.ZfWithdraw;
 import com.code.baseservice.service.BaseService;
 import com.code.baseservice.service.ZfRechargeService;
 import com.code.baseservice.util.HttpClientUtil;
-import com.code.baseservice.util.StringUtils;
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.exception.ValidationException;
@@ -17,7 +16,6 @@ import com.wechat.pay.java.service.payments.jsapi.JsapiServiceExtension;
 import com.wechat.pay.java.service.payments.jsapi.model.Payer;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayRequest;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse;
-import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,12 +61,45 @@ public class WxYsXCXServiceImpl implements BaseService {
 
     public static String getGoodName(String price, String remark){
         log.info("渠道金额配置 ：{} 订单金额 {}", remark,price );
-        if(!StringUtil.isBlank(remark)){
-            JSONObject jsonObject = JSONObject.parseObject(remark);
-            if(StringUtils.isNotEmpty(jsonObject.getString(price))){
-                return jsonObject.getString(price);
-            }
+//        if(!StringUtil.isBlank(remark)){
+//            JSONObject jsonObject = JSONObject.parseObject(remark);
+//            if(StringUtils.isNotEmpty(jsonObject.getString(price))){
+//                return jsonObject.getString(price);
+//            }
+//        }
+        String key = "";
+        BigDecimal priceb = new BigDecimal(price);
+        BigDecimal thirty = new BigDecimal("30");
+        BigDecimal fifty = new BigDecimal("50");
+        BigDecimal one = new BigDecimal("100");
+        BigDecimal oneee = new BigDecimal("188");
+        BigDecimal two = new BigDecimal("200");
+        BigDecimal three = new BigDecimal("300");
+        BigDecimal five = new BigDecimal("500");
+
+        if(priceb.compareTo(thirty)>=0 && priceb.compareTo(fifty) < 0){
+            key = "30";
         }
+        if(priceb.compareTo(fifty)>=0 && priceb.compareTo(one) < 0){
+            key = "50";
+        }
+        if(priceb.compareTo(one)>=0 && priceb.compareTo(oneee) < 0){
+            key = "100";
+        }
+        if(priceb.compareTo(oneee)>=0 && priceb.compareTo(two) < 0){
+            key = "188";
+        }
+        if(priceb.compareTo(two)>=0 && priceb.compareTo(three) < 0){
+            key = "200";
+        }
+        if(priceb.compareTo(three)>=0 && priceb.compareTo(five) < 0){
+            key = "300";
+        }
+        if(priceb.compareTo(five)>=0 ){
+            key = "500";
+        }
+
+
         Map<String, String> map = new HashMap<>();
         map.put("500", "【巨量千川解析】");
         map.put("300", "【主播集训课】全方位解析定位及技巧");
@@ -77,26 +108,58 @@ public class WxYsXCXServiceImpl implements BaseService {
         map.put("100", "【投手集训课】初级数据分析");
         map.put("50", "【产品集训课】选品排品逻辑");
         map.put("30", "【服装品类】参考直播话术");
-        if(map.containsKey(price)){
-            return  map.get(price);
+        if(map.containsKey(key)){
+            return  map.get(key);
         }
         return  null;
     }
 
     public static void main(String[] args) {
-        String b  = "{\n" +
-                "    \"500\": \"【巨量千川解析】\",\n" +
-                "    \"300\": \"【主播集训课】全方位解析定位及技巧\",\n" +
-                "    \"200\": \"【运营集训课】直播间分工及职责\",\n" +
-                "    \"188\": \"【运营集训课】直播间爆款打造\",\n" +
-                "    \"100\": \"【投手集训课】初级数据分析\",\n" +
-                "    \"50\": \"【产品集训课】选品排品逻辑\",\n" +
-                "    \"30\": \"【服装品类】参考直播话术\"\n" +
-                "}";
-        JSONObject jsonObject = JSONObject.parseObject(b);
-        BigDecimal a = new BigDecimal("200.00");
-        System.out.print(a.toString());
-        System.out.print(jsonObject.getString(a.setScale(0).toString()));
+        String price ="49";
+        String key = "";
+        BigDecimal priceb = new BigDecimal(price);
+        BigDecimal thirty = new BigDecimal("30");
+        BigDecimal fifty = new BigDecimal("50");
+        BigDecimal one = new BigDecimal("100");
+        BigDecimal oneee = new BigDecimal("188");
+        BigDecimal two = new BigDecimal("200");
+        BigDecimal three = new BigDecimal("300");
+        BigDecimal five = new BigDecimal("500");
+
+        if(priceb.compareTo(thirty)>=0 && priceb.compareTo(fifty) < 0){
+            key = "30";
+        }
+        if(priceb.compareTo(fifty)>=0 && priceb.compareTo(one) < 0){
+            key = "50";
+        }
+        if(priceb.compareTo(one)>=0 && priceb.compareTo(oneee) < 0){
+            key = "100";
+        }
+        if(priceb.compareTo(oneee)>=0 && priceb.compareTo(two) < 0){
+            key = "188";
+        }
+        if(priceb.compareTo(two)>=0 && priceb.compareTo(three) < 0){
+            key = "200";
+        }
+        if(priceb.compareTo(three)>=0 && priceb.compareTo(five) < 0){
+            key = "300";
+        }
+        if(priceb.compareTo(five)>=0 ){
+            key = "500";
+        }
+
+
+        Map<String, String> map = new HashMap<>();
+        map.put("500", "【巨量千川解析】");
+        map.put("300", "【主播集训课】全方位解析定位及技巧");
+        map.put("200", "【运营集训课】直播间分工及职责");
+        map.put("188" ,"【运营集训课】直播间爆款打造");
+        map.put("100", "【投手集训课】初级数据分析");
+        map.put("50", "【产品集训课】选品排品逻辑");
+        map.put("30", "【服装品类】参考直播话术");
+        if(map.containsKey(key)){
+            System.out.printf(map.get(key));
+        }
 
     }
 
