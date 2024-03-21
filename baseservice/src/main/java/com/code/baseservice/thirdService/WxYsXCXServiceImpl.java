@@ -111,7 +111,8 @@ public class WxYsXCXServiceImpl implements BaseService {
         if(map.containsKey(key)){
             return  map.get(key);
         }
-        return  null;
+        return  "视频案例展示";
+//        return  null;
     }
 
     public static void main(String[] args) {
