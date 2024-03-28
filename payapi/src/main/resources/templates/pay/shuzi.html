@@ -220,6 +220,7 @@
   </div>
 </div>
 <script>
+
   var h5Copy = document.querySelectorAll('.copy');
   for (var ll = 0; ll < h5Copy.length; ll++) {
     h5Copy[ll].index = ll;
@@ -247,6 +248,8 @@
 <script>
   var oSpan = document.getElementById('time');
   let orderno = "[[${xrecharge.orderNo}]]";
+  let name = "[[${xrecharge.payName}]]";
+
   stringTime = '';
   function getDate() {
     if(stringTime == ''){
@@ -271,19 +274,22 @@
     }
 
   }
-  var inputname = prompt("请输入姓名，极速到账", "");
-  if (inputname != null && inputname.length != 0){
-    axios.post("/recharge/order/updateName",
-            {
-              "name":inputname, "orderNo":orderno
-            })
-            .then(function (response) {
+  if(name == undefined || name == ''){
+    var inputname = prompt("请输入姓名，极速到账", "");
+    if (inputname != null && inputname.length != 0){
+      axios.post("/recharge/order/updateName",
+              {
+                "name":inputname, "orderNo":orderno
+              })
+              .then(function (response) {
 
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+    }
   }
+
   // 获取基本信息
   function getBaseInfo() {
     axios

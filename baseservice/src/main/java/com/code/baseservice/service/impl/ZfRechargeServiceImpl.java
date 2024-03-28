@@ -283,11 +283,25 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         if(zfAgents.contains(335)){
             return 335;
         }
-        if(zfAgents.contains(674)){
-            return 674;
-        }
+//        if(zfAgents.contains(674)){
+//            return 674;
+//        }
         if(zfAgents.contains(699)){
             return 699;
+        }
+
+        String priority = "priority";
+
+        Object priorityAgentId = redisUtilService.get(priority);
+        if(priorityAgentId != null){
+            try {
+                if(zfAgents.contains(Integer.valueOf(priorityAgentId.toString()))){
+                    redisUtilService.del(priority);
+                    return Integer.valueOf(priorityAgentId.toString());
+                }
+            }catch (Exception e){
+                log.error("异常 ",e);
+            }
         }
 
         Object currentAgent  =  redisUtilService.get(key);

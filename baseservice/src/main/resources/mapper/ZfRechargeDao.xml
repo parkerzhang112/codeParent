@@ -19,11 +19,12 @@
         <result property="merchantFee" column="merchant_fee" />
         <result property="payType" column="pay_type" />
         <result property="remark" column="remark" />
+        <result property="payName" column="pay_name"/>
     </resultMap>
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfRechargeMap">
-        select merchant_order_no, remark,pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee,pay_type
+        select merchant_order_no, remark,pay_amount, paid_amount, order_no, notify_url, code_id, create_time, update_time, merchant_id, channel_id, agent_id, order_status, notify_status, merchant_fee,pay_type,pay_name
         from zf_recharge
         where order_no = #{orderNo}
     </select>
