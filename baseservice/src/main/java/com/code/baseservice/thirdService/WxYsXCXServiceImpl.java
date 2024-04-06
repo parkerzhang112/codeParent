@@ -224,7 +224,7 @@ public class WxYsXCXServiceImpl implements BaseService {
             return null;
         }
         request.setDescription(goodName);
-        request.setNotifyUrl( "https://bjy6688.top/recharge/json_notify/"+ zfRecharge.getOrderNo());
+        request.setNotifyUrl( "https://zafasd013.top/outpay/recharge/json_notify/"+ zfRecharge.getOrderNo());
         request.setOutTradeNo(zfRecharge.getOrderNo());
         // 调用request.setXxx(val)设置所需参数，具体参数可见Request定义
         // 调用接口
