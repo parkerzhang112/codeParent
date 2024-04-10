@@ -1,6 +1,7 @@
 package com.code.baseservice.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.base.constant.RedisConstant;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.enums.TransTypeEnum;
 import com.code.baseservice.base.exception.BaseException;
@@ -10,12 +11,15 @@ import com.code.baseservice.dto.backapi.OperaChannelParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.dto.payapi.TransferParams;
 import com.code.baseservice.entity.*;
+import com.code.baseservice.service.RedisUtilService;
 import com.code.baseservice.service.ZfChannelRecordService;
 import com.code.baseservice.service.ZfChannelService;
 import com.code.baseservice.service.ZfChannelTransService;
 import com.code.baseservice.util.CommonUtil;
 import com.code.baseservice.util.HttpClientUtil;
 import com.code.baseservice.util.MD5Util;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -29,6 +33,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * (ZfChannel)表服务实现类
@@ -50,6 +55,9 @@ public class ZfChannelServiceImpl implements ZfChannelService {
 
     @Autowired
     private ZfChannelTransService zfChannelTransService;
+
+    @Autowired
+    private RedisUtilService redisUtilService;
 
     /**
      * 通过ID查询单条数据
@@ -73,6 +81,10 @@ public class ZfChannelServiceImpl implements ZfChannelService {
         log.info("渠道查询结果 订单号 {},渠道集合:{}", rechareParams.getMerchant_order_no(), channels);
 
         return channels.get(0);
+    }
+
+    private Integer selectOneAgentByRobin(List<Integer> zfAgents, String key, Integer merchantId) {
+
     }
 
     @Override

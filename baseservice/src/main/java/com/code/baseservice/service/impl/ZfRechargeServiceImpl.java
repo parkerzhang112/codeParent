@@ -104,12 +104,11 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         //延签
         vaildSign(rechareParams, zfMerchant);
         //去重
-//        vaildRepeat(rechareParams);
+        vaildRepeat(rechareParams);
         //查渠道
         ZfChannel zfChannel = zfChannelService.queryChannelByParams(rechareParams);
         //入单
         ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
-
         try {
             JSONObject jsonObject;
             if(zfChannel.getPayType() != 8){
@@ -123,12 +122,14 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 log.info("单号 {} 订单更新结果  {}", zfRecharge.getMerchantOrderNo(),  r);
 
             }else {
-                List<ZfCode> zfCodes = 
+                List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfRecharge);
+
                 ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfRecharge);
-
-
-                 jsonObject = buildReuslt(zfMerchant, zfRecharge);
+                zfRecharge.setCodeId(zfCode.getCodeId());
+                jsonObject = buildReuslt(zfMerchant, zfRecharge);
             }
+            zfRechargeDao.insert(zfRecharge);
+
             ZfChannelRecord zfChannelRecord = new ZfChannelRecord();
             zfChannelRecord.setRechargeTimesTotal(1);
             zfChannelRecord.setChannelId(zfRecharge.getChannelId());
@@ -193,7 +194,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             xRecharge.setIsThird(StringUtils.isNotEmpty(zfChannel.getThirdMerchantId()) ? 1 : 0);
 //            xRecharge.setCodeId(zfCode.getCodeId());
 //            xRecharge.setAgentId(zfCode.getAgentId());
-            zfRechargeDao.insert(xRecharge);
             return xRecharge;
         } catch (Exception e) {
             log.info("创建订单异常 订单号 {}", rechareParams.getMerchant_order_no(), e);
@@ -249,14 +249,12 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 
     private ZfCode selectOneCardByRobin(List<ZfCode> zfCodes, ZfRecharge zfRecharge) {
 
-        Telegram telegram = new Telegram();
         Set<Integer> agengids = zfCodes.stream().map(ZfCode::getAgentId).collect(Collectors.toSet());
         List<Integer> sortagentIds = agengids.stream().sorted(((o1, o2) -> o2.compareTo(o1))).collect(Collectors.toList());
         String agentKey = RedisConstant.CURRENT_AGENT;
         Integer agentId = selectOneAgentByRobin(sortagentIds, agentKey, zfRecharge.getMerchantId());
         zfCodes = zfCodes.stream().filter(o1 -> o1.getAgentId().equals(agentId)).collect(Collectors.toList());
         List<String> codeDistinctList = zfCodes.stream().map(ZfCode::getName).collect(Collectors.toList());
-        telegram.sendWarrnSmsMessage(zfRecharge, "存款出码", String.join("-", codeDistinctList));
         String amountBettwen = getAmountBettwen(zfRecharge);
         String key = agentId + "_" + amountBettwen + RedisConstant.CURRENT_CODE;
         Object currentCard = redisUtilService.get(key);

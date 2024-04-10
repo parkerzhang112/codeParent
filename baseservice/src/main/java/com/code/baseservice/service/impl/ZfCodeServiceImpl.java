@@ -1,5 +1,7 @@
 package com.code.baseservice.service.impl;
 
+import com.code.baseservice.base.enums.ResultEnum;
+import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfCodeDao;
 import com.code.baseservice.dto.autoapi.TransParams;
 import com.code.baseservice.entity.ZfCode;
@@ -55,17 +57,15 @@ public class ZfCodeServiceImpl implements ZfCodeService {
             codeType = 1;
        }
         List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount(), codeType);
+        if(zfCodes.size() == 0){
+            throw new BaseException(ResultEnum.NO_CODE);
+        }
+
         List<ZfCode> filterCard = new ArrayList<>();
         for (int i =0 ; i < zfCodes.size(); i ++){
-//            String codeAmount = "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfCodes.get(i).getName();
-//            if(redisUtilService.hasKey(codeAmount)){
-//                continue;
-//            }
             filterCard.add(zfCodes.get(i));
         }
         if(filterCard.size() == 0){
-
-//            throw  new BaseException(ResultEnum.NO_CODE);
             return  filterCard;
         }
         return filterCard;

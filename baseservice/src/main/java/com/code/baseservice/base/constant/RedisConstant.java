@@ -11,6 +11,7 @@ public class RedisConstant {
     public static String CURRENT_AGENT = "current_agent";
     public static String WEIFHT_AGENT = "weight_agent";
 
+    public static String POLL_CHANNEL = "poll_channel";
 
     public static String PAID_ORDER = "p_order";
 
