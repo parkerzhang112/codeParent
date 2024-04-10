@@ -28,9 +28,9 @@ import java.util.*;
 @Service("WxYsXCXService")
 public class WxYsXCXServiceImpl implements BaseService {
 
-    private String appid = "wx13bda2bc99c3998d";
+    private String appid = "wx31c8156e39f646c7";
 
-    private String appsecrect = "88dba6659e43eab4e895f8c6a661aa31";
+    private String appsecrect = "996b2b1eb34e86d44f432648faa1da28";
 
     @Value("${app.viewurl:}")
     private String viewUrl;
@@ -68,50 +68,14 @@ public class WxYsXCXServiceImpl implements BaseService {
 //            }
 //        }
         String key = "";
-        BigDecimal priceb = new BigDecimal(price);
-        BigDecimal thirty = new BigDecimal("30");
-        BigDecimal fifty = new BigDecimal("50");
-        BigDecimal one = new BigDecimal("100");
-        BigDecimal oneee = new BigDecimal("188");
-        BigDecimal two = new BigDecimal("200");
-        BigDecimal three = new BigDecimal("300");
-        BigDecimal five = new BigDecimal("500");
-
-        if(priceb.compareTo(thirty)>=0 && priceb.compareTo(fifty) < 0){
-            key = "30";
-        }
-        if(priceb.compareTo(fifty)>=0 && priceb.compareTo(one) < 0){
-            key = "50";
-        }
-        if(priceb.compareTo(one)>=0 && priceb.compareTo(oneee) < 0){
-            key = "100";
-        }
-        if(priceb.compareTo(oneee)>=0 && priceb.compareTo(two) < 0){
-            key = "188";
-        }
-        if(priceb.compareTo(two)>=0 && priceb.compareTo(three) < 0){
-            key = "200";
-        }
-        if(priceb.compareTo(three)>=0 && priceb.compareTo(five) < 0){
-            key = "300";
-        }
-        if(priceb.compareTo(five)>=0 ){
-            key = "500";
-        }
-
-
         Map<String, String> map = new HashMap<>();
-        map.put("500", "【巨量千川解析】");
-        map.put("300", "【主播集训课】全方位解析定位及技巧");
-        map.put("200", "【运营集训课】直播间分工及职责");
-        map.put("188" ,"【运营集训课】直播间爆款打造");
-        map.put("100", "【投手集训课】初级数据分析");
-        map.put("50", "【产品集训课】选品排品逻辑");
-        map.put("30", "【服装品类】参考直播话术");
-        if(map.containsKey(key)){
-            return  map.get(key);
+        map.put("100", "19朵玫瑰花束");
+        map.put("50", "11朵玫瑰花束");
+        map.put("30", "8朵仿真玫瑰");
+        if(map.containsKey(price)){
+            return  map.get(price);
         }
-        return  "视频案例展示";
+        return  "补货";
 //        return  null;
     }
 
@@ -151,13 +115,9 @@ public class WxYsXCXServiceImpl implements BaseService {
 
 
         Map<String, String> map = new HashMap<>();
-        map.put("500", "【巨量千川解析】");
-        map.put("300", "【主播集训课】全方位解析定位及技巧");
-        map.put("200", "【运营集训课】直播间分工及职责");
-        map.put("188" ,"【运营集训课】直播间爆款打造");
-        map.put("100", "【投手集训课】初级数据分析");
-        map.put("50", "【产品集训课】选品排品逻辑");
-        map.put("30", "【服装品类】参考直播话术");
+        map.put("100", "19朵玫瑰花束");
+        map.put("50", "11朵玫瑰花束");
+        map.put("30", "8朵仿真玫瑰");
         if(map.containsKey(key)){
             System.out.printf(map.get(key));
         }
@@ -179,7 +139,7 @@ public class WxYsXCXServiceImpl implements BaseService {
             jumpWxa.put("query", "query="+zfRecharge.getOrderNo() + "&amount="+zfRecharge.getPayAmount());
             jumpWxa.put("env_version", "release");
             params.put("jump_wxa", jumpWxa);
-            log.info("单号 {}  参数 {}",zfRecharge.getMerchantOrderNo(), JSONObject.toJSONString(params));
+            log.info("单号 {}  参数 {} token {}",zfRecharge.getMerchantOrderNo(), JSONObject.toJSONString(params), accessToken);
             String getUrlRespone = HttpClientUtil.doPostJson("https://api.weixin.qq.com/wxa/generatescheme?access_token="+accessToken, params.toJSONString());
             JSONObject getUrlResponeJson = JSONObject.parseObject(getUrlRespone);
             if(getUrlResponeJson.getInteger("errcode") == 0){
@@ -190,6 +150,8 @@ public class WxYsXCXServiceImpl implements BaseService {
                 map1.put("pay_amount", zfRecharge.getPayAmount());
                 map1.put("payurl", getUrlResponeJson.getString("openlink"));
                 return new JSONObject(map1);
+            }else {
+                log.error("请求异常  订单号{}", zfRecharge.getOrderNo(), getUrlRespone);
             }
         }catch (Exception e){
             log.error("请求异常  订单号{}", zfRecharge.getOrderNo(), e);

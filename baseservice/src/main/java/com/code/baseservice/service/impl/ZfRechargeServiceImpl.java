@@ -123,6 +123,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 log.info("单号 {} 订单更新结果  {}", zfRecharge.getMerchantOrderNo(),  r);
 
             }else {
+
+
                  jsonObject = buildReuslt(zfMerchant, zfRecharge);
             }
             ZfChannelRecord zfChannelRecord = new ZfChannelRecord();
