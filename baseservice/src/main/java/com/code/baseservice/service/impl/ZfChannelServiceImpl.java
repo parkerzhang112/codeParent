@@ -18,8 +18,7 @@ import com.code.baseservice.service.ZfChannelTransService;
 import com.code.baseservice.util.CommonUtil;
 import com.code.baseservice.util.HttpClientUtil;
 import com.code.baseservice.util.MD5Util;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import io.swagger.models.auth.In;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -31,9 +30,9 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * (ZfChannel)表服务实现类
@@ -83,8 +82,31 @@ public class ZfChannelServiceImpl implements ZfChannelService {
         return channels.get(0);
     }
 
-    private Integer selectOneAgentByRobin(List<Integer> zfAgents, String key, Integer merchantId) {
-
+    private ZfChannel selectOneAgentByRobin(List<ZfChannel> zfChannels,ZfRecharge zfRecharge) {
+        String key = RedisConstant.ROBIN_CARD_KEY;
+        Integer currentChannel = (Integer) redisUtilService.get(key);
+        log.info("当前轮训的码 {}", currentChannel);
+        if(Objects.isNull(currentChannel)){
+            String amountKey = zfRecharge.getPayType()+ "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfChannels.get(0).getChannelId();
+            log.info("轮训码信息为空");
+            redisUtilService.set(amountKey, 1, 600);
+            redisUtilService.set(key, zfChannels.get(0).getChannelId().intValue());
+            return  zfChannels.get(0);
+        }
+        for (int i= 0;i < zfChannels.size(); i++){
+            String amountKey = "channel"+zfRecharge.getPayType() +"onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfChannels.get(i).getChannelId();
+            if(zfChannels.get(i).getChannelId() < currentChannel && zfChannels.get(i).getChannelId().equals(agentId)){
+                log.info("渠道轮训下一位 {}", zfChannels.get(i));
+                redisUtilService.set(key, zfChannels.get(i).getChannelId().intValue());
+                redisUtilService.set(amountKey, 1, 600);
+                return  zfChannels.get(i);
+            }
+        }
+        String amountKey = zfRecharge.getPayType()+ "onlyAmount"+zfRecharge.getPayAmount().toBigInteger()+zfChannels.get(0).getChannelId();
+        redisUtilService.set(amountKey, 1, 600);
+        redisUtilService.set(key, zfChannels.get(0).getChannelId().intValue());
+        log.info("单一渠道 {}", zfChannels);
+        return  zfChannels.get(0);
     }
 
     @Override
