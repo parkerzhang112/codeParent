@@ -123,6 +123,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 log.info("单号 {} 订单更新结果  {}", zfRecharge.getMerchantOrderNo(),  r);
 
             }else {
+                List<ZfCode> zfCodes = 
+                ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfRecharge);
 
 
                  jsonObject = buildReuslt(zfMerchant, zfRecharge);
