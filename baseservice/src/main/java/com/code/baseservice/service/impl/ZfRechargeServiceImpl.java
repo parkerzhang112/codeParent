@@ -650,6 +650,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 }
             String isExist = "get:code:" + zfRecharge.getOrderNo();
             if(redisUtilService.hasKey(isExist)){
+                log.info("开始查询订单 {} 订单已经分配",orderno);
                 ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
                 map.put("payurl", zfCode.getImage());
                 map.put("trans_account", zfCode.getAccount());
@@ -659,9 +660,10 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 return new JSONObject(map);
             }
             if(rLockOrder.tryLock(2,5, TimeUnit.SECONDS)){
-
+                log.info("开始查询订单 {}  开始找码}",orderno);
                 if(!zfRecharge.getOrderStatus().equals(0)){
                     if(zfRecharge.getOrderStatus().equals(1)){
+                        log.info("开始查询订单 {}  订单状态已更新，直接显示已经更新的码 {}}",orderno, zfRecharge.getCodeId());
                         ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
                         map.put("payurl", zfCode.getImage());
                         map.put("trans_account", zfCode.getAccount());
@@ -673,13 +675,14 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 }
                 //没有分配码，则尝试分配
                 List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfRecharge);
+
                 //没有找到二维码，则继续等待
                 if(zfCodes.size() == 0){
                     map.put("order_status", 0);
                     return new JSONObject(map);
                 }
                     ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfRecharge);
-                    if(zfCode == null){
+                if(zfCode == null){
                         map.put("order_status", 0);
                         return new JSONObject(map);
                     }
@@ -709,7 +712,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 }
             //返回订单信息
         }catch (Exception e){
-            log.error("查码异常 ", e);
+            log.error("查码异常 ", e.getStackTrace());
             return new JSONObject(map);
         }finally {
             if(rLockOrder.isLocked() && rLockOrder.isHeldByCurrentThread()){
