@@ -1,6 +1,7 @@
 package com.code.payapi.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.base.constant.RedisConstant;
 import com.code.baseservice.base.enums.PaytypeEnum;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
@@ -8,10 +9,9 @@ import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.ZfChannel;
+import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfRecharge;
-import com.code.baseservice.service.CommonService;
-import com.code.baseservice.service.ZfChannelService;
-import com.code.baseservice.service.ZfRechargeService;
+import com.code.baseservice.service.*;
 import com.code.baseservice.thirdService.WxYsXCXServiceImpl;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +46,12 @@ public class RechargeController {
 
     @Autowired
     WxYsXCXServiceImpl wxYsXCXService;
+
+    @Autowired
+    RedisUtilService redisUtilService;
+
+    @Autowired
+    ZfCodeService zfCodeService;
 
     @ApiOperation("创建订单")
     @PostMapping("/create")
@@ -153,7 +159,9 @@ public class RechargeController {
             zfRecharge.setPayName(queryParams.getOpenId());
             JSONObject openId = wxYsXCXService.getOpenId(zfChannel, zfRecharge);
             zfRecharge.setPayName(openId.getString("openid"));
-            JSONObject jsonObject =   wxYsXCXService.createPrePayId(zfChannel, zfRecharge);
+            ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
+            JSONObject jsonObject =   wxYsXCXService.createPrePayId(zfChannel, zfRecharge, zfCode);
+            redisUtilService.set(RedisConstant.LIMIT + zfRecharge.getCodeId(), 1, zfCode.getLimitSends());
             log.info("支付参数加密返回 {}", jsonObject.toJSONString());
             responseResult.setData(jsonObject);
         } catch (BaseException e) {

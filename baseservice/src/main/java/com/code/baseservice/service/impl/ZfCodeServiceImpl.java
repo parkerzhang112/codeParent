@@ -1,5 +1,6 @@
 package com.code.baseservice.service.impl;
 
+import com.code.baseservice.base.constant.RedisConstant;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfCodeDao;
@@ -9,6 +10,7 @@ import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfWithdraw;
 import com.code.baseservice.service.RedisUtilService;
 import com.code.baseservice.service.ZfCodeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,7 @@ import java.util.List;
  * @since 2023-03-19 23:07:16
  */
 @Service("zfCodeService")
+@Slf4j
 public class ZfCodeServiceImpl implements ZfCodeService {
     @Resource
     private ZfCodeDao zfCodeDao;
@@ -58,15 +61,20 @@ public class ZfCodeServiceImpl implements ZfCodeService {
        }
         List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount(), codeType);
         if(zfCodes.size() == 0){
+            log.error("sql查询出来无可用码 {}", zfRecharge);
             throw new BaseException(ResultEnum.NO_CODE);
         }
-
         List<ZfCode> filterCard = new ArrayList<>();
         for (int i =0 ; i < zfCodes.size(); i ++){
+            String key  = RedisConstant.LIMIT + zfCodes.get(i).getCodeId();
+            if(redisUtilService.hasKey(key)){
+                continue;
+            }
             filterCard.add(zfCodes.get(i));
         }
         if(filterCard.size() == 0){
-            return  filterCard;
+            log.error("过滤后出来无可用码 {}", zfRecharge);
+            throw new BaseException(ResultEnum.NO_CODE);
         }
         return filterCard;
     }

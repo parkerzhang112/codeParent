@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.entity.ZfChannel;
+import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfWithdraw;
 import com.code.baseservice.service.BaseService;
@@ -12,6 +13,7 @@ import com.code.baseservice.util.HttpClientUtil;
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.exception.ValidationException;
+import com.wechat.pay.java.core.http.DefaultHttpClientBuilder;
 import com.wechat.pay.java.service.payments.jsapi.JsapiServiceExtension;
 import com.wechat.pay.java.service.payments.jsapi.model.Payer;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayRequest;
@@ -22,7 +24,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.SocketAddress;
 import java.util.*;
+
+import static java.net.Proxy.Type.HTTP;
 
 @Slf4j
 @Service("WxYsXCXService")
@@ -127,7 +134,7 @@ public class WxYsXCXServiceImpl implements BaseService {
     @Override
     public JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge) {
         try {
-            String respone =  HttpClientUtil.doGet("https://api.weixin.qq.com/cgi-bin/token?appid="+this.appid+"&secret="+this.appsecrect+"&grant_type=client_credential");
+            String respone =  HttpClientUtil.doGet("https://api.weixin.qq.com/cgi-bin/token?appid="+zfChannel.getThirdMerchantId()+"&secret="+zfChannel.getThirdMerchantPrivateKey()+"&grant_type=client_credential");
             JSONObject  jsopObject = JSONObject.parseObject(respone);
             String accessToken = jsopObject.getString("access_token");
             JSONObject params = new JSONObject();
@@ -159,38 +166,43 @@ public class WxYsXCXServiceImpl implements BaseService {
         return null;
     }
 
-    public JSONObject createPrePayId(ZfChannel zfChannel, ZfRecharge zfRecharge){
+    public JSONObject createPrePayId(ZfChannel zfChannel, ZfRecharge zfRecharge, ZfCode zfCode){
+        List<String> ms = Arrays.asList(zfChannel.getProyx().split("\\:"));
+        DefaultHttpClientBuilder httpClient = new DefaultHttpClientBuilder();
+        SocketAddress socketAddress = new InetSocketAddress(ms.get(0), Integer.valueOf(ms.get(1)));
+        httpClient.proxy(new Proxy(HTTP, socketAddress)).build();
         // 使用自动更新平台证书的RSA配置
         // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
-        List<String> ms = Arrays.asList(zfChannel.getThirdMerchantId().split("\\|"));
         Config config =
                 new RSAAutoCertificateConfig.Builder()
-                        .merchantId(ms.get(0))
+                        .merchantId(zfCode.getAccount())
                         // 使用 com.wechat.pay.java.core.util 中的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
-                        .privateKeyFromPath(zfChannel.getThirdMerchantPrivateKey())
-                        .merchantSerialNumber(ms.get(1))
-                        .apiV3Key(zfChannel.getThirdMerchantPublicKey())
+                        .privateKeyFromPath(zfCode.getImage())
+                        .merchantSerialNumber(zfCode.getWxCertificateNo())
+                        .httpClientBuilder(httpClient)
+                        .apiV3Key(zfCode.getWxMerchantPublicKey())
                         .build();
         service = new JsapiServiceExtension.Builder().config(config).build();
         PrepayRequest request = new PrepayRequest();
         com.wechat.pay.java.service.payments.jsapi.model.Amount amount = new com.wechat.pay.java.service.payments.jsapi.model.Amount();
         amount.setTotal(zfRecharge.getPayAmount().intValue() * 100);
         request.setAmount(amount);
-        request.setAppid(this.appid);
+        request.setAppid(zfChannel.getThirdMerchantId());
         Payer payer =  new Payer();
         payer.setOpenid(zfRecharge.getPayName());
         request.setPayer(payer);
-        request.setMchid(ms.get(0));
+        request.setMchid(zfCode.getAccount());
         String goodName = getGoodName(zfRecharge.getPayAmount().setScale(0).toString(), zfChannel.getRemark());
         if(goodName == null){
             return null;
         }
         request.setDescription(goodName);
-        request.setNotifyUrl( "https://zafasd013.top/outpay/recharge/json_notify/"+ zfRecharge.getOrderNo());
+        request.setNotifyUrl( "https://"+zfChannel.getDomain()+"/outpay/recharge/json_notify/"+ zfRecharge.getOrderNo());
         request.setOutTradeNo(zfRecharge.getOrderNo());
         // 调用request.setXxx(val)设置所需参数，具体参数可见Request定义
         // 调用接口
         try {
+
             log.info("单号 {} 开始请求 {}  参数 {}",zfRecharge.getMerchantOrderNo(), domain + "/recharge/create", JSONObject.toJSONString(request));
             PrepayWithRequestPaymentResponse response = service.prepayWithRequestPayment(request);
             if(response.getAppId() != null){

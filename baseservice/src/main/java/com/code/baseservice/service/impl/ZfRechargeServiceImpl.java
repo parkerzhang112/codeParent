@@ -262,9 +262,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
 
         log.info("当前轮训的码 {}", currentCard);
         if (Objects.isNull(currentCard)) {
-            String amountKey = "onlyAmount" + zfRecharge.getPayAmount().toBigInteger() + zfCodes.get(0).getCodeId();
             log.info("轮训码信息为空");
-            redisUtilService.set(amountKey, 1, 600);
             redisUtilService.set(key, zfCodes.get(0).getCodeId().intValue());
             return zfCodes.get(0);
         }
@@ -273,12 +271,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             if (zfCodes.get(i).getCodeId() < (Integer) currentCard && zfCodes.get(i).getAgentId().equals(agentId)) {
                 log.info("码轮训下一位 {}", zfCodes.get(i));
                 redisUtilService.set(key, zfCodes.get(i).getCodeId().intValue());
-                redisUtilService.set(amountKey, 1, 600);
                 return zfCodes.get(i);
             }
         }
-        String amountKey = "onlyAmount" + zfRecharge.getPayAmount().toBigInteger() + zfCodes.get(0).getCodeId();
-        redisUtilService.set(amountKey, 1, 600);
         redisUtilService.set(key, zfCodes.get(0).getCodeId().intValue());
         log.info("单一码 {}", zfCodes);
         return zfCodes.get(0);

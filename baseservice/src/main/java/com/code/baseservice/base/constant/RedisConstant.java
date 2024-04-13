@@ -2,6 +2,7 @@ package com.code.baseservice.base.constant;
 
 public class RedisConstant {
 
+    public static String LIMIT = "code_limit";
     public static  String ROBIN_CARD_KEY = "current_card";
 
     public static String BALANCE_LOCK = "balance_lock";

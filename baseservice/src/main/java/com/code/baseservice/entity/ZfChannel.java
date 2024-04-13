@@ -65,5 +65,10 @@ public class ZfChannel implements Serializable {
 
     private String remark;
 
+    private String domain;
+
+    private String proyx;
+
+
 }
 

@@ -74,6 +74,15 @@ public class ZfCode implements Serializable {
 
     private String ip;
 
+    private Integer limitSends;
+
+    private String wxCertificateNo;
+
+    private String wxMerchantPublicKey;
+
+    private String apiDevelopId;
+
+    private String wxMerchantId;
 
 }
 
