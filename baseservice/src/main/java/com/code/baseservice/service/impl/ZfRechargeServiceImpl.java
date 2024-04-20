@@ -2,6 +2,7 @@ package com.code.baseservice.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.constant.RedisConstant;
+import com.code.baseservice.base.enums.PaytypeEnum;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfRechargeDao;
@@ -111,7 +112,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
         try {
             JSONObject jsonObject;
-            if(zfChannel.getPayType() != 8){
+            if(zfChannel.getPayType() != PaytypeEnum.微信原生.getValue() && zfChannel.getPayType() != PaytypeEnum.微信小程序.getValue()){
                  jsonObject = commonService.create(zfChannel, zfRecharge);
                  log.info("单号 {} 三方请求的结果 {}", zfRecharge.getMerchantOrderNo(),jsonObject.toJSONString());
                 if(null != jsonObject.getString("payurl")){
@@ -120,7 +121,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                  zfRecharge.setOrderStatus(1);
                 int r = zfRechargeDao.update(zfRecharge);
                 log.info("单号 {} 订单更新结果  {}", zfRecharge.getMerchantOrderNo(),  r);
-
             }else {
                 List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfRecharge);
 
@@ -564,6 +564,10 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 if(jsonObject == null){
                     map.put("order_status", 0);
                     return new JSONObject(map);
+                }
+                ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
+                if(zfCode.getLimitSends() != 0){
+                    redisUtilService.set(RedisConstant.LIMIT + zfRecharge.getCodeId(), 1, zfCode.getLimitSends());
                 }
                 zfRecharge.setPayUrl(jsonObject.getString("payurl"));
                 zfRecharge.setCreateTime(new Date());

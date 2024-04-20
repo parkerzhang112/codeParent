@@ -1,7 +1,6 @@
 package com.code.payapi.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.code.baseservice.base.constant.RedisConstant;
 import com.code.baseservice.base.enums.PaytypeEnum;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
@@ -161,7 +160,6 @@ public class RechargeController {
             zfRecharge.setPayName(openId.getString("openid"));
             ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
             JSONObject jsonObject =   wxYsXCXService.createPrePayId(zfChannel, zfRecharge, zfCode);
-            redisUtilService.set(RedisConstant.LIMIT + zfRecharge.getCodeId(), 1, zfCode.getLimitSends());
             log.info("支付参数加密返回 {}", jsonObject.toJSONString());
             responseResult.setData(jsonObject);
         } catch (BaseException e) {

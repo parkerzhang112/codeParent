@@ -1,6 +1,8 @@
 package com.code.baseservice.service.impl;
 
 import com.code.baseservice.base.constant.RedisConstant;
+import com.code.baseservice.base.enums.CodeTypeEnum;
+import com.code.baseservice.base.enums.PaytypeEnum;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfCodeDao;
@@ -59,6 +61,9 @@ public class ZfCodeServiceImpl implements ZfCodeService {
         if(payType == 3){
             codeType = 1;
        }
+        if(payType == PaytypeEnum.微信小程序.getValue()){
+            codeType = CodeTypeEnum.微信商户.getCode();
+        }
         List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount(), codeType);
         if(zfCodes.size() == 0){
             log.error("sql查询出来无可用码 {}", zfRecharge);

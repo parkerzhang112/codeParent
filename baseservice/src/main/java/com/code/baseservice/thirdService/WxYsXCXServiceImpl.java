@@ -3,6 +3,7 @@ package com.code.baseservice.thirdService;
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
+import com.code.baseservice.dto.ZFchannelSku;
 import com.code.baseservice.entity.ZfChannel;
 import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfRecharge;
@@ -14,11 +15,13 @@ import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.exception.ValidationException;
 import com.wechat.pay.java.core.http.DefaultHttpClientBuilder;
+import com.wechat.pay.java.core.http.UrlEncoder;
 import com.wechat.pay.java.service.payments.jsapi.JsapiServiceExtension;
 import com.wechat.pay.java.service.payments.jsapi.model.Payer;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayRequest;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -66,75 +69,65 @@ public class WxYsXCXServiceImpl implements BaseService {
         return  "error";
     }
 
-    public static String getGoodName(String price, String remark){
-        log.info("渠道金额配置 ：{} 订单金额 {}", remark,price );
-//        if(!StringUtil.isBlank(remark)){
-//            JSONObject jsonObject = JSONObject.parseObject(remark);
-//            if(StringUtils.isNotEmpty(jsonObject.getString(price))){
-//                return jsonObject.getString(price);
-//            }
-//        }
-        String key = "";
-        Map<String, String> map = new HashMap<>();
-        map.put("100", "19朵玫瑰花束");
-        map.put("50", "11朵玫瑰花束");
-        map.put("30", "8朵仿真玫瑰");
-        if(map.containsKey(price)){
-            return  map.get(price);
+    public static String getGoodName(BigDecimal price, String goods){
+        ZFchannelSku zFchannelSku  = JSONObject.parseObject(goods, ZFchannelSku.class);
+        if(StringUtils.isNotBlank(zFchannelSku.getShop_one_price())){
+            List<String> between = Arrays.asList(zFchannelSku.getShop_one_price().split(","));
+            if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
+                return zFchannelSku.getShop_one_name();
+            }
         }
-        return  "补货";
-//        return  null;
+        if(StringUtils.isNotBlank(zFchannelSku.getShop_two_price())){
+            List<String> between = Arrays.asList(zFchannelSku.getShop_two_price().split(","));
+            if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
+                return zFchannelSku.getShop_two_name();
+            }
+        }
+        if(StringUtils.isNotBlank(zFchannelSku.getShop_three_price())){
+            List<String> between = Arrays.asList(zFchannelSku.getShop_three_price().split(","));
+            if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
+                return zFchannelSku.getShop_three_name();
+            }
+        }
+        if(StringUtils.isNotBlank(zFchannelSku.getShop_four_price())){
+            List<String> between = Arrays.asList(zFchannelSku.getShop_four_price().split(","));
+            if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
+                return zFchannelSku.getShop_four_name();
+            }
+        }
+        if(StringUtils.isNotBlank(zFchannelSku.getShop_five_price())){
+            List<String> between = Arrays.asList(zFchannelSku.getShop_five_price().split(","));
+            if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
+                return zFchannelSku.getShop_five_name();
+            }
+        }
+        if(StringUtils.isNotBlank(zFchannelSku.getShop_six_price())){
+            List<String> between = Arrays.asList(zFchannelSku.getShop_six_price().split(","));
+            if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
+                return zFchannelSku.getShop_six_name();
+            }
+        }
+        return  zFchannelSku.getShop_default_name();
     }
 
     public static void main(String[] args) {
-        String price ="49";
-        String key = "";
-        BigDecimal priceb = new BigDecimal(price);
-        BigDecimal thirty = new BigDecimal("30");
-        BigDecimal fifty = new BigDecimal("50");
-        BigDecimal one = new BigDecimal("100");
-        BigDecimal oneee = new BigDecimal("188");
-        BigDecimal two = new BigDecimal("200");
-        BigDecimal three = new BigDecimal("300");
-        BigDecimal five = new BigDecimal("500");
-
-        if(priceb.compareTo(thirty)>=0 && priceb.compareTo(fifty) < 0){
-            key = "30";
-        }
-        if(priceb.compareTo(fifty)>=0 && priceb.compareTo(one) < 0){
-            key = "50";
-        }
-        if(priceb.compareTo(one)>=0 && priceb.compareTo(oneee) < 0){
-            key = "100";
-        }
-        if(priceb.compareTo(oneee)>=0 && priceb.compareTo(two) < 0){
-            key = "188";
-        }
-        if(priceb.compareTo(two)>=0 && priceb.compareTo(three) < 0){
-            key = "200";
-        }
-        if(priceb.compareTo(three)>=0 && priceb.compareTo(five) < 0){
-            key = "300";
-        }
-        if(priceb.compareTo(five)>=0 ){
-            key = "500";
-        }
-
-
-        Map<String, String> map = new HashMap<>();
-        map.put("100", "19朵玫瑰花束");
-        map.put("50", "11朵玫瑰花束");
-        map.put("30", "8朵仿真玫瑰");
-        if(map.containsKey(key)){
-            System.out.printf(map.get(key));
-        }
-
+        List<String> ms =   Arrays.asList("127.0.0.1:13048".split("\\:"));
+        System.out.println(ms);
     }
 
     @Override
     public JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge) {
         try {
-            String respone =  HttpClientUtil.doGet("https://api.weixin.qq.com/cgi-bin/token?appid="+zfChannel.getThirdMerchantId()+"&secret="+zfChannel.getThirdMerchantPrivateKey()+"&grant_type=client_credential");
+            String url  = "https://api.weixin.qq.com/cgi-bin/token?appid="+zfChannel.getThirdMerchantId()+"&secret="+zfChannel.getThirdMerchantPrivateKey()+"&grant_type=client_credential";
+            String respone= "";
+            if (StringUtils.isNotBlank(zfChannel.getProxy())){
+                List<String> ms = Arrays.asList(zfChannel.getProxy().split("\\:"));
+                 respone =  HttpClientUtil.doGet(url, null, ms.get(0), ms.get(1));
+
+            }else {
+                 respone =  HttpClientUtil.doGet(url, null);
+
+            }
             JSONObject  jsopObject = JSONObject.parseObject(respone);
             String accessToken = jsopObject.getString("access_token");
             JSONObject params = new JSONObject();
@@ -143,11 +136,17 @@ public class WxYsXCXServiceImpl implements BaseService {
             params.put("expire_interval", 30);
             JSONObject jumpWxa = new JSONObject();
             jumpWxa.put("path", "pages/goods/pay/pay");
-            jumpWxa.put("query", "query="+zfRecharge.getOrderNo() + "&amount="+zfRecharge.getPayAmount());
+            jumpWxa.put("query", "query="+zfRecharge.getOrderNo() + "&amount="+zfRecharge.getPayAmount() + "&requesturl=" + UrlEncoder.urlEncode(zfChannel.getDomain())) ;
             jumpWxa.put("env_version", "release");
             params.put("jump_wxa", jumpWxa);
             log.info("单号 {}  参数 {} token {}",zfRecharge.getMerchantOrderNo(), JSONObject.toJSONString(params), accessToken);
-            String getUrlRespone = HttpClientUtil.doPostJson("https://api.weixin.qq.com/wxa/generatescheme?access_token="+accessToken, params.toJSONString());
+            String getUrlRespone = "";
+            if (StringUtils.isNotBlank(zfChannel.getProxy())){
+                 List<String> ms = Arrays.asList(zfChannel.getProxy().split("\\:"));
+                 getUrlRespone = HttpClientUtil.doPostJsonByProxy("https://api.weixin.qq.com/wxa/generatescheme?access_token="+accessToken, params.toJSONString(), ms.get(0), ms.get(1));
+            }else {
+                getUrlRespone = HttpClientUtil.doPostJson("https://api.weixin.qq.com/wxa/generatescheme?access_token="+accessToken, params.toJSONString());
+            }
             JSONObject getUrlResponeJson = JSONObject.parseObject(getUrlRespone);
             if(getUrlResponeJson.getInteger("errcode") == 0){
                 log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), getUrlRespone);
@@ -158,7 +157,7 @@ public class WxYsXCXServiceImpl implements BaseService {
                 map1.put("payurl", getUrlResponeJson.getString("openlink"));
                 return new JSONObject(map1);
             }else {
-                log.error("请求异常  订单号{}", zfRecharge.getOrderNo(), getUrlRespone);
+                log.error("请求异常  订单号{} 响应内容 {}", zfRecharge.getOrderNo(), getUrlRespone);
             }
         }catch (Exception e){
             log.error("请求异常  订单号{}", zfRecharge.getOrderNo(), e);
@@ -167,21 +166,33 @@ public class WxYsXCXServiceImpl implements BaseService {
     }
 
     public JSONObject createPrePayId(ZfChannel zfChannel, ZfRecharge zfRecharge, ZfCode zfCode){
-        List<String> ms = Arrays.asList(zfChannel.getProyx().split("\\:"));
-        DefaultHttpClientBuilder httpClient = new DefaultHttpClientBuilder();
-        SocketAddress socketAddress = new InetSocketAddress(ms.get(0), Integer.valueOf(ms.get(1)));
-        httpClient.proxy(new Proxy(HTTP, socketAddress)).build();
-        // 使用自动更新平台证书的RSA配置
-        // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
-        Config config =
-                new RSAAutoCertificateConfig.Builder()
-                        .merchantId(zfCode.getAccount())
-                        // 使用 com.wechat.pay.java.core.util 中的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
-                        .privateKeyFromPath(zfCode.getImage())
-                        .merchantSerialNumber(zfCode.getWxCertificateNo())
-                        .httpClientBuilder(httpClient)
-                        .apiV3Key(zfCode.getWxMerchantPublicKey())
-                        .build();
+        List<String> ms = Arrays.asList(zfChannel.getProxy().split("\\:"));
+        Config config = null;
+        if(ms.size() == 2) {
+            // 使用自动更新平台证书的RSA配置
+            // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
+            DefaultHttpClientBuilder httpClient = new DefaultHttpClientBuilder();
+            SocketAddress socketAddress = new InetSocketAddress(ms.get(0), Integer.valueOf(ms.get(1)));
+            httpClient.proxy(new Proxy(HTTP, socketAddress));
+             config =
+                    new RSAAutoCertificateConfig.Builder()
+                            .merchantId(zfCode.getAccount())
+                            // 使用 com.wechat.pay.java.core.util 中的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
+                            .privateKeyFromPath(zfCode.getImage().replaceAll("profile", "data/image"))
+                            .merchantSerialNumber(zfCode.getWxCertificateNo())
+                            .httpClientBuilder(httpClient)
+                            .apiV3Key(zfCode.getWxMerchantPublicKey())
+                            .build();
+        }else {
+            config =
+                    new RSAAutoCertificateConfig.Builder()
+                            .merchantId(zfCode.getAccount())
+                            // 使用 com.wechat.pay.java.core.util 中的函数从本地文件中加载商户私钥，商户私钥会用来生成请求的签名
+                            .privateKeyFromPath(zfCode.getImage().replaceAll("profile", "data/image"))
+                            .merchantSerialNumber(zfCode.getWxCertificateNo())
+                            .apiV3Key(zfCode.getWxMerchantPublicKey())
+                            .build();
+        }
         service = new JsapiServiceExtension.Builder().config(config).build();
         PrepayRequest request = new PrepayRequest();
         com.wechat.pay.java.service.payments.jsapi.model.Amount amount = new com.wechat.pay.java.service.payments.jsapi.model.Amount();
@@ -192,7 +203,7 @@ public class WxYsXCXServiceImpl implements BaseService {
         payer.setOpenid(zfRecharge.getPayName());
         request.setPayer(payer);
         request.setMchid(zfCode.getAccount());
-        String goodName = getGoodName(zfRecharge.getPayAmount().setScale(0).toString(), zfChannel.getRemark());
+        String goodName = getGoodName(zfRecharge.getPayAmount().setScale(0), zfChannel.getGoods());
         if(goodName == null){
             return null;
         }
@@ -202,7 +213,6 @@ public class WxYsXCXServiceImpl implements BaseService {
         // 调用request.setXxx(val)设置所需参数，具体参数可见Request定义
         // 调用接口
         try {
-
             log.info("单号 {} 开始请求 {}  参数 {}",zfRecharge.getMerchantOrderNo(), domain + "/recharge/create", JSONObject.toJSONString(request));
             PrepayWithRequestPaymentResponse response = service.prepayWithRequestPayment(request);
             if(response.getAppId() != null){
@@ -227,8 +237,14 @@ public class WxYsXCXServiceImpl implements BaseService {
 
     public JSONObject getOpenId(ZfChannel zfChannel, ZfRecharge zfRecharge){
         try{
-            String url = "https://api.weixin.qq.com/sns/jscode2session?appid="+this.appid+"&secret="+this.appsecrect+"&js_code="+zfRecharge.getPayName()+"&grant_type=authorization_code";
-            String res = HttpClientUtil.doGet(url);
+            String url = "https://api.weixin.qq.com/sns/jscode2session?appid="+zfChannel.getThirdMerchantId()+"&secret="+zfChannel.getThirdMerchantPrivateKey()+"&js_code="+zfRecharge.getPayName()+"&grant_type=authorization_code";
+            String res= "";
+            if (StringUtils.isNotBlank(zfChannel.getProxy())){
+                List<String> ms = Arrays.asList(zfChannel.getProxy().split("\\:"));
+                res =  HttpClientUtil.doGet(url, null, ms.get(0), ms.get(1));
+            }else {
+                res =  HttpClientUtil.doGet(url, null);
+            }
             log.info("获取open id {}", res);
             JSONObject jsonObject = JSONObject.parseObject(res);
             return jsonObject;

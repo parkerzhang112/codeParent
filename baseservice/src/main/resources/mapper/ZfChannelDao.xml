@@ -18,8 +18,9 @@
         <result property="channelBalance" column="channel_balance" />
         <result property="channelCode" column="channel_code" />
         <result property="remark" column="remark" />
-        <result property="proyx" column="proyx" />
+        <result property="proxy" column="proxy" />
         <result property="domain" column="domain" />
+        <result property="goods" column="goods" />
     </resultMap>
     <update id="updateChannelFee">
 

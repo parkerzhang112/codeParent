@@ -67,8 +67,10 @@ public class ZfChannel implements Serializable {
 
     private String domain;
 
-    private String proyx;
+    private String proxy;
 
+    //商品价格表
+    private String goods;
 
 }
 

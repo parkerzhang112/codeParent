@@ -87,6 +87,18 @@
         <activeByDefault>true</activeByDefault>
       </activation>
     </profile>
+    <profile>
+      <!--执行打包命令时将使用此处的id进行定位-->
+      <id>pro_mini</id>
+      <properties>
+        <!--此处为对应的环境放置配置文件的目录-->
+        <env>pro_mini</env>
+      </properties>
+      <activation>
+        <!--此处将dev设置为默认环境-->
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
   </profiles>
 
 </project>

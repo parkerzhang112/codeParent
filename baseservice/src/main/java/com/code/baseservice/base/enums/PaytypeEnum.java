@@ -6,6 +6,15 @@ public enum PaytypeEnum {
     TRANS(1,"支付宝转账"),
     SMALL_CODE(2,"小额支付宝扫码"),
     SHUZI(3,"数字人民币"),
+    S_YUNSHANFU(4,"小额云闪付"),
+    YUNSHANFU(5,"大额云闪付"),
+    S_WEIXIN_CODE(6,"小额微信扫码支付"),
+    WEIXIN_CODE(7,"微信扫码支付"),
+    微信原生(8,"微信原生扫码"),
+
+    微信小程序(9,"微信小程序"),
+    银行卡大额(10,"银行卡大额"),
+
     ;
 
     private Integer value;
