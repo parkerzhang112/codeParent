@@ -35,6 +35,9 @@ public class RechargeController {
         log.info("入款参数 订单号 {} 信息 {}", rechareParams.getMerchant_order_no(), rechareParams.toString());
         ResponseResult responseResult = new ResponseResult();
         try {
+            if("test".equals(rechareParams.getName())){
+                rechareParams.setName("");
+            }
             JSONObject jsonObject = zfRechargeService.create(rechareParams);
             responseResult.setData(jsonObject);
         }catch (BaseException e){

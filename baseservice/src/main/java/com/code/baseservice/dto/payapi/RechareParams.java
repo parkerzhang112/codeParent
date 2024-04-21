@@ -37,6 +37,9 @@ public class RechareParams {
     @NonNull
     private  String notify_url;
 
+    @JsonProperty("return_url")
+    @NonNull
+    private  String return_url;
     @JsonProperty("remark")
     private String remark;
 }

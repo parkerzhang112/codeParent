@@ -16,9 +16,10 @@ public class PayTypeRateConstans {
         map.put(6, "_s_weixin");
         map.put(7, "_weixin");
         map.put(9, "_card");
+        map.put(11, "_b_code");
 
 
-        if(code == 2){
+        if(code == 2 || code == 11){
             if(paidAmount.compareTo(new BigDecimal("800") ) > -1){
                 return "";
             }

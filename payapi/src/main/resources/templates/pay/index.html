@@ -210,6 +210,7 @@
             order_no,
             url = "",
             pay_amount = 0,
+            return_url = ""
           } = result.data;
           if (order_status == 0) {
             // 0 的时候继续加载 - 轮询
@@ -228,7 +229,9 @@
             document.getElementsByClassName("toast-body")[0].innerText =
               "支付超时，请重新下单。！";
             document.getElementById("overlay").style.display = "block";
-
+            if(return_url != ''){
+              location.href = result.data.return_url;
+            }
             clearTimer();
           } else if (order_status == 4 || order_status == 2) {
             document.getElementById("tips_4").style.display = "none";
@@ -237,6 +240,9 @@
             document.getElementsByClassName("toast-body")[0].innerText =
               "支付成功，请重新下单。";
             document.getElementById("overlay").style.display = "block";
+            if(return_url != ''){
+              location.href = result.data.return_url;
+            }
             clearTimer();
           }
 
