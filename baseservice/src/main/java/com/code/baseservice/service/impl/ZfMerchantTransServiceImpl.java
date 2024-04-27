@@ -1,15 +1,14 @@
 package com.code.baseservice.service.impl;
 
+import com.code.baseservice.dao.ZfMerchantTransDao;
+import com.code.baseservice.entity.ZfMerchantTrans;
+import com.code.baseservice.service.ZfMerchantTransService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
-import com.code.baseservice.entity.ZfMerchantTrans;
-import com.code.baseservice.dao.ZfMerchantTransDao;
-import com.code.baseservice .service.ZfMerchantTransService;
 
 /**
  * (ZfMerchantTrans)表服务实现类
@@ -80,4 +79,6 @@ public class ZfMerchantTransServiceImpl implements ZfMerchantTransService {
     public boolean deleteById(Integer merchantId) {
         return this.zfMerchantTransDao.deleteById(merchantId) > 0;
     }
+
+
 }

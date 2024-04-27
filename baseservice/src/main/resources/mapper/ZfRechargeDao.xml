@@ -167,6 +167,9 @@
         <if test="returnUrl != null">
             return_url ,
         </if>
+            <if test="orderStatus != null">
+                order_status ,
+            </if>
         </trim>
         values
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -209,6 +212,9 @@
         </if>
         <if test="returnUrl != null">
             #{returnUrl},
+        </if>
+        <if test="orderStatus != null">
+            #{orderStatus},
         </if>
         </trim>
     </insert>

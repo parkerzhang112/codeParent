@@ -44,4 +44,6 @@ public interface ZfCodeService {
     ZfCode queryByName(String name);
 
     ZfCode queryByAccountByLike(String account);
+
+    List<ZfCode> queryGroupList(Integer i);
 }

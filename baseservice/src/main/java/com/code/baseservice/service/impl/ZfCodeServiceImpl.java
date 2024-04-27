@@ -153,4 +153,10 @@ public class ZfCodeServiceImpl implements ZfCodeService {
 
     }
 
+    @Override
+    public List<ZfCode> queryGroupList(Integer  merchantId) {
+        List<ZfCode> zfCodes = zfCodeDao.queryCodeByMerchant(merchantId);
+        return zfCodes;
+    }
+
 }

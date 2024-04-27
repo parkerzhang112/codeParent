@@ -2,6 +2,7 @@ package com.code.baseservice.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.constant.RedisConstant;
+import com.code.baseservice.base.enums.PaytypeEnum;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfRechargeDao;
@@ -13,7 +14,6 @@ import com.code.baseservice.entity.*;
 import com.code.baseservice.service.*;
 import com.code.baseservice.util.*;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -57,9 +57,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     private RedisUtilService redisUtilService;
 
     @Autowired
-    private RedissonClient redissonClient;
-
-    @Autowired
     private ZfAgentService zfAgentService;
 
     @Value("${app.viewurl:}")
@@ -88,7 +85,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
     /**
      * 通过ID查询单条数据
      *
-     * @param merchantOrderNo 主键
      * @return 实例对象
      */
     @Override
@@ -190,6 +186,33 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
         //返回
         return buildReusltCard(zfMerchant,zfRecharge, zfCode);
+    }
+
+    @Override
+    public void createOrderByTelegram(RechareParams rechareParams, String account) {
+        ZfCode zfCode = zfCodeService.queryByAccount(account);
+        if(null == zfCode){
+            log.info("无效二维码 {}", rechareParams);
+            throw new BaseException(ResultEnum.NO_EXIST_CARD);
+        }
+        vaildRepeat(rechareParams);
+        List<ZfChannel> channels =  zfChannelService.queryChannelByParams(rechareParams);
+        ZfChannel zfChannel = channels.get(0);
+        ZfRecharge zfRecharge = new ZfRecharge(rechareParams);
+        zfRecharge.setChannelId(zfChannel.getChannelId());
+        zfRecharge.setAgentId(zfCode.getAgentId());
+        zfRecharge.setCodeId(zfCode.getCodeId());
+        zfRecharge.setUpdateTime(new Date());
+        ZfMerchant zfMerchant = zfMerchantService.queryById(rechareParams.getMerchant_id());
+        String orderNo= CommonUtil.getOrderNo(zfMerchant.getMerchantCode(), "D");
+        zfRecharge.setOrderNo(orderNo);
+        zfRecharge.setPayType(zfChannel.getPayType());
+        zfRecharge.setPayName(rechareParams.getName());
+        zfRecharge.setOrderStatus(1);
+        int r = zfRechargeDao.insert(zfRecharge);
+        //增加已收额度
+        redisUtilService.set("notice:agent:" + zfCode.getAgentId(), 1,1200);
+        zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
     }
 
     private JSONObject buildReusltCard(ZfMerchant zfMerchant, ZfRecharge zfRecharge, ZfCode zfCode) {
@@ -491,6 +514,19 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             zfMerchantTransService.insert(new ZfMerchantTrans(zfRecharge, xMerchant));
             //更新日报
             zfMerchantRecordService.updateRecord(new ZfMerchantRecord(zfRecharge));
+            if(zfRecharge.getPayType() == PaytypeEnum.GROUP.getValue()){
+                Telegram telegram = new Telegram();
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("订单: "+zfRecharge.getMerchantOrderNo()+" 成功金额："+ zfRecharge.getPaidAmount());
+                List<ZfCode> zfCodes = zfCodeService.queryGroupList(zfRecharge.getMerchantId());
+                List<Integer> ids =  zfCodes.stream().map(ZfCode::getCodeId).collect(Collectors.toList());
+                if(!ids.contains(zfRecharge.getCodeId())){
+                    ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
+                    stringBuilder.append("\n账号: "+zfCode.getAccount()+" 不能收款自动下码");
+                }
+                telegram.sendSuccess( stringBuilder.toString());
+            }
+
         }catch (Exception e){
             log.error("订单异常 {} {}",zfRecharge.getMerchantOrderNo(), e.getStackTrace());
             throw new RuntimeException(e);

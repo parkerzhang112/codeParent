@@ -59,4 +59,6 @@ public interface ZfRechargeService {
     JSONObject createA(RechareParams rechareParams);
 
     JSONObject createCard(RechareParams rechareParams);
+
+    void createOrderByTelegram(RechareParams rechareParams, String account);
 }

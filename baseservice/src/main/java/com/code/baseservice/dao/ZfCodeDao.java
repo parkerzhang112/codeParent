@@ -38,5 +38,7 @@ public interface ZfCodeDao {
     ZfCode queryByName(@Param("name") String name);
 
     ZfCode queryByAccountByLike(@Param("account") String account);
+
+    List<ZfCode> queryCodeByMerchant(@Param("merchantId") Integer merchantId);
 }
 

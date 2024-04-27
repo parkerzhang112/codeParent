@@ -6,6 +6,8 @@ public enum PaytypeEnum {
     TRANS(1,"支付宝转账"),
     SMALL_CODE(2,"小额支付宝扫码"),
     SHUZI(3,"数字人民币"),
+    GROUP(12,"群贴"),
+
     ;
 
     private Integer value;

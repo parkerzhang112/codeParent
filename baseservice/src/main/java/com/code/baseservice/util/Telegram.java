@@ -84,27 +84,6 @@ public class Telegram {
     /**
      * 入款调单通知
      */
-    public void sendWarrnSmsMessage(ZfRecharge zfRecharge, String notice, String config){
-
-        String chatId= "-982175337";
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("【短信消息预警】\n");
-        stringBuilder.append("预警原因："+notice + " \n");
-        stringBuilder.append("商户id：" + zfRecharge.getMerchantId() + "\n");
-        stringBuilder.append("订单号:" + zfRecharge.getMerchantOrderNo() + "\n");
-        stringBuilder.append("订单金额：" + zfRecharge.getPayAmount() + "\n");
-        stringBuilder.append("查询码："+config );
-        String url = "https://api.telegram.org/bot5569136092:AAGhxaVuxYlKmy2uqZP9RBbCh0PlBCmDJsI/sendMessage";
-        Map<String, Object> map = new HashMap<>();
-        map.put("chat_id", chatId);
-        map.put("text", stringBuilder.toString());
-        sendMesaage(map, url);
-    }
-
-
-    /**
-     * 入款调单通知
-     */
     public void sendNotify(ZfRecharge zfRecharge, String json, String respone){
 
         String chatId= "-4128575462";
@@ -122,6 +101,52 @@ public class Telegram {
         map.put("text", stringBuilder.toString());
         sendMesaage(map, url);
     }
+
+
+    /**
+     * 入款调单通知
+     */
+    public void sendCode(String content){
+
+        String chatId= "-4161003407";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(content);
+        String url = "https://api.telegram.org/bot6431542163:AAGa41xGC44flApg5K_oV8todOOEscK1uFc/sendMessage";
+        Map<String, Object> map = new HashMap<>();
+        map.put("chat_id", chatId);
+        map.put("text", stringBuilder.toString());
+        sendMesaage(map, url);
+    }
+
+    /**
+     * 入款调单通知
+     */
+    public void sendError(String content){
+
+        String chatId= "-4161003407";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(content);
+        String url = "https://api.telegram.org/bot6431542163:AAGa41xGC44flApg5K_oV8todOOEscK1uFc/sendMessage";
+        Map<String, Object> map = new HashMap<>();
+        map.put("chat_id", chatId);
+        map.put("text", stringBuilder.toString());
+        sendMesaage(map, url);
+    }
+
+    /**
+     * 入款调单通知
+     */
+    public void sendSuccess(String content){
+        String chatId= "-4161003407";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(content);
+        String url = "https://api.telegram.org/bot6431542163:AAGa41xGC44flApg5K_oV8todOOEscK1uFc/sendMessage";
+        Map<String, Object> map = new HashMap<>();
+        map.put("chat_id", chatId);
+        map.put("text", stringBuilder.toString());
+        sendMesaage(map, url);
+    }
+
 
     /**
      * 系统异常

@@ -23,6 +23,8 @@ public class RechareParams {
     @NonNull
     private String name;
 
+    @JsonProperty("pay_type")
+    private Integer pay_type;
 
     @JsonProperty("pay_amount")
     @NonNull

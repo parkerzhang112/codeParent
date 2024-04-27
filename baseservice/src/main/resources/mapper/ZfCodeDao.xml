@@ -89,6 +89,26 @@
     </select>
 
 
+    <select id="queryCodeByMerchant" resultMap="ZfCodeMap">
+        select
+        zc.*
+        from zf_code zc
+        left join zf_agent za on zc.agent_id=za.agent_id
+        left join zf_code_record zcr on zcr.code_id = zc.code_id and zcr.record_date=current_date
+        left join zf_channel_code zcc on zc.agent_id=zcc.code_id
+        left join zf_channel zh on zcc.channe_id=zh.channel_id
+        where zc.group_open = 1
+        and zc.status=100
+        and za.status =1
+        and (zc.day_limit_amount <![CDATA[ > ]]> 500 or zc.day_limit_amount=0 or zcr.recharge_amount is null)
+        and (zc.day_limit_times <![CDATA[ > ]]> 1 or zc.day_limit_times =0 or zcr.recharge_times is null )
+        and zc.code_type = 0
+        and za.accept_amount-1000 > 1000
+        and FIND_IN_SET(#{merchantId}, zh.merchant_id)
+        group by za.weight, zc.code_id
+        limit 10;
+    </select>
+
     <!--通过主键修改数据-->
     <update id="update">
         update zf_code
