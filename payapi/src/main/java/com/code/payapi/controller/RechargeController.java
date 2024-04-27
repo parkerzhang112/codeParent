@@ -62,7 +62,12 @@ public class RechargeController {
             JSONObject jsonObject = zfRechargeService.create(rechareParams);
             responseResult.setData(jsonObject);
         } catch (BaseException e) {
-            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+            log.error("系统异常", e);
+            if(rechareParams.getIs_test() ==1){
+                responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+            }else {
+                responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+            }
         } catch (Exception e) {
             log.error("系统异常", e);
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");

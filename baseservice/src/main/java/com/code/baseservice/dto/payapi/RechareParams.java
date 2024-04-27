@@ -35,4 +35,7 @@ public class RechareParams {
 
     @JsonProperty("remark")
     private String remark;
+
+    @JsonProperty("is_test")
+    private Integer is_test;
 }

@@ -123,12 +123,15 @@ public class WxYsXCXServiceImpl implements BaseService {
             if (StringUtils.isNotBlank(zfChannel.getProxy())){
                 List<String> ms = Arrays.asList(zfChannel.getProxy().split("\\:"));
                  respone =  HttpClientUtil.doGet(url, null, ms.get(0), ms.get(1));
-
             }else {
                  respone =  HttpClientUtil.doGet(url, null);
-
             }
+
             JSONObject  jsopObject = JSONObject.parseObject(respone);
+            if(!jsopObject.containsKey("access_token")){
+                log.info("获取access_token失败，可能原因 appid和appsercet配置错误, 渠道 {}", zfChannel.getChannelName());
+                throw  new BaseException(ResultEnum.ERROR);
+            }
             String accessToken = jsopObject.getString("access_token");
             JSONObject params = new JSONObject();
             params.put("is_expire", true);
@@ -157,7 +160,8 @@ public class WxYsXCXServiceImpl implements BaseService {
                 map1.put("payurl", getUrlResponeJson.getString("openlink"));
                 return new JSONObject(map1);
             }else {
-                log.error("请求异常  订单号{} 响应内容 {}", zfRecharge.getOrderNo(), getUrlRespone);
+                log.info("获取微信小程序加密地址异常，可能原因 微信小程序未发布支付插件或日限制次数, 渠道 {}", zfChannel.getChannelName());
+                throw  new BaseException(ResultEnum.WEIXIAOCHENXU_PATH_ERROR);
             }
         }catch (Exception e){
             log.error("请求异常  订单号{}", zfRecharge.getOrderNo(), e);

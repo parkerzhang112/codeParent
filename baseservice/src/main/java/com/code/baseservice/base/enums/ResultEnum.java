@@ -51,7 +51,12 @@ public enum ResultEnum {
     NO_ENOUGH_AMOUNT(811, "积分不够"),
     NO_COMMISSION_AMOUNT(812, "佣金不够"),
     DE_ERR(812, "分配代理与操作代理不一致"),
-    CHANNEL_BALANCE_NO_ENOUGH(813, "渠道余额不足")
+    CHANNEL_BALANCE_NO_ENOUGH(813, "渠道余额不足"),
+
+    WEIXIAOCHENXU_APPID_ERROR(1000, "微信小程序appid或者appsercet配置错误"),
+    WEIXIAOCHENXU_PATH_ERROR(1001, "小程序加密路径获取失败，小程序未发布支付插件或者日限制次数"),
+
+
     ;
 
 

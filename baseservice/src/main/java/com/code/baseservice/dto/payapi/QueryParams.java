@@ -32,4 +32,6 @@ public class QueryParams {
 
     @JsonProperty("openId")
     private String openId;
+
+
 }
