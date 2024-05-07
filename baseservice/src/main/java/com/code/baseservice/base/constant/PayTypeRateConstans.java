@@ -18,6 +18,7 @@ public class PayTypeRateConstans {
         map.put(9, "_card");
         map.put(11, "_b_code");
         map.put(12, "_g_code");
+        map.put(12, "_d_code");
 
 
         if(code == 2 || code == 11){
