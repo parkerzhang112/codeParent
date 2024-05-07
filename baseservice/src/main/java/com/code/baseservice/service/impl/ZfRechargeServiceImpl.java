@@ -580,7 +580,9 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 return new JSONObject(map);
 
             //返回订单信息
-        }catch (Exception e){
+        }catch (BaseException e){
+            throw  e;
+        }catch (Exception e) {
             log.error("创建订单异常 ", e);
             map.put("order_status", 3);
             return new JSONObject(map);

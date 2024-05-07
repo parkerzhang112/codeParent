@@ -76,23 +76,6 @@
         <label>订单号：<span id="order" th:text="${xrecharge.orderNo}"></span></label>
 <!--        <span id="orderId">0</span>-->
       </div>
-      <div class="tips">
-        <p class="tips_2">
-          请按<strong id="amount"  th:text="${xrecharge.payAmount}">0</strong
-          >付款，截图保存到相册，使用扫一扫打开完成支付
-        </p>
-        <p class="tips_3">或复制以下链接到微信打开， 您可以将以上链接发到自己的微信聊天框搜索，即可进入支付<span style="font-size: 23px; color: #1e2125"></span></p>
-
-      </div>
-          <p id="tips_4">正在获取二维码...</p>
-
-      <div id="qrcode"  width="220" height="220px">
-        <div class="qrcode"  width="220" height="220px">
-          <div class="tips">
-            <span class="tips_2 pay_url" style="border: solid 1px; border-radius: 1px"></span><button onclick="copyText()">复制</button>
-          </div>
-          </div>
-    </div>
 
     <!-- 弹窗提示 -->
     <div class="overlay" id="overlay">
@@ -137,7 +120,7 @@
 
                 if (result.code !== 200) {
                   document.getElementsByClassName("toast-body")[0].innerText =
-                          result.message;
+                          result.msg;
                   document.getElementById("overlay").style.display = "block";
                   return;
                 }
@@ -154,29 +137,22 @@
 
                 } else if (order_status == 1) {
                   // 1 数据加载成功
-                  document.getElementById("tips_4").style.display = "none";
-                  document.getElementsByClassName("qrcode")[0].style.display = "block"; // 图片地址
-                  if($('.qrcode').find("canvas").length == 0){
-                      $('.qrcode').qrcode(result.data.payurl);
-                    $(".qrocde").dow
-                    $(".pay_url").text(result.data.payurl);
-                  }
-                  stringTime = result.data.time;
+                  window.location.href= result.data.payurl
                 } else if (order_status == 3) {
                   document.getElementById("tips_4").style.display = "none";
-                  // 3 订单支付失败
-                  document.getElementsByClassName("toast-body")[0].innerText =
-                          "支付超时，请重新下单。！";
-                  document.getElementById("overlay").style.display = "block";
+                  // // 3 订单支付失败
+                  // document.getElementsByClassName("toast-body")[0].innerText =
+                  //         "支付超时，请重新下单。！";
+                  // document.getElementById("overlay").style.display = "block";
 
                   clearTimer();
                 } else if (order_status == 4 || order_status == 2) {
-                  document.getElementById("tips_4").style.display = "none";
-                  console.log("状态=", result.data);
-                  // 3 订单超时
-                  document.getElementsByClassName("toast-body")[0].innerText =
-                          "支付成功，请重新下单。";
-                  document.getElementById("overlay").style.display = "block";
+                  // document.getElementById("tips_4").style.display = "none";
+                  // console.log("状态=", result.data);
+                  // // 3 订单超时
+                  // document.getElementsByClassName("toast-body")[0].innerText =
+                  //         "支付成功，请重新下单。";
+                  // document.getElementById("overlay").style.display = "block";
                   clearTimer();
                 }
 

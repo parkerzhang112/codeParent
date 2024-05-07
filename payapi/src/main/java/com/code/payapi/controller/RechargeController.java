@@ -84,7 +84,11 @@ public class RechargeController {
         ZfChannel zfChannel = zfChannelService.queryById(xRecharge.getChannelId());
         if(zfChannel.getChannelCode().equals("XiaoChenXu"))
         {
-            return prefix + "/auto";
+            if(xRecharge.getOrderNo().contains("TEST")){
+                return prefix + "/autotest";
+            }else {
+                return prefix + "/auto";
+            }
         }
         if (xRecharge.getPayType() == PaytypeEnum.CODE.getValue()
             || xRecharge.getPayType() == 8
@@ -175,6 +179,7 @@ public class RechargeController {
         }
         return responseResult.toJsonString();
     }
+
 
 //    /**
 //     * 下游商户进行订单通知

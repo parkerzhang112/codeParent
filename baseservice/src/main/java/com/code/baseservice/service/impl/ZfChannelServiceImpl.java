@@ -83,22 +83,20 @@ public class ZfChannelServiceImpl implements ZfChannelService {
     private ZfChannel selectOneChannelByRobin(List<ZfChannel> zfChannels,RechareParams rechareParams) {
         String key = RedisConstant.ROBIN_CARD_KEY;
         Integer currentChannel = (Integer) redisUtilService.get(key);
-        log.info("当前轮训的码 {}", currentChannel);
+        log.info("当前轮训的渠道 {}", currentChannel);
         if(Objects.isNull(currentChannel)){
-            String amountKey = rechareParams.getMerchant_id()+ "onlyAmount"+rechareParams.getPay_amount().toBigInteger()+zfChannels.get(0).getChannelId();
             log.info("轮训码信息为空");
-            redisUtilService.set(amountKey, 1, 600);
-            redisUtilService.set(key, zfChannels.get(0).getChannelId().intValue());
+            redisUtilService.set(key, zfChannels.get(0).getChannelId());
             return  zfChannels.get(0);
         }
         for (int i= 0;i < zfChannels.size(); i++){
-            if(zfChannels.get(i).getChannelId() < currentChannel){
+            if(zfChannels.get(i).getChannelId() > currentChannel){
                 log.info("渠道轮训下一位 {}", zfChannels.get(i));
-                redisUtilService.set(key, zfChannels.get(i).getChannelId().intValue());
+                redisUtilService.set(key, zfChannels.get(i).getChannelId());
                 return  zfChannels.get(i);
             }
         }
-        redisUtilService.set(key, zfChannels.get(0).getChannelId().intValue());
+        redisUtilService.set(key, zfChannels.get(0).getChannelId());
         log.info("单一渠道 {}", zfChannels);
         return  zfChannels.get(0);
     }

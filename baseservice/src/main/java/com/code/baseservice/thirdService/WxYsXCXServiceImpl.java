@@ -70,39 +70,40 @@ public class WxYsXCXServiceImpl implements BaseService {
     }
 
     public static String getGoodName(BigDecimal price, String goods){
+        log.info("商品价格 {}", goods);
         ZFchannelSku zFchannelSku  = JSONObject.parseObject(goods, ZFchannelSku.class);
         if(StringUtils.isNotBlank(zFchannelSku.getShop_one_price())){
-            List<String> between = Arrays.asList(zFchannelSku.getShop_one_price().split(","));
+            List<String> between = Arrays.asList(zFchannelSku.getShop_one_price().split("-"));
             if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
                 return zFchannelSku.getShop_one_name();
             }
         }
         if(StringUtils.isNotBlank(zFchannelSku.getShop_two_price())){
-            List<String> between = Arrays.asList(zFchannelSku.getShop_two_price().split(","));
+            List<String> between = Arrays.asList(zFchannelSku.getShop_two_price().split("-"));
             if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
                 return zFchannelSku.getShop_two_name();
             }
         }
         if(StringUtils.isNotBlank(zFchannelSku.getShop_three_price())){
-            List<String> between = Arrays.asList(zFchannelSku.getShop_three_price().split(","));
+            List<String> between = Arrays.asList(zFchannelSku.getShop_three_price().split("-"));
             if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
                 return zFchannelSku.getShop_three_name();
             }
         }
         if(StringUtils.isNotBlank(zFchannelSku.getShop_four_price())){
-            List<String> between = Arrays.asList(zFchannelSku.getShop_four_price().split(","));
+            List<String> between = Arrays.asList(zFchannelSku.getShop_four_price().split("-"));
             if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
                 return zFchannelSku.getShop_four_name();
             }
         }
         if(StringUtils.isNotBlank(zFchannelSku.getShop_five_price())){
-            List<String> between = Arrays.asList(zFchannelSku.getShop_five_price().split(","));
+            List<String> between = Arrays.asList(zFchannelSku.getShop_five_price().split("-"));
             if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
                 return zFchannelSku.getShop_five_name();
             }
         }
         if(StringUtils.isNotBlank(zFchannelSku.getShop_six_price())){
-            List<String> between = Arrays.asList(zFchannelSku.getShop_six_price().split(","));
+            List<String> between = Arrays.asList(zFchannelSku.getShop_six_price().split("-"));
             if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
                 return zFchannelSku.getShop_six_name();
             }
@@ -118,19 +119,19 @@ public class WxYsXCXServiceImpl implements BaseService {
     @Override
     public JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge) {
         try {
-            String url  = "https://api.weixin.qq.com/cgi-bin/token?appid="+zfChannel.getThirdMerchantId()+"&secret="+zfChannel.getThirdMerchantPrivateKey()+"&grant_type=client_credential";
-            String respone= "";
-            if (StringUtils.isNotBlank(zfChannel.getProxy())){
+            String url = "https://api.weixin.qq.com/cgi-bin/token?appid=" + zfChannel.getThirdMerchantId() + "&secret=" + zfChannel.getThirdMerchantPrivateKey() + "&grant_type=client_credential";
+            String respone = "";
+            if (StringUtils.isNotBlank(zfChannel.getProxy())) {
                 List<String> ms = Arrays.asList(zfChannel.getProxy().split("\\:"));
-                 respone =  HttpClientUtil.doGet(url, null, ms.get(0), ms.get(1));
-            }else {
-                 respone =  HttpClientUtil.doGet(url, null);
+                respone = HttpClientUtil.doGet(url, null, ms.get(0), ms.get(1));
+            } else {
+                respone = HttpClientUtil.doGet(url, null);
             }
 
-            JSONObject  jsopObject = JSONObject.parseObject(respone);
-            if(!jsopObject.containsKey("access_token")){
+            JSONObject jsopObject = JSONObject.parseObject(respone);
+            if (!jsopObject.containsKey("access_token")) {
                 log.info("获取access_token失败，可能原因 appid和appsercet配置错误, 渠道 {}", zfChannel.getChannelName());
-                throw  new BaseException(ResultEnum.ERROR);
+                throw new BaseException(ResultEnum.WEIXIAOCHENXU_APPID_ERROR);
             }
             String accessToken = jsopObject.getString("access_token");
             JSONObject params = new JSONObject();
@@ -139,19 +140,19 @@ public class WxYsXCXServiceImpl implements BaseService {
             params.put("expire_interval", 30);
             JSONObject jumpWxa = new JSONObject();
             jumpWxa.put("path", "pages/goods/pay/pay");
-            jumpWxa.put("query", "query="+zfRecharge.getOrderNo() + "&amount="+zfRecharge.getPayAmount() + "&requesturl=" + UrlEncoder.urlEncode(zfChannel.getDomain())) ;
+            jumpWxa.put("query", "query=" + zfRecharge.getOrderNo() + "&amount=" + zfRecharge.getPayAmount() + "&requesturl=" + UrlEncoder.urlEncode(zfChannel.getDomain()));
             jumpWxa.put("env_version", "release");
             params.put("jump_wxa", jumpWxa);
-            log.info("单号 {}  参数 {} token {}",zfRecharge.getMerchantOrderNo(), JSONObject.toJSONString(params), accessToken);
+            log.info("单号 {}  参数 {} token {}", zfRecharge.getMerchantOrderNo(), JSONObject.toJSONString(params), accessToken);
             String getUrlRespone = "";
-            if (StringUtils.isNotBlank(zfChannel.getProxy())){
-                 List<String> ms = Arrays.asList(zfChannel.getProxy().split("\\:"));
-                 getUrlRespone = HttpClientUtil.doPostJsonByProxy("https://api.weixin.qq.com/wxa/generatescheme?access_token="+accessToken, params.toJSONString(), ms.get(0), ms.get(1));
-            }else {
-                getUrlRespone = HttpClientUtil.doPostJson("https://api.weixin.qq.com/wxa/generatescheme?access_token="+accessToken, params.toJSONString());
+            if (StringUtils.isNotBlank(zfChannel.getProxy())) {
+                List<String> ms = Arrays.asList(zfChannel.getProxy().split("\\:"));
+                getUrlRespone = HttpClientUtil.doPostJsonByProxy("https://api.weixin.qq.com/wxa/generatescheme?access_token=" + accessToken, params.toJSONString(), ms.get(0), ms.get(1));
+            } else {
+                getUrlRespone = HttpClientUtil.doPostJson("https://api.weixin.qq.com/wxa/generatescheme?access_token=" + accessToken, params.toJSONString());
             }
             JSONObject getUrlResponeJson = JSONObject.parseObject(getUrlRespone);
-            if(getUrlResponeJson.getInteger("errcode") == 0){
+            if (getUrlResponeJson.getInteger("errcode") == 0) {
                 log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), getUrlRespone);
                 TreeMap<String, Object> map1 = new TreeMap<>();
                 map1.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
@@ -159,10 +160,12 @@ public class WxYsXCXServiceImpl implements BaseService {
                 map1.put("pay_amount", zfRecharge.getPayAmount());
                 map1.put("payurl", getUrlResponeJson.getString("openlink"));
                 return new JSONObject(map1);
-            }else {
+            } else {
                 log.info("获取微信小程序加密地址异常，可能原因 微信小程序未发布支付插件或日限制次数, 渠道 {}", zfChannel.getChannelName());
-                throw  new BaseException(ResultEnum.WEIXIAOCHENXU_PATH_ERROR);
+                throw new BaseException(ResultEnum.WEIXIAOCHENXU_PATH_ERROR);
             }
+        }catch (BaseException e){
+            throw  e;
         }catch (Exception e){
             log.error("请求异常  订单号{}", zfRecharge.getOrderNo(), e);
         }

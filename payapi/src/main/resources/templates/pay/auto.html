@@ -117,11 +117,6 @@
               .then(function (response) {
                 console.log("请求的数据：", response);
                 let result = response.data;
-
-                if (result.code !== 200) {
-                  console.log("请求失败！");
-                  return;
-                }
                 // 拿到数据
                 let {
                   order_status,
