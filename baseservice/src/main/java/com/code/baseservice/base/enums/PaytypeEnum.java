@@ -10,11 +10,8 @@ public enum PaytypeEnum {
     YUNSHANFU(5,"大额云闪付"),
     S_WEIXIN_CODE(6,"小额微信扫码支付"),
     WEIXIN_CODE(7,"微信扫码支付"),
-    微信原生(8,"微信原生扫码"),
-
+    微信原生(10,"微信原生扫码"),
     微信小程序(9,"微信小程序"),
-    银行卡大额(10,"银行卡大额"),
-
     ;
 
     private Integer value;

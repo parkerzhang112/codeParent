@@ -61,7 +61,7 @@ public class ZfCodeServiceImpl implements ZfCodeService {
         if(payType == 3){
             codeType = 1;
        }
-        if(payType == PaytypeEnum.微信小程序.getValue()){
+        if(payType == PaytypeEnum.微信小程序.getValue() || payType == PaytypeEnum.微信原生.getValue()){
             codeType = CodeTypeEnum.微信商户.getCode();
         }
         List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount(), codeType);

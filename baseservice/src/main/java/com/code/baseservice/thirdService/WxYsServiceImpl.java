@@ -3,25 +3,29 @@ package com.code.baseservice.thirdService;
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
+import com.code.baseservice.dto.ZFchannelSku;
 import com.code.baseservice.entity.ZfChannel;
+import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfWithdraw;
 import com.code.baseservice.service.BaseService;
+import com.code.baseservice.service.ZfCodeService;
 import com.code.baseservice.service.ZfRechargeService;
 import com.code.baseservice.util.HttpClientUtil;
-import com.code.baseservice.util.StringUtils;
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.exception.ValidationException;
 import com.wechat.pay.java.service.payments.nativepay.NativePayService;
-import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Slf4j
 @Service("WeixinService")
@@ -33,6 +37,9 @@ public class WxYsServiceImpl implements BaseService {
 
     @Autowired
     private ZfRechargeService zfRechargeService;
+
+    @Autowired
+    private ZfCodeService zfCodeService;
 
     private String domain = "http://34.150.25.159/api/order";
 
@@ -55,27 +62,48 @@ public class WxYsServiceImpl implements BaseService {
             return  "error";
     }
 
-    public static String getGoodName(String price, String remark){
-        log.info("渠道金额配置 ：{} 订单金额 {}", remark,price );
-        if(!StringUtil.isBlank(remark)){
-            JSONObject jsonObject = JSONObject.parseObject(remark);
-            if(StringUtils.isNotEmpty(jsonObject.getString(price))){
-                return jsonObject.getString(price);
+    public static String getGoodName(BigDecimal price, String goods){
+        log.info("商品价格 {}", goods);
+        ZFchannelSku zFchannelSku  = JSONObject.parseObject(goods, ZFchannelSku.class);
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(zFchannelSku.getShop_one_price())){
+            List<String> between = Arrays.asList(zFchannelSku.getShop_one_price().split("-"));
+            if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
+                return zFchannelSku.getShop_one_name();
             }
         }
-        Map<String, String> map = new HashMap<>();
-        map.put("500", "【巨量千川解析】");
-        map.put("300", "【主播集训课】全方位解析定位及技巧");
-        map.put("200", "【运营集训课】直播间分工及职责");
-        map.put("188" ,"【运营集训课】直播间爆款打造");
-        map.put("100", "【投手集训课】初级数据分析");
-        map.put("50", "【产品集训课】选品排品逻辑");
-        map.put("30", "【服装品类】参考直播话术");
-        if(map.containsKey(price)){
-            return  map.get(price);
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(zFchannelSku.getShop_two_price())){
+            List<String> between = Arrays.asList(zFchannelSku.getShop_two_price().split("-"));
+            if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
+                return zFchannelSku.getShop_two_name();
+            }
         }
-        return  null;
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(zFchannelSku.getShop_three_price())){
+            List<String> between = Arrays.asList(zFchannelSku.getShop_three_price().split("-"));
+            if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
+                return zFchannelSku.getShop_three_name();
+            }
+        }
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(zFchannelSku.getShop_four_price())){
+            List<String> between = Arrays.asList(zFchannelSku.getShop_four_price().split("-"));
+            if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
+                return zFchannelSku.getShop_four_name();
+            }
+        }
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(zFchannelSku.getShop_five_price())){
+            List<String> between = Arrays.asList(zFchannelSku.getShop_five_price().split("-"));
+            if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
+                return zFchannelSku.getShop_five_name();
+            }
+        }
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(zFchannelSku.getShop_six_price())){
+            List<String> between = Arrays.asList(zFchannelSku.getShop_six_price().split("-"));
+            if(price.compareTo(new BigDecimal(between.get(0))) > -1 && price.compareTo(new BigDecimal(between.get(1)) ) < 1){
+                return zFchannelSku.getShop_six_name();
+            }
+        }
+        return  zFchannelSku.getShop_default_name();
     }
+
 
     public static void main(String[] args) {
         String b  = "{\n" +
@@ -96,16 +124,16 @@ public class WxYsServiceImpl implements BaseService {
 
     @Override
     public JSONObject create(ZfChannel zfChannel, ZfRecharge zfRecharge) {
-
+        ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
         // 使用自动更新平台证书的RSA配置
         // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
         List<String> ms = Arrays.asList(zfChannel.getThirdMerchantId().split("\\|"));
         Config config =
                 new RSAAutoCertificateConfig.Builder()
-                        .merchantId(ms.get(0))
-                        .privateKeyFromPath(zfChannel.getThirdMerchantPrivateKey())
-                        .merchantSerialNumber(ms.get(1))
-                        .apiV3Key(zfChannel.getThirdMerchantPublicKey())
+                        .merchantId(zfCode.getAccount())
+                        .privateKeyFromPath(zfCode.getImage().replaceAll("profile", "D:/ruoyi/uploadPath/profile"))
+                        .merchantSerialNumber(zfCode.getWxCertificateNo())
+                        .apiV3Key(zfCode.getWxMerchantPublicKey())
                         .build();
         // 构建service
         NativePayService service = new NativePayService.Builder().config(config).build();
@@ -114,14 +142,14 @@ public class WxYsServiceImpl implements BaseService {
         com.wechat.pay.java.service.payments.nativepay.model.Amount amount = new com.wechat.pay.java.service.payments.nativepay.model.Amount();
         amount.setTotal(zfRecharge.getPayAmount().intValue() * 100);
         request.setAmount(amount);
-        request.setAppid(ms.get(2));
-        request.setMchid(ms.get(0));
-        String goodName = getGoodName(zfRecharge.getPayAmount().setScale(0).toString(), zfChannel.getRemark());
+        request.setAppid(zfChannel.getThirdMerchantId());
+        request.setMchid(zfCode.getAccount());
+        String goodName = getGoodName(zfRecharge.getPayAmount(), zfChannel.getGoods());
         if(goodName == null){
             return null;
         }
         request.setDescription(goodName);
-        request.setNotifyUrl( "https://bjy6688.top/recharge/json_notify/"+ zfRecharge.getOrderNo());
+        request.setNotifyUrl( "https://mini8888.top//recharge/json_notify/"+ zfRecharge.getOrderNo());
         request.setOutTradeNo(zfRecharge.getOrderNo());
         // 调用下单方法，得到应答et
 

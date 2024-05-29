@@ -129,7 +129,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 jsonObject = buildReuslt(zfMerchant, zfRecharge);
             }
             zfRechargeDao.insert(zfRecharge);
-
             ZfChannelRecord zfChannelRecord = new ZfChannelRecord();
             zfChannelRecord.setRechargeTimesTotal(1);
             zfChannelRecord.setChannelId(zfRecharge.getChannelId());

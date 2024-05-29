@@ -91,7 +91,7 @@ public class RechargeController {
             }
         }
         if (xRecharge.getPayType() == PaytypeEnum.CODE.getValue()
-            || xRecharge.getPayType() == 8
+            || xRecharge.getPayType() == PaytypeEnum.微信原生.getValue()
         ) {
             return prefix + "/index";
 //        } else if(xRecharge.getPayType() == 8) {
