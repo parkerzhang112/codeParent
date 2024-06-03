@@ -20,13 +20,14 @@
         <result property="wxMerchantPublicKey" column="wx_merchant_public_key"/>
         <result property="wxCertificateNo" column="wx_certificate_no"/>
         <result property="limitSends" column="limit_sends"/>
+        <result property="apiDevelopId" column="api_develop_id"/>
     </resultMap>
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfCodeMap">
         select
           code_id, agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name,
-          account,wx_merchant_public_key,wx_certificate_no,limit_sends
+          account,wx_merchant_public_key,wx_certificate_no,limit_sends,api_develop_id
         from zf_code
         where code_id = #{codeId}
     </select>

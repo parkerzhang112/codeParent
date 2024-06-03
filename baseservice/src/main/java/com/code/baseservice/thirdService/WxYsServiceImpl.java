@@ -127,11 +127,10 @@ public class WxYsServiceImpl implements BaseService {
         ZfCode zfCode = zfCodeService.queryById(zfRecharge.getCodeId());
         // 使用自动更新平台证书的RSA配置
         // 一个商户号只能初始化一个配置，否则会因为重复的下载任务报错
-        List<String> ms = Arrays.asList(zfChannel.getThirdMerchantId().split("\\|"));
         Config config =
                 new RSAAutoCertificateConfig.Builder()
                         .merchantId(zfCode.getAccount())
-                        .privateKeyFromPath(zfCode.getImage().replaceAll("profile", "D:/ruoyi/uploadPath/profile"))
+                        .privateKeyFromPath(zfCode.getImage().replaceAll("profile", "data/image"))
                         .merchantSerialNumber(zfCode.getWxCertificateNo())
                         .apiV3Key(zfCode.getWxMerchantPublicKey())
                         .build();
@@ -142,7 +141,7 @@ public class WxYsServiceImpl implements BaseService {
         com.wechat.pay.java.service.payments.nativepay.model.Amount amount = new com.wechat.pay.java.service.payments.nativepay.model.Amount();
         amount.setTotal(zfRecharge.getPayAmount().intValue() * 100);
         request.setAmount(amount);
-        request.setAppid(zfChannel.getThirdMerchantId());
+        request.setAppid(zfCode.getApiDevelopId());
         request.setMchid(zfCode.getAccount());
         String goodName = getGoodName(zfRecharge.getPayAmount(), zfChannel.getGoods());
         if(goodName == null){
