@@ -69,6 +69,9 @@ public class ZfCodeServiceImpl implements ZfCodeService {
         if(payType == 9){
             codeType = 4;
         }
+        if(payType == 1){
+            codeType = 6;
+        }
         List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount(), codeType);
 
         List<ZfCode> filterCard = new ArrayList<>();
