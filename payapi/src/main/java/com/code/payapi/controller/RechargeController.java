@@ -214,8 +214,8 @@ public class RechargeController {
     @PostMapping("/notify/{orderNo}")
     @ResponseBody
     public String notify(@PathVariable("orderNo") String orderNo, @RequestParam  Map<String, Object> map) {
+        log.info("收到通知 {}", map);
         ResponseResult responseResult = new ResponseResult();
-
         try {
             ZfRecharge zfRecharge = zfRechargeService.queryById(orderNo);
             if(zfRecharge != null){
@@ -223,8 +223,8 @@ public class RechargeController {
                 String jsonObject = commonService.notify(zfRecharge,zfChannel, map);
                 return jsonObject;
             }
-
         } catch (BaseException e) {
+            log.error("系统异常 {}", e);
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());
         } catch (Exception e) {
             log.error("系统异常 {}", e);

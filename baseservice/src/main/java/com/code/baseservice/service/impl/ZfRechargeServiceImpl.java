@@ -105,7 +105,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         //延签
         vaildSign(rechareParams, zfMerchant);
         //去重
-        vaildRepeat(rechareParams);
+//        vaildRepeat(rechareParams);
         //查渠道
         ZfChannel zfChannel = zfChannelService.queryChannelByParams(rechareParams);
         //入单
@@ -119,8 +119,6 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                     zfRecharge.setPayUrl(jsonObject.getString("payurl"));
                 }
                  zfRecharge.setOrderStatus(1);
-                int r = zfRechargeDao.update(zfRecharge);
-                log.info("单号 {} 订单更新结果  {}", zfRecharge.getMerchantOrderNo(),  r);
             }else {
                 List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfRecharge);
 

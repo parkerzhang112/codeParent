@@ -47,6 +47,9 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     private ShengYaoServiceImpl shengYaoService;
 
+    @Autowired
+    private WanHaoServiceImpl wanHaoService;
+
     public BaseService transToService(String channelCode){
         switch (channelCode){
             case "SANSHI":
@@ -67,6 +70,8 @@ public class CommonServiceImpl implements CommonService {
                 return wxYsXCXService;
             case "ShengYao":
                 return shengYaoService;
+            case "WanHao":
+                return wanHaoService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
@@ -92,6 +97,8 @@ public class CommonServiceImpl implements CommonService {
                 return wxYsXCXService;
             case "ShengYao":
                 return shengYaoService;
+            case "WanHao":
+                return wanHaoService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }

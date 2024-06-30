@@ -167,6 +167,9 @@
             <if test="isThird != null">
                 is_third ,
             </if>
+        <if test="orderStatus != 0">
+            order_status ,
+        </if>
         </trim>
         values
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -204,6 +207,9 @@
         <if test="isThird != null">
             #{isThird},
         </if>
+            <if test="orderStatus != 0">
+                #{orderStatus} ,
+            </if>
         </trim>
     </insert>
 
