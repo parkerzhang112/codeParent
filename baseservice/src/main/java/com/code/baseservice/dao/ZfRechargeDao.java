@@ -1,5 +1,6 @@
 package com.code.baseservice.dao;
 
+import com.code.baseservice.dto.frontapi.order.QueryOrderDto;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfTransRecord;
@@ -84,5 +85,7 @@ public interface ZfRechargeDao {
     void toNotifyException(ZfRecharge zfRecharge);
 
     List<ZfRecharge> queryAllByLimit(@Param("orderStatus")int status,@Param("limit") int limit, @Param("offset") int offset);
+
+    List<ZfRecharge> selectListByApp(QueryOrderDto queryOrderDto);
 }
 

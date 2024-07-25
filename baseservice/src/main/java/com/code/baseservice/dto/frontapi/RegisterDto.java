@@ -10,23 +10,35 @@ import lombok.Data;
  * @date 2023-03-18
  */
 @Data
-public class LoginDto {
+public class RegisterDto {
     private static final long serialVersionUID = 1L;
 
     /**
      * 主键id
      */
-    @JsonProperty("username")
+    @JsonProperty("user_name")
     private String userName;
 
     /**
-     * 代理id
+     * 密码
      */
     @JsonProperty("password")
     private String password;
 
     /**
-     * 二维码地址
+     * 二次密码
+     */
+    @JsonProperty("confirm_password")
+    private String confirm_password;
+
+    /**
+     * 邀请码
+     */
+        @JsonProperty("invite_code")
+    private String InvitationCode;
+
+    /**
+     * 验证码
      */
     @JsonProperty("code")
     private String code;

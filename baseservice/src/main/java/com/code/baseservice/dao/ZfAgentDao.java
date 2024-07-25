@@ -83,5 +83,9 @@ public interface ZfAgentDao {
     int updateAgentFee(ZfAgent zfAgent);
 
     ZfAgent queryByCode(@Param("agentCode") String agentCode);
+
+    List<ZfAgent> queryByAccount(@Param("agentAccount") String userName);
+
+    Integer selectMaxId();
 }
 

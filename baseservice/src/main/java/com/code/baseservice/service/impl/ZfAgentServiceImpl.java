@@ -7,12 +7,17 @@ import com.code.baseservice.base.enums.TransTypeEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfAgentDao;
 import com.code.baseservice.dto.backapi.OperaAgentParams;
+import com.code.baseservice.dto.frontapi.LoginDto;
+import com.code.baseservice.dto.frontapi.RegisterDto;
 import com.code.baseservice.entity.*;
 import com.code.baseservice.service.ZfAgentRechargeOrderService;
 import com.code.baseservice.service.ZfAgentRecordService;
 import com.code.baseservice.service.ZfAgentService;
 import com.code.baseservice.service.ZfAgentTransService;
+import com.code.baseservice.util.MD5Util;
+import com.code.baseservice.util.StringUtils;
 import com.code.baseservice.util.Telegram;
+import com.warrenstrange.googleauth.GoogleAuthenticator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.redisson.api.RLock;
@@ -23,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -453,7 +459,62 @@ public class ZfAgentServiceImpl implements ZfAgentService {
         }
     }
 
+    @Override
+    public ZfAgent queryByAcount(String account){
+        List<ZfAgent> zfAgents =  zfAgentDao.queryByAccount(account);
+        if(zfAgents.size() > 1){
+            throw  new BaseException(ResultEnum.LOGIN_ERR);
+        }
+        return zfAgents.get(0);
+    }
 
+    @Override
+    public String login(LoginDto loginDto) {
+        List<ZfAgent> zfAgents =  zfAgentDao.queryByAccount(loginDto.getUserName());
+        if(zfAgents.size() > 1){
+            throw  new BaseException(ResultEnum.LOGIN_ERR);
+        }
+        ZfAgent zfAgent = zfAgents.get(0);
+        if(!zfAgent.getPwd().equals(MD5Util.getMD5Str(loginDto.getPassword()))){
+            throw  new BaseException(ResultEnum.LOGIN_ERR);
+        }
+        return zfAgent.getAgentAccount();
+    }
+
+    @Override
+    public String regsiter(RegisterDto registerDto) {
+        List<ZfAgent> zfAgent2 = zfAgentDao.queryByAccount(registerDto.getUserName());
+        if(zfAgent2.size() > 0){
+            new BaseException(ResultEnum.USER_NAME_IS_EXIST);
+        }
+        if(!registerDto.getPassword().matches("^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{8,16}$")){
+            new BaseException(ResultEnum.PASSWORD_RULE_ERROR);
+        }
+        //校验密码
+        if(!registerDto.getPassword().equals(registerDto.getConfirm_password())){
+            new BaseException(ResultEnum.PASSWORD_NO_SAME);
+        }
+        //校验代理邀请码
+        ZfAgent parentAgent = zfAgentDao.queryByCode(registerDto.getInvitationCode());
+        if(parentAgent == null){
+            new BaseException(ResultEnum.INVITE_CODE_VAILD);
+        }
+        //获取代理费率
+        ZfAgent zfAgent1 = (new ZfAgent()).generateInfoByRegister(registerDto, parentAgent);
+        zfAgent1.setAgentId(zfAgentDao.selectMaxId() + 1);
+        String random = zfAgent1.getAgentId() +  (StringUtils.createRandomStr1(6- zfAgent1.getAgentId().toString().length())).toUpperCase();
+
+        zfAgent1.setAgentCode(random);
+        zfAgent1.setRate(getRate());
+        zfAgent1.setGoogleCode( new GoogleAuthenticator().createCredentials().getKey());
+        //写入代理
+        zfAgentDao.insert(zfAgent1);
+        return registerDto.getUserName();
+    }
+
+    private String getRate() {
+        return "{\"recharge\":{\"rate_type_s_weixin\":\"1\",\"rate_value_d_code\":\"1\",\"rate_value_g_code\":\"2\",\"rate_value_s_code\":\"0\",\"rate_value_s_weixin\":\"0\",\"rate_type\":\"1\",\"rate_type_s_shuzi\":\"1\",\"rate_type_s_code\":\"1\",\"rate_value_weixin\":\"0\",\"rate_type_b_code\":\"1\",\"rate_value_b_code\":\"1\",\"rate_value\":\"0\",\"rate_type_g_code\":\"1\",\"rate_type_d_code\":\"1\",\"rate_type_trans\":\"1\",\"rate_type_weixin\":\"1\",\"rate_value_trans\":\"0\",\"rate_value_s_shuzi\":\"0\"},\"trans\":{\"rate_type\":\"0\",\"rate_value\":\"0\"}}";
+    }
 
 
     public BigDecimal sumAgentFee(ZfRecharge zfRecharge, String rate) {

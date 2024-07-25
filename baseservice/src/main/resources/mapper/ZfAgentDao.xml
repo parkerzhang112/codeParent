@@ -96,6 +96,15 @@
         from zf_agent
         where agent_code = #{agentCode}
     </select>
+    <select id="queryByAccount" resultType="com.code.baseservice.entity.ZfAgent">
+                select
+          agent_id,weight, balance, name, rate, parent_id, pwd, google_code, agent_account,accept_amount
+        from zf_agent
+        where agent_account = #{agentAccount}
+    </select>
+    <select id="selectMaxId" resultType="java.lang.Integer">
+                select max(agent_id) from  zf_agent order by agent_id desc limit 1;
+    </select>
 
     <!--新增所有列-->
     <insert id="insert" keyProperty="agentId" useGeneratedKeys="true">

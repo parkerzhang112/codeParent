@@ -1,6 +1,8 @@
 package com.code.baseservice.service;
 
 import com.code.baseservice.dto.backapi.OperaAgentParams;
+import com.code.baseservice.dto.frontapi.LoginDto;
+import com.code.baseservice.dto.frontapi.RegisterDto;
 import com.code.baseservice.entity.ZfAgent;
 import com.code.baseservice.entity.ZfAgentRechargeOrder;
 import com.code.baseservice.entity.ZfRecharge;
@@ -51,4 +53,9 @@ public interface ZfAgentService {
      */
      void updateAgentCreditAmount(ZfAgentRechargeOrder zfAgentRechargeOrder) ;
 
+    String login(LoginDto loginDto);
+
+    String regsiter(RegisterDto registerDto);
+
+    public ZfAgent queryByAcount(String account);
 }

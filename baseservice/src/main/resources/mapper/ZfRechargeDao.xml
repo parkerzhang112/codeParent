@@ -21,6 +21,8 @@
         <result property="remark" column="remark" />
         <result property="payName" column="pay_name"/>
         <result property="returnUrl" column="return_url"/>
+        <result property="name" column="name"/>
+
     </resultMap>
 
     <!--查询单个-->
@@ -119,6 +121,39 @@
             <if test="merchantFee != null">
                 and merchant_fee = #{merchantFee}
             </if>
+        </where>
+    </select>
+    <select id="selectListByApp" resultMap="ZfRechargeMap">
+        select
+        z_r.merchant_order_no,
+        z_r.pay_amount,
+        z_r.paid_amount,
+        z_r.order_no,
+        z_r.notify_url,
+        z_r.code_id,
+        z_r.create_time,
+        z_r.update_time,
+        z_r.merchant_id,
+        z_r.channel_id,
+        z_r.agent_id,
+        z_r.order_status,
+        z_r.notify_status,
+        z_r.merchant_fee,
+        z_c.name
+        from zf_recharge z_r
+        left join zf_code z_c on z_r.code_id = z_c.code_id
+        <where>
+            <if test="orderNo != null  and orderNo != ''">and z_r.order_no = #{orderNo}</if>
+            <if test="codeId != null ">and z_r.code_id = #{codeId}</if>
+            <if test="agentId != null ">and z_r.agent_id = #{agentId}</if>
+            <if test="orderStatus != null ">and z_r.order_status = #{orderStatus}</if>
+<!--            <if test="startTime != null and startTime != ''">&lt;!&ndash; 开始时间检索 &ndash;&gt;-->
+<!--                and z_r.create_time &gt;= #{startTime}-->
+<!--            </if>-->
+<!--            <if test="endTime != null and endTime != ''">&lt;!&ndash; 结束时间检索 &ndash;&gt;-->
+<!--                and z_r.create_time &lt;= #{endTime}-->
+<!--            </if>-->
+
         </where>
     </select>
 

@@ -51,7 +51,13 @@ public enum ResultEnum {
     NO_ENOUGH_AMOUNT(811, "积分不够"),
     NO_COMMISSION_AMOUNT(812, "佣金不够"),
     DE_ERR(812, "分配代理与操作代理不一致"),
+    LOGIN_ERR(813, "用户或者密码不存在"),
+    PASSWORD_NO_SAME(814, "两次密码不一致"),
+    PASSWORD_RULE_ERROR(815, "密码格式错误"),
 
+    INVITE_CODE_VAILD(816, "代理邀请码无效"),
+    VAILD_CODE_ERROR(817, "验证码不对"),
+    USER_NAME_IS_EXIST(818, "用户已存在"),
     ;
 
 

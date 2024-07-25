@@ -8,6 +8,7 @@ import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfRechargeDao;
 import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import com.code.baseservice.dto.backapi.OperaOrderParams;
+import com.code.baseservice.dto.frontapi.order.QueryOrderDto;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.*;
@@ -213,6 +214,11 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         //增加已收额度
         redisUtilService.set("notice:agent:" + zfCode.getAgentId(), 1,1200);
         zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
+    }
+
+    @Override
+    public List<ZfRecharge> selectListByApp(QueryOrderDto queryOrderDto) {
+        return  zfRechargeDao.selectListByApp(queryOrderDto);
     }
 
     private JSONObject buildReusltCard(ZfMerchant zfMerchant, ZfRecharge zfRecharge, ZfCode zfCode) {

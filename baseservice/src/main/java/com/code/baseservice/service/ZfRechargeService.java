@@ -3,6 +3,7 @@ package com.code.baseservice.service;
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import com.code.baseservice.dto.backapi.OperaOrderParams;
+import com.code.baseservice.dto.frontapi.order.QueryOrderDto;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.ZfCode;
@@ -61,4 +62,6 @@ public interface ZfRechargeService {
     JSONObject createCard(RechareParams rechareParams);
 
     void createOrderByTelegram(RechareParams rechareParams, String account);
+
+    List<ZfRecharge> selectListByApp(QueryOrderDto queryOrderDto);
 }

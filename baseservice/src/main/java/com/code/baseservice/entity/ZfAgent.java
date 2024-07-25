@@ -1,5 +1,7 @@
 package com.code.baseservice.entity;
 
+import com.code.baseservice.dto.frontapi.RegisterDto;
+import com.code.baseservice.util.MD5Util;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -69,6 +71,20 @@ public class ZfAgent implements Serializable {
     private BigDecimal weight;
 
 
-    private BigDecimal agentCode;
+    private String agentCode;
+
+    /**
+     *  一级代理
+     */
+    private Long oneLevelAgent;
+
+    public ZfAgent generateInfoByRegister(RegisterDto registerDto, ZfAgent parentAgent) {
+        name = registerDto.getUserName();
+        agentAccount = registerDto.getUserName();
+        pwd = MD5Util.getMD5Str(registerDto.getPassword());
+        parentId =  parentAgent.getAgentId();
+        oneLevelAgent = parentAgent.getOneLevelAgent();
+        return this;
+    }
 }
 
