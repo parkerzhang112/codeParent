@@ -31,6 +31,7 @@
         and min_amount <![CDATA[ <= ]]> #{pay_amount}
         and max_amount <![CDATA[ >= ]]>  #{pay_amount}
         and channel_status = 1
+        and pay_type = #{pay_type}
         and channel_type = 1
     </select>
 
