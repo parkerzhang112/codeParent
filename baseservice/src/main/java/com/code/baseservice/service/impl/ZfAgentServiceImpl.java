@@ -471,14 +471,19 @@ public class ZfAgentServiceImpl implements ZfAgentService {
     @Override
     public String login(LoginDto loginDto) {
         List<ZfAgent> zfAgents =  zfAgentDao.queryByAccount(loginDto.getUserName());
-        if(zfAgents.size() > 1){
+        if(zfAgents.size() != 1 ){
             throw  new BaseException(ResultEnum.LOGIN_ERR);
         }
         ZfAgent zfAgent = zfAgents.get(0);
-        if(!zfAgent.getPwd().equals(MD5Util.getMD5Str(loginDto.getPassword()))){
+        if(!zfAgent.getPwd().equals(encryptPassword(loginDto.getUserName(),loginDto.getPassword(),"11111"))){
             throw  new BaseException(ResultEnum.LOGIN_ERR);
         }
         return zfAgent.getAgentAccount();
+    }
+
+    public String encryptPassword(String loginName, String password, String salt)
+    {
+        return MD5Util.getMD5Str(loginName + password + salt);
     }
 
     @Override

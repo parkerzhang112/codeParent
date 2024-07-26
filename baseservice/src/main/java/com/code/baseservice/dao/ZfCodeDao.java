@@ -1,7 +1,9 @@
 package com.code.baseservice.dao;
 
+import com.code.baseservice.dto.frontapi.code.QueryCodeDto;
 import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfWithdraw;
+import com.code.baseservice.vo.ZfCodeVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
@@ -40,5 +42,7 @@ public interface ZfCodeDao {
     ZfCode queryByAccountByLike(@Param("account") String account);
 
     List<ZfCode> queryCodeByMerchant(@Param("merchantId") Integer merchantId);
+
+    List<ZfCodeVo> queryListByAgentId(QueryCodeDto agentId);
 }
 

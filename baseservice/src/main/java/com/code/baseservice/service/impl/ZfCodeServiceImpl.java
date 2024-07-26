@@ -2,6 +2,7 @@ package com.code.baseservice.service.impl;
 
 import com.code.baseservice.dao.ZfCodeDao;
 import com.code.baseservice.dto.autoapi.TransParams;
+import com.code.baseservice.dto.frontapi.code.QueryCodeDto;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.ZfChannel;
 import com.code.baseservice.entity.ZfCode;
@@ -9,6 +10,7 @@ import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfWithdraw;
 import com.code.baseservice.service.RedisUtilService;
 import com.code.baseservice.service.ZfCodeService;
+import com.code.baseservice.vo.ZfCodeVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -160,6 +162,12 @@ public class ZfCodeServiceImpl implements ZfCodeService {
     public List<ZfCode> queryGroupList(Integer  merchantId) {
         List<ZfCode> zfCodes = zfCodeDao.queryCodeByMerchant(merchantId);
         return zfCodes;
+    }
+
+    @Override
+    public List<ZfCodeVo> queryListByAgentId(QueryCodeDto queryCodeDto) {
+        List<ZfCodeVo> zfCodeVos = zfCodeDao.queryListByAgentId(queryCodeDto);
+        return zfCodeVos;
     }
 
 }

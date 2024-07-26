@@ -64,6 +64,7 @@ public class OrderController {
             if (new Integer(1).equals(operaOrderParams.getOrderType())) {
                 zfRechargeService.confirmOrder(operaOrderParams);
             }
+            responseResult.setCode(ResultEnum.SUCCESS.getCode());
             return responseResult.toJsonString();
         } catch (BaseException e) {
             responseResult.setCode(e.getCode()).setMsg(e.getMessage());

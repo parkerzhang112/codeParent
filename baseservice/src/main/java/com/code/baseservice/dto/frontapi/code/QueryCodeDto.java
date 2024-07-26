@@ -1,10 +1,11 @@
 package com.code.baseservice.dto.frontapi.code;
 
+import com.code.baseservice.dto.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class QueryCodeDto {
+public class QueryCodeDto extends BaseEntity {
 
     /*
     * 开关状态
@@ -23,11 +24,13 @@ public class QueryCodeDto {
      * 二维码账号
      */
     @JsonProperty("account")
-    private Integer account;
+    private String account;
 
     /**
      * 二维码名称
      */
     @JsonProperty("name")
-    private Integer name;
+    private String name;
+
+    private Integer agentId;
 }

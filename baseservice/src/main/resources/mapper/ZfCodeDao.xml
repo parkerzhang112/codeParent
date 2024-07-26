@@ -19,6 +19,26 @@
         <result property="account" column="account" />
     </resultMap>
 
+    <resultMap type="com.code.baseservice.vo.ZfCodeVo" id="ZfCodeVoMap">
+        <result property="codeId" column="code_id" />
+        <result property="agentId" column="agent_id" />
+        <result property="minAmount" column="min_amount" />
+        <result property="maxAmount" column="max_amount" />
+        <result property="image" column="image" />
+        <result property="status" column="status" />
+        <result property="isOpen" column="is_open" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+        <result property="dayLimitAmount" column="day_limit_amount" />
+        <result property="dayLimitTimes" column="day_limit_times" />
+        <result property="name" column="name" />
+        <result property="channelId" column="channe_id" />
+        <result property="account" column="account" />
+        <result property="rechargeTimes" column="recharge_times" />
+        <result property="rechargeAmount" column="recharge_amount" />
+
+    </resultMap>
+
     <!--查询单个-->
     <select id="queryById" resultMap="ZfCodeMap">
         select
@@ -107,6 +127,36 @@
         and FIND_IN_SET(#{merchantId}, zh.merchant_id)
         group by za.weight, zc.code_id
         limit 10;
+    </select>
+    <select id="queryListByAgentId" resultType="com.code.baseservice.vo.ZfCodeVo">
+
+        select
+        zc.*,
+        zcc.recharge_amount,
+        zcc.recharge_times,
+        zcc.fee
+        from zf_code zc
+        left join zf_agent za on zc.agent_id=za.agent_id
+        left join  zf_code_record zcc on zcc.code_id = zc.code_id
+        <where>
+            <if test="account != null and account != '' ">
+                and zc.account = #{account}
+            </if>
+            <if test="account != null and account != '' ">
+                and zc.account = #{account}
+            </if>
+            <if test="isOpen != null ">
+                and zc.is_open = #{isOpen}
+            </if>
+            <if test="isOpen != null ">
+                and zc.is_open = #{isOpen}
+            </if>
+            <if test="codeType != null ">
+                and zc.code_type = #{codeType}
+            </if>
+
+        </where>
+        order by update_time desc;
     </select>
 
     <!--通过主键修改数据-->

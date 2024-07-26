@@ -5,11 +5,20 @@ import com.code.baseservice.dto.FrontResponseResult;
 import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.frontapi.code.AddCodeDto;
 import com.code.baseservice.dto.frontapi.code.QueryCodeDto;
+import com.code.baseservice.entity.ZfAgent;
+import com.code.baseservice.service.ZfAgentService;
+import com.code.baseservice.service.ZfCodeService;
+import com.code.baseservice.vo.ZfCodeVo;
+import com.code.frontapi.util.TokenUtil;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Api(tags = "支付资料", description = "流水api")
 @Slf4j
@@ -17,18 +26,33 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping(value = "/user/code")
 public class CodeController {
 
+    @Autowired
+    ZfCodeService zfCodeService;
+
+    @Autowired
+    TokenUtil tokenUtil;
+
+    @Autowired
+    ZfAgentService zfAgentService;
+
+
     @PostMapping(value ={"/list"})
     @ResponseBody
-    public FrontResponseResult<QueryCodeDto> list(@RequestBody QueryCodeDto queryCodeDto, HttpServletRequest request){
+    public PageInfo<ZfCodeVo> list(@RequestBody QueryCodeDto queryCodeDto, HttpServletRequest request){
         try {
-            return new FrontResponseResult<>("操作成功", 200, queryCodeDto);
+            String token  =   request.getHeader("token");
+            String account  = tokenUtil.parseToken(token).get("loginName");
+            ZfAgent zfAgent = zfAgentService.queryByAcount(account);
+            PageHelper.startPage(queryCodeDto.getPageNum(), queryCodeDto.getPageSize());
+            queryCodeDto.setAgentId(zfAgent.getAgentId());
+            List<ZfCodeVo> vos =  zfCodeService.queryListByAgentId(queryCodeDto);
+            return new PageInfo<>(vos);
         }catch (BaseException e){
-            return new FrontResponseResult<>("操作成功", 200, queryCodeDto);
             //其他非法异常，重新上传;
         }catch (Exception e){
             log.error("获取用户二维码异常 ", e);
-            return new FrontResponseResult<>("操作成功", 200, queryCodeDto);
         }
+        return new PageInfo<>();
     }
 
 

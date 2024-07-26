@@ -147,12 +147,12 @@
             <if test="codeId != null ">and z_r.code_id = #{codeId}</if>
             <if test="agentId != null ">and z_r.agent_id = #{agentId}</if>
             <if test="orderStatus != null ">and z_r.order_status = #{orderStatus}</if>
-<!--            <if test="startTime != null and startTime != ''">&lt;!&ndash; 开始时间检索 &ndash;&gt;-->
-<!--                and z_r.create_time &gt;= #{startTime}-->
-<!--            </if>-->
-<!--            <if test="endTime != null and endTime != ''">&lt;!&ndash; 结束时间检索 &ndash;&gt;-->
-<!--                and z_r.create_time &lt;= #{endTime}-->
-<!--            </if>-->
+            <if test="startTime != null and startTime != ''"><!-- 开始时间检索 -->
+                and z_r.create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''"><!-- 结束时间检索 -->
+                and z_r.create_time &lt;= #{endTime}
+            </if>
 
         </where>
     </select>
