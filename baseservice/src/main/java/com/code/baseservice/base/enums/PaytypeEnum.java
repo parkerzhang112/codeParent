@@ -7,6 +7,9 @@ public enum PaytypeEnum {
     SMALL_CODE(2,"小额支付宝扫码"),
     SHUZI(3,"数字人民币"),
     GROUP(12,"群贴"),
+    ZHONGCODE(11,"支付宝中额"),
+    CHAOCODE(13,"支付宝超额"),
+
 
     ;
 

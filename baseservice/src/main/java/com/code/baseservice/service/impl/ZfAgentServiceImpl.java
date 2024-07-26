@@ -465,6 +465,7 @@ public class ZfAgentServiceImpl implements ZfAgentService {
             if(jsonObject.containsKey("recharge")){
                 JSONObject rechargeRate = jsonObject.getJSONObject("recharge");
                 String rate_prex = PayTypeRateConstans.getRateString(zfRecharge.getPayType(),zfRecharge.getPaidAmount());
+                log.info("结算支付方式费率 {}", rate_prex);
                 String rate_type_key = "rate_type" + rate_prex;
                 String rate_value_key = "rate_value" + rate_prex;
                 if(!Strings.isEmpty(rechargeRate.getString(rate_type_key))&& !Strings.isEmpty(rechargeRate.getString(rate_type_key))){
