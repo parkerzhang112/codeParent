@@ -128,7 +128,7 @@
         group by za.weight, zc.code_id
         limit 10;
     </select>
-    <select id="queryListByAgentId" resultType="com.code.baseservice.vo.ZfCodeVo">
+    <select id="queryListByAgentId" resultMap="ZfCodeMap">
 
         select
         zc.*,
@@ -142,21 +142,17 @@
             <if test="account != null and account != '' ">
                 and zc.account = #{account}
             </if>
-            <if test="account != null and account != '' ">
-                and zc.account = #{account}
-            </if>
-            <if test="isOpen != null ">
-                and zc.is_open = #{isOpen}
-            </if>
             <if test="isOpen != null ">
                 and zc.is_open = #{isOpen}
             </if>
             <if test="codeType != null ">
                 and zc.code_type = #{codeType}
             </if>
-
+            <if test="agentId != null">
+                and zc.agent_id = #{agentId}
+            </if>
         </where>
-        order by update_time desc;
+        order by update_time desc
     </select>
 
     <!--通过主键修改数据-->

@@ -43,7 +43,7 @@ public class LoginController {
     public String login(@RequestBody LoginDto loginDto, HttpServletRequest request){
         ResponseResult responseResult = new ResponseResult();
         try {
-            log.info("开始登录");
+            log.info("开始登录 {}", loginDto);
             zfAgentService.login(loginDto);
             String token =  tokenUtil.getToken(loginDto.getUserName());
             responseResult.setCode(ResultEnum.SUCCESS.getCode());

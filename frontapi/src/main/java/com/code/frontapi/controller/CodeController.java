@@ -1,11 +1,14 @@
 package com.code.frontapi.controller;
 
+import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
-import com.code.baseservice.dto.FrontResponseResult;
 import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.frontapi.code.AddCodeDto;
+import com.code.baseservice.dto.frontapi.code.EditCodeDto;
+import com.code.baseservice.dto.frontapi.code.OpenCodeDto;
 import com.code.baseservice.dto.frontapi.code.QueryCodeDto;
 import com.code.baseservice.entity.ZfAgent;
+import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.service.ZfAgentService;
 import com.code.baseservice.service.ZfCodeService;
 import com.code.baseservice.vo.ZfCodeVo;
@@ -58,38 +61,82 @@ public class CodeController {
 
     @PostMapping(value ={"/detail/{code_id}"})
     @ResponseBody
-    public FrontResponseResult<QueryCodeDto>  detail(@PathVariable("agentId") Integer agentId, HttpServletRequest request){
+    public ResponseResult  detail(@PathVariable("code_id") Integer codeId, HttpServletRequest request){
         ResponseResult responseResult = new ResponseResult();
         try {
-            return new FrontResponseResult<>("操作成功", 200, null);
-
+            ZfCode zfCode = zfCodeService.queryById(codeId);
+            responseResult.setCode(ResultEnum.SUCCESS.getCode());
+            responseResult.setData(zfCode);
         }catch (BaseException e){
-            return new FrontResponseResult<>("操作成功", 200, null);
-
+            responseResult.setCode(e.getCode());
+            responseResult.setData(e.getMessage());
             //其他非法异常，重新上传;
         }catch (Exception e){
+            responseResult.setCode(ResultEnum.ERROR.getCode());
+            responseResult.setData(ResultEnum.ERROR.getMsg());
             log.error("获取用户二维码异常 {}", e.getStackTrace());
-            return new FrontResponseResult<>("操作成功", 200, null);
-
         }
+        return  responseResult;
     }
 
 
     @PostMapping(value ={"/edit"})
     @ResponseBody
-    public String edit(@RequestBody AddCodeDto addCodeDto, HttpServletRequest request){
+    public ResponseResult edit(@RequestBody EditCodeDto editCodeDto, HttpServletRequest request){
         ResponseResult responseResult = new ResponseResult();
         try {
-            log.info("获取用户二维码 {}", addCodeDto);
+            ZfCode zfCode = new ZfCode();
+            zfCode.setCodeId(editCodeDto.getCodeId());
+            zfCode.setDayLimitAmount(editCodeDto.getDayLimitAmount());
+            zfCode.setDayLimitTimes(editCodeDto.getDayLimitTimes());
+            int r =  zfCodeService.update(zfCode);
+            if(r > 0){
+                responseResult.setCode(ResultEnum.SUCCESS.getCode());
+                responseResult.setMsg("操作成功");
+            }else {
+                responseResult.setCode(ResultEnum.ERROR.getCode());
+                responseResult.setMsg(ResultEnum.ERROR.getMsg());
+            }
+            log.info("获取用户二维码 {}", editCodeDto);
         }catch (BaseException e){
+            responseResult.setCode(e.getCode());
+            responseResult.setMsg(e.getMessage());
             //其他非法异常，重新上传;
         }catch (Exception e){
-            log.error("获取用户二维码异常 {}", e.getStackTrace());
+            responseResult.setCode(ResultEnum.ERROR.getCode());
+            responseResult.setMsg(ResultEnum.ERROR.getMsg());
         }
-        responseResult.setMsg("操作成功");
-        return responseResult.toJsonString();
+        return responseResult;
     }
 
+
+    @PostMapping(value ={"/open"})
+    @ResponseBody
+    public ResponseResult open(@RequestBody OpenCodeDto openCodeDto, HttpServletRequest request){
+        ResponseResult responseResult = new ResponseResult();
+        try {
+            log.info("开启二维码 {}", openCodeDto);
+            ZfCode zfCode = new ZfCode();
+            zfCode.setCodeId(openCodeDto.getCodeId());
+            zfCode.setIsOpen(openCodeDto.getIsOpen());
+            int r =  zfCodeService.update(zfCode);
+            if(r > 0){
+                responseResult.setCode(ResultEnum.SUCCESS.getCode());
+                responseResult.setMsg("操作成功");
+            }else {
+                responseResult.setCode(ResultEnum.ERROR.getCode());
+                responseResult.setMsg(ResultEnum.ERROR.getMsg());
+            }
+        }catch (BaseException e){
+            responseResult.setCode(e.getCode());
+            responseResult.setMsg(e.getMessage());
+            //其他非法异常，重新上传;
+        }catch (Exception e){
+            responseResult.setCode(ResultEnum.ERROR.getCode());
+            responseResult.setMsg(ResultEnum.ERROR.getMsg());
+        }
+        return responseResult;
+    }
 
     @PostMapping(value ={"/add"})
     @ResponseBody
