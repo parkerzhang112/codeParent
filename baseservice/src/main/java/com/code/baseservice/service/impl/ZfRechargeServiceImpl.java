@@ -502,7 +502,7 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
                 return;
             }
             //计算会员手续费
-            BigDecimal fee = zfMerchantService.sumMerchantFee(zfRecharge.getPaidAmount(),xMerchant);
+            BigDecimal fee = zfChannelService.sumChannelFee(zfRecharge.getPaidAmount(),xChannel);
             zfRecharge.setMerchantFee(fee);
             zfRechargeDao.update(zfRecharge);
             zfAgentService.updateAgentFee(zfRecharge, zfRecharge.getAgentId(), BigDecimal.ZERO);
