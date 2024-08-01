@@ -15,15 +15,6 @@ import java.math.BigDecimal;
 public class AddCodeDto  {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 主键id
-     */
-    @JsonProperty("code_id")
-    private Integer codeId;
-
-    /**
-     * 代理id
-     */
     @JsonProperty("agent_id")
     private Integer agentId;
 
@@ -32,12 +23,6 @@ public class AddCodeDto  {
      */
     @JsonProperty("image_url")
     private String imageUrl;
-
-    /**
-     * 开关状态
-     */
-    @JsonProperty("is_open")
-    private Integer isOpen;
 
     /**
      * 日限额

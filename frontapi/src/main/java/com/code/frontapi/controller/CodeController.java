@@ -149,6 +149,7 @@ public class CodeController {
         }catch (Exception e){
             log.error("获取用户二维码异常 {}", e.getStackTrace());
         }
+        responseResult.setCode(ResultEnum.SUCCESS.getCode());
         responseResult.setMsg("操作成功");
         return responseResult.toJsonString();
     }
