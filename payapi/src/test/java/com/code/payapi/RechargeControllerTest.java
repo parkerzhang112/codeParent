@@ -1,6 +1,7 @@
 package com.code.payapi;
 
 import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.base.enums.PaytypeEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
@@ -498,6 +499,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
         rechareParams.setPay_amount(new BigDecimal("146"));
         rechareParams.setNotify_url("http://127.0.0.1:8081/test/notify");
         rechareParams.setRemark(StringUtil.createRandomStr1(3));
+        rechareParams.setPay_type(PaytypeEnum.CARD.getValue());
         TreeMap<String, Object> map = new TreeMap<>();
         map.put("merchant_id", rechareParams.getMerchant_id());
         map.put("merchant_order_no", rechareParams.getMerchant_order_no());
@@ -505,6 +507,7 @@ public class RechargeControllerTest extends PayapiApplicationTests {
         map.put("notify_url", rechareParams.getNotify_url());
         String sign_str = new CommonUtil().getSign(map);
         sign_str = sign_str.concat("key=".concat(xMerchant.getKey()));
+        map.put("pay_type", PaytypeEnum.ZHONGCODE.getValue());
         log.info("签名字符串: {}", sign_str);
         String sign =  MD5Util.getMD5Str(sign_str).toUpperCase();
         rechareParams.setSign(sign);

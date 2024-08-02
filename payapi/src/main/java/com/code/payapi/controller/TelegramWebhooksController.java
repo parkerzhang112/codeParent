@@ -64,6 +64,7 @@ public class TelegramWebhooksController {
                 rechareParams.setPay_amount(new BigDecimal(amount));
                 String account = Arrays.asList(infos.get(4).split("：")).get(1);
                 rechareParams.setNotify_url("http://127.0.0.1");
+                rechareParams.setPay_type(12);
                 zfRechargeService.createOrderByTelegram(rechareParams, account);
             }
             if (jsonObject.getJSONObject("message").getString("text").contains("获取在线码")) {

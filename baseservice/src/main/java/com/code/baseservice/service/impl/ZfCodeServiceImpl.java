@@ -1,5 +1,6 @@
 package com.code.baseservice.service.impl;
 
+import com.code.baseservice.base.enums.PaytypeEnum;
 import com.code.baseservice.dao.ZfCodeDao;
 import com.code.baseservice.dto.autoapi.TransParams;
 import com.code.baseservice.dto.payapi.RechareParams;
@@ -71,6 +72,9 @@ public class ZfCodeServiceImpl implements ZfCodeService {
         }
         if(payType == 1){
             codeType = 6;
+        }
+        if(payType .equals( PaytypeEnum.CARD.getValue())){
+            codeType = 4;
         }
         List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, zfRecharge.getPayAmount(), codeType);
 
