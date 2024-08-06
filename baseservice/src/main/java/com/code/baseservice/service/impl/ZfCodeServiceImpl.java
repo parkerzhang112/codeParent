@@ -1,16 +1,18 @@
 package com.code.baseservice.service.impl;
 
+import com.code.baseservice.base.enums.CodeTypeEnum;
+import com.code.baseservice.base.enums.ResultEnum;
+import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfCodeDao;
 import com.code.baseservice.dto.autoapi.TransParams;
+import com.code.baseservice.dto.frontapi.code.AddCodeDto;
 import com.code.baseservice.dto.frontapi.code.QueryCodeDto;
 import com.code.baseservice.dto.payapi.RechareParams;
-import com.code.baseservice.entity.ZfChannel;
-import com.code.baseservice.entity.ZfCode;
-import com.code.baseservice.entity.ZfRecharge;
-import com.code.baseservice.entity.ZfWithdraw;
+import com.code.baseservice.entity.*;
 import com.code.baseservice.service.RedisUtilService;
 import com.code.baseservice.service.ZfCodeService;
 import com.code.baseservice.vo.ZfCodeVo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +27,16 @@ import java.util.List;
  * @since 2023-03-19 23:07:16
  */
 @Service("zfCodeService")
+@Slf4j
 public class ZfCodeServiceImpl implements ZfCodeService {
     @Resource
     private ZfCodeDao zfCodeDao;
 
     @Autowired
     private RedisUtilService redisUtilService;
+
+    @Autowired
+    private  FileUploadService fileUploadService;
 
     /**
      * 通过ID查询单条数据
@@ -168,6 +174,37 @@ public class ZfCodeServiceImpl implements ZfCodeService {
     public List<ZfCodeVo> queryListByAgentId(QueryCodeDto queryCodeDto) {
         List<ZfCodeVo> zfCodeVos = zfCodeDao.queryListByAgentId(queryCodeDto);
         return zfCodeVos;
+    }
+
+    @Override
+    public void addCode(AddCodeDto addCodeDto, ZfAgent zfAgent) {
+        ZfCode exist =  zfCodeDao.queryByAccount(addCodeDto.getAccount());
+        if(exist != null && exist.getCodeType().equals(addCodeDto.getCodeType())){
+            throw new BaseException(ResultEnum.CODE_IS_EXIST);
+        }
+        ZfCode zfCode = new ZfCode();
+        if(addCodeDto.getCodeType() .equals(CodeTypeEnum.二维码.getCode() )
+                || addCodeDto.getCodeType() .equals(CodeTypeEnum.微信二维码.getCode() ))
+        {
+            zfCode.setImage( fileUploadService.uploadFile(addCodeDto.getImage()));
+        }
+        zfCode.setStatus(100);
+        zfCode.setDayLimitTimes(addCodeDto.getDayLimitTimes());
+        zfCode.setDayLimitAmount(addCodeDto.getDayLimitAmount());
+        zfCode.setAgentId(zfAgent.getAgentId());
+        zfCode.setName(addCodeDto.getName());
+        zfCode.setAccount(addCodeDto.getAccount());
+        zfCode.setCodeType(addCodeDto.getCodeType());
+        zfCode.setMinAmount(addCodeDto.getMinAmount());
+        zfCode.setMaxAmount(addCodeDto.getMaxAmount());
+        zfCode.setDayLimitTimes(addCodeDto.getDayLimitTimes());
+        int r = zfCodeDao.insert(zfCode);
+        if(r == 0){
+            log.error("插入二维码失败");
+            throw  new BaseException(ResultEnum.ERROR);
+        }
+        log.info("插入二维码成功 {} {}", addCodeDto, zfAgent);
+        return;
     }
 
 }

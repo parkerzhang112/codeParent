@@ -1,12 +1,10 @@
 package com.code.baseservice.service;
 
 import com.code.baseservice.dto.autoapi.TransParams;
+import com.code.baseservice.dto.frontapi.code.AddCodeDto;
 import com.code.baseservice.dto.frontapi.code.QueryCodeDto;
 import com.code.baseservice.dto.payapi.RechareParams;
-import com.code.baseservice.entity.ZfChannel;
-import com.code.baseservice.entity.ZfCode;
-import com.code.baseservice.entity.ZfRecharge;
-import com.code.baseservice.entity.ZfWithdraw;
+import com.code.baseservice.entity.*;
 import com.code.baseservice.vo.ZfCodeVo;
 
 import java.util.List;
@@ -50,4 +48,6 @@ public interface ZfCodeService {
     List<ZfCode> queryGroupList(Integer i);
 
     List<ZfCodeVo> queryListByAgentId(QueryCodeDto agentId);
+
+    void addCode(AddCodeDto addCodeDto, ZfAgent zfAgent);
 }

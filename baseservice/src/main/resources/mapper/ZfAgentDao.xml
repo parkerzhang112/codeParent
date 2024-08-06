@@ -96,7 +96,7 @@
         from zf_agent
         where agent_code = #{agentCode}
     </select>
-    <select id="queryByAccount" resultType="com.code.baseservice.entity.ZfAgent">
+    <select id="queryByAccount" resultMap="ZfAgentMap">
                 select
           agent_id,weight, balance, name, rate, parent_id, pwd, google_code, agent_account,accept_amount
         from zf_agent

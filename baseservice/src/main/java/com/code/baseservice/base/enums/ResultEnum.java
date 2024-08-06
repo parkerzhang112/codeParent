@@ -58,6 +58,8 @@ public enum ResultEnum {
     INVITE_CODE_VAILD(816, "代理邀请码无效"),
     VAILD_CODE_ERROR(817, "验证码不对"),
     USER_NAME_IS_EXIST(818, "用户已存在"),
+    CODE_IS_EXIST(810, "码已存在"),
+
     ;
 
 

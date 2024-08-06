@@ -140,17 +140,25 @@ public class CodeController {
 
     @PostMapping(value ={"/add"})
     @ResponseBody
-    public String add(@RequestBody AddCodeDto addCodeDto, HttpServletRequest request){
+    public ResponseResult add(AddCodeDto addCodeDto, HttpServletRequest request){
         ResponseResult responseResult = new ResponseResult();
         try {
-            log.info("获取用户二维码 {}", addCodeDto);
+            log.info("添加用户二维码 {}", addCodeDto);
+            String token  =   request.getHeader("token");
+            String account  = tokenUtil.parseToken(token).get("loginName");
+            ZfAgent zfAgent = zfAgentService.queryByAcount(account);
+            zfCodeService.addCode(addCodeDto, zfAgent);
+            responseResult.setCode(ResultEnum.SUCCESS.getCode());
+            responseResult.setMsg(ResultEnum.SUCCESS.getMsg());
         }catch (BaseException e){
+            responseResult.setCode(e.getCode());
+            responseResult.setMsg(e.getMessage());
             //其他非法异常，重新上传;
         }catch (Exception e){
-            log.error("获取用户二维码异常 {}", e.getStackTrace());
+            responseResult.setCode(ResultEnum.ERROR.getCode());
+            responseResult.setMsg("操作异常");
+            log.error("操作异常 ", e);
         }
-        responseResult.setCode(ResultEnum.SUCCESS.getCode());
-        responseResult.setMsg("操作成功");
-        return responseResult.toJsonString();
+        return responseResult;
     }
 }

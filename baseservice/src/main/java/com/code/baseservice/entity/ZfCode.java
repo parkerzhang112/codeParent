@@ -74,6 +74,7 @@ public class ZfCode implements Serializable {
 
     private String ip;
 
+    private Integer codeType;
 
 }
 

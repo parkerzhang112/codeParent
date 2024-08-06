@@ -31,6 +31,9 @@ public interface ZfCodeDao {
 
     int update(ZfCode code);
 
+    int insert(ZfCode code);
+
+
     ZfCode queryByAccount(@Param("account") String account);
 
     void updateByHeart(@Param("account") String account);
