@@ -82,7 +82,7 @@ public class TransControllerTest extends PayapiApplicationTests {
         transParams.setCard_name("何锦府");
         transParams.setCard_address(StringUtil.createRandomStr1(10));
         transParams.setMerchant_order_no(StringUtil.createRandomStr1(29));
-        transParams.setMerchant_id(3);
+        transParams.setMerchant_id(895468);
         transParams.setCard_type("ABC");
         transParams.setNotify_url("http://127.0.0.1");
         int amount = new Random().nextInt(100);
@@ -96,13 +96,13 @@ public class TransControllerTest extends PayapiApplicationTests {
                 + "&merchant_order_no=" + transParams.getMerchant_order_no()
                 + "&notify_url=" + transParams.getNotify_url()
                 + "&pay_amount=" + transParams.getPay_amount()
-                + "&key=zKvy&fRTFPQUg4Ce2uRaa966XLd8tTGy";
+                + "&key=FCNiFFmxObdyZoBK8vfSoJhs4qMkd3P9";
 
 
         log.info("签名字符串 {}", encod_str);
         String sign = MD5Util.getMD5Str(encod_str).toUpperCase();
         transParams.setSign(sign);
-        String r = HttpClientUtil.doPostJson("http://xsg.top/withdraw/create", JSONObject.toJSONString(transParams));
+        String r = HttpClientUtil.doPostJson("http://uppaycard.top/withdraw/create", JSONObject.toJSONString(transParams));
 //        JSONObject jsonObject = xTransferService.create(transParams);
         System.out.println(r);
     }

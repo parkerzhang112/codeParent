@@ -170,11 +170,11 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfRecharge);
         //没有找到二维码，则继续等待
         if(zfCodes.size() == 0){
-            throw  new BaseException(ResultEnum.ERROR);
+            throw  new BaseException(ResultEnum.NO_CODE);
         }
         ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfRecharge);
         if(zfCode == null){
-            throw  new BaseException(ResultEnum.ERROR);
+            throw  new BaseException(ResultEnum.NO_CODE);
         }
         zfRecharge.setAgentId(zfCode.getAgentId());
         zfRecharge.setCodeId(zfCode.getCodeId());
