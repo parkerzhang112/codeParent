@@ -38,7 +38,7 @@ public class FileUploadService {
             File destinationFile = new File(uploadDir, uniqueFileName);
             Files.copy(file.getInputStream(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-            return uniqueFileName;
+            return uploadFile+ "/"+uniqueFileName;
         }catch (Exception e){
             log.error("文件上传异常", e);
         }

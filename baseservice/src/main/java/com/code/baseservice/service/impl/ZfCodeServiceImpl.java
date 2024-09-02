@@ -1,6 +1,5 @@
 package com.code.baseservice.service.impl;
 
-import com.code.baseservice.base.enums.CodeTypeEnum;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfCodeDao;
@@ -183,11 +182,7 @@ public class ZfCodeServiceImpl implements ZfCodeService {
             throw new BaseException(ResultEnum.CODE_IS_EXIST);
         }
         ZfCode zfCode = new ZfCode();
-        if(addCodeDto.getCodeType() .equals(CodeTypeEnum.二维码.getCode() )
-                || addCodeDto.getCodeType() .equals(CodeTypeEnum.微信二维码.getCode() ))
-        {
-            zfCode.setImage( fileUploadService.uploadFile(addCodeDto.getImage()));
-        }
+        zfCode.setImage(addCodeDto.getImageUrl());
         zfCode.setStatus(100);
         zfCode.setDayLimitTimes(addCodeDto.getDayLimitTimes());
         zfCode.setDayLimitAmount(addCodeDto.getDayLimitAmount());

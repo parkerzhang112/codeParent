@@ -11,6 +11,7 @@ import com.code.baseservice.entity.ZfAgent;
 import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.service.ZfAgentService;
 import com.code.baseservice.service.ZfCodeService;
+import com.code.baseservice.service.impl.FileUploadService;
 import com.code.baseservice.vo.ZfCodeVo;
 import com.code.frontapi.util.TokenUtil;
 import com.github.pagehelper.PageHelper;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Api(tags = "支付资料", description = "流水api")
@@ -38,6 +40,9 @@ public class CodeController {
     @Autowired
     ZfAgentService zfAgentService;
 
+    @Autowired
+    private FileUploadService fileUploadService;
+
 
     @PostMapping(value ={"/list"})
     @ResponseBody
@@ -46,6 +51,9 @@ public class CodeController {
             String token  =   request.getHeader("token");
             String account  = tokenUtil.parseToken(token).get("loginName");
             ZfAgent zfAgent = zfAgentService.queryByAcount(account);
+            if(queryCodeDto.getCodeType() == -1){
+                queryCodeDto.setCodeType(null);
+            }
             PageHelper.startPage(queryCodeDto.getPageNum(), queryCodeDto.getPageSize());
             queryCodeDto.setAgentId(zfAgent.getAgentId());
             List<ZfCodeVo> vos =  zfCodeService.queryListByAgentId(queryCodeDto);
@@ -147,8 +155,33 @@ public class CodeController {
             String token  =   request.getHeader("token");
             String account  = tokenUtil.parseToken(token).get("loginName");
             ZfAgent zfAgent = zfAgentService.queryByAcount(account);
+            addCodeDto.setMinAmount(new BigDecimal("100"));
+            addCodeDto.setMaxAmount(new BigDecimal("2000"));
             zfCodeService.addCode(addCodeDto, zfAgent);
+
             responseResult.setCode(ResultEnum.SUCCESS.getCode());
+            responseResult.setMsg(ResultEnum.SUCCESS.getMsg());
+        }catch (BaseException e){
+            responseResult.setCode(e.getCode());
+            responseResult.setMsg(e.getMessage());
+            //其他非法异常，重新上传;
+        }catch (Exception e){
+            responseResult.setCode(ResultEnum.ERROR.getCode());
+            responseResult.setMsg("操作异常");
+            log.error("操作异常 ", e);
+        }
+        return responseResult;
+    }
+
+    @PostMapping(value ={"/upload"})
+    @ResponseBody
+    public ResponseResult upload(AddCodeDto addCodeDto, HttpServletRequest request){
+        ResponseResult responseResult = new ResponseResult();
+        try {
+            log.info("用户上传二维码 {}", addCodeDto);
+            String path =  fileUploadService.uploadFile(addCodeDto.getImage());
+            responseResult.setCode(ResultEnum.SUCCESS.getCode());
+            responseResult.setData(path);
             responseResult.setMsg(ResultEnum.SUCCESS.getMsg());
         }catch (BaseException e){
             responseResult.setCode(e.getCode());
