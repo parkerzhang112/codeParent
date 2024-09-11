@@ -136,17 +136,21 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             }else if(channels.size() == 1 && zfCodes.size() == 0){
                 isHaveCode = 0;
             }
-
         }
-        //查码
-//        List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(zfChannels, rechareParams, zfMerchant);
-        //轮码
-//        ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfMerchant, rechareParams);
-//        commonService.request(zfChannel, rechareParams);
         //入单
         ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
-
-        //返回
+        if(rechareParams.getPay_type().equals(PaytypeEnum.CARD.getValue())){
+            //查码
+            List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(rechareParams,channels.get(0));
+            //轮码
+            ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfRecharge);
+            zfRecharge.setMerchantOrderNo(zfRecharge.getMerchantOrderNo());
+            zfRecharge.setAgentId(zfCode.getAgentId());
+            zfRecharge.setCodeId(zfCode.getCodeId());
+            zfRecharge.setUpdateTime(new Date());
+            zfRecharge.setOrderStatus(1);
+            zfRechargeDao.updateProcess(zfRecharge);
+        }
         JSONObject jsonObject =  buildReuslt(zfMerchant,zfRecharge);
         jsonObject.put("have_code", isHaveCode);
         return jsonObject;
@@ -290,8 +294,8 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
             xRecharge.setOrderNo(orderNo);
             xRecharge.setPayType(zfChannel.getPayType());
             xRecharge.setChannelId(zfChannel.getChannelId());
-            if(zfChannel.getPayType().equals(4)){
-                xRecharge.setRemark("恭喜"+StringUtil.createRandomStr1(3));
+            if(zfChannel.getPayType().equals(4) || zfChannel.getPayType().equals(10)){
+                xRecharge.setRemark(StringUtil.createRandomStr1(6).toUpperCase());
             }
             xRecharge.setPayName(rechareParams.getName());
 //            xRecharge.setCodeId(zfCode.getCodeId());

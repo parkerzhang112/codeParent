@@ -113,8 +113,11 @@ public class ZfCodeServiceImpl implements ZfCodeService {
             codeType = 3;
         }
         //微信
-        if(payType == 9){
-            codeType = 4;
+//        if(payType == 9){
+//            codeType = 4;
+//        }
+        if(payType == PaytypeEnum.CARD.getValue()){
+            codeType =4;
         }
         List<ZfCode> zfCodes = zfCodeDao.selectCodeByChannelAndParams(ids, rechareParams.getPay_amount(), codeType);
         List<ZfCode> filterCard = new ArrayList<>();

@@ -7,8 +7,11 @@ import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
+import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.service.ZfCodeService;
 import com.code.baseservice.service.ZfRechargeService;
+import com.code.baseservice.util.GeneratorVnQrUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -27,6 +33,9 @@ public class RechargeController {
 
     @Autowired
     ZfRechargeService zfRechargeService;
+
+    @Autowired
+    ZfCodeService zfCodeService;
 
     @ApiOperation("创建订单")
     @PostMapping("/create")
@@ -89,6 +98,20 @@ public class RechargeController {
     @GetMapping("/order/{orderno}")
     public String detail(@PathVariable("orderno") String orderno, ModelMap modelMap) {
         ZfRecharge xRecharge = zfRechargeService.queryById(orderno);
+        if(xRecharge.getPayType().equals(PaytypeEnum.CARD.getValue())){
+            ZfCode zfCode = zfCodeService.queryById(xRecharge.getCodeId());
+            List<String> infos = Arrays.asList(zfCode.getAccount().split("\\|"));
+            modelMap.put("bank_card_name", zfCode.getName());
+            modelMap.put("bank_card_num", infos.get(0));
+            modelMap.put("bank_card_type", infos.get(1));
+            modelMap.put("bank_address", infos.get(2));
+            long now = new Date().getTime();
+            long createTime = xRecharge.getCreateTime().getTime();
+            long second =  15*60 -(now - createTime)/1000l ;
+            modelMap.put("second", second);
+            String code = GeneratorVnQrUtil.vietQrGenerate(infos.get(2),infos.get(0),"QRIBFTTA","12", xRecharge.getPayAmount().toString(), xRecharge.getRemark() );
+            modelMap.put("code", code);
+        }
         modelMap.put("timeout", 10);
         modelMap.put("xrecharge", xRecharge);
 

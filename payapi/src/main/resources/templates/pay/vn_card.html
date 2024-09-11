@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAKE转账信息</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80vw;
+            height: 100vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        .image-display {
+            width: 500px; /* 设置为正方形 */
+            height: 500px; /* 高度与宽度相同 */
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .title {
+            background-color: #ff69b4;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 40px;
+            margin-bottom: 60px;
+            text-align: center;
+            width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 22px;
+            position: relative;
+            top: 50px;
+        }
+        .info-item {
+            padding: 10px;
+            background-color: transparent;
+            border-radius: 5px;
+            display: block;
+        }
+        .info-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            margin-top: 20px;
+            line-height: 1.2;
+        }
+        .info-content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .info-content {
+            color: #555;
+            padding: 10px;
+            background-color: #e0e0ff;
+            border-radius: 10px;
+            text-align: left;
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .copy-btn {
+            background-color: #ff69b4;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .warning {
+            background-color: #ffe6e6;
+            color: #ff4d4d;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 40px;
+            font-size: 16px;
+            text-align: left;
+            border: 2px solid red;
+        }
+        .warning strong {
+            color: red;
+            font-size: 18px;
+        }
+        .warning p {
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+        .timer {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+            text-align: center;
+        }
+        #timer-content {
+            background-color: #fff;
+            color: #ff69b4;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 22px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="title">CAKE Thông tin chuyển khoản</div>
+
+    <div id="qrcode" class="image-display"></div>
+
+    <div class="info-item">
+        <span class="info-title">Tên người nhận:</span>
+        <div class="info-content-wrapper">
+            <span class="info-content" id="account-name" th:text="${bank_card_name}">NGUYEN VAN BINH</span>
+        </div>
+    </div>
+
+    <div class="info-item">
+        <span class="info-title" >Ngân hàng nhận:</span>
+        <div class="info-content-wrapper">
+            <span class="info-content" th:text="${bank_card_type}">CAKE BY VP BANK</span>
+        </div>
+    </div>
+
+    <div class="info-item">
+        <span class="info-title">Số tài khoản:</span>
+        <div class="info-content-wrapper">
+            <span class="info-content" id="account-number" th:text="${bank_card_num}"></span>
+            <button class="copy-btn" onclick="copyText('account-number')">sao chép</button>
+        </div>
+    </div>
+
+    <div class="info-item">
+        <span class="info-title">Số tiền:</span>
+        <div class="info-content-wrapper">
+            <span class="info-content" id="amount" th:text="${xrecharge.payAmount}"></span>
+            <button class="copy-btn" onclick="copyText('amount')">sao chép</button>
+        </div>
+    </div>
+
+    <div class="info-item">
+        <span class="info-title">Nội dung chuyển tiền:</span>
+        <div class="info-content-wrapper">
+            <span class="info-content" id="transfer-content" th:text="${xrecharge.remark}"></span>
+            <button class="copy-btn" onclick="copyText('transfer-content')">sao chép</button>
+        </div>
+    </div>
+
+    <div class="timer">
+        <span id="timer-content">Thời gian thanh toán: 15:00</span>
+    </div>
+
+    <div class="warning">
+        <p><strong>lưu ý:</strong></p>
+        <p>1. Vui lòng kiểm tra đúng số tài khoản tên người nhận trước khi toán. Nếu có sai sót, chúng tôi sẽ không chịu trách nhiệm!</p>
+        <p>2. không bảo lưu số tài khoản, không thay đổi số tiền nạp</p>
+        <p>3. chú ý sao chép nội dung chuyển tiền để việc xác minh nhanh chóng hơn</p>
+    </div>
+</div>
+
+<div id="timeout" style="display: none; font-size: 42px; color: red">
+    <span>Hết thời gian đặt hàng</span>
+</div>
+
+<script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+<script>
+
+    let time = "[[${second}]]";
+    let code  = "[[${code}]]";
+    var qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: code,
+        width: 450,
+        height: 450
+    });
+
+    function copyText(elementId) {
+        var text = document.getElementById(elementId).innerText;
+        navigator.clipboard.writeText(text).then(function() {
+            alert('Đã sao chép: ' + text);
+        }, function() {
+            alert('Sao chép thất bại');
+        });
+    }
+
+    var countdownTime = time;
+    var timerElement = document.getElementById('timer-content');
+    var timeout = document.getElementById('timerout');
+
+    function updateTimer() {
+        var minutes = Math.floor(countdownTime / 60);
+        var seconds = countdownTime % 60;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        timerElement.innerText = "Thời gian thanh toán: " + minutes + ":" + seconds;
+
+        if (countdownTime <= 0) {
+            clearInterval(timerInterval);
+
+            // 隐藏container
+            document.querySelector('.container').style.display = 'none';
+
+            // 显示timeout
+            document.getElementById('timeout').style.display = 'block';
+            document.getElementById('timeout').innerText = "Hết thời gian đặt hàng";
+        } else {
+            countdownTime--;
+        }
+    }
+
+
+    var timerInterval = setInterval(updateTimer, 1000);
+</script>
+</body>
+</html>
