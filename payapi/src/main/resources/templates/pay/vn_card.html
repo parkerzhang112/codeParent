@@ -26,8 +26,8 @@
             box-sizing: border-box;
         }
         .image-display {
-            width: 500px; /* 设置为正方形 */
-            height: 500px; /* 高度与宽度相同 */
+            width: 60vw; /* Set to 60% of the viewport width for better video screen fit */
+            height: 60vw; /* Maintain aspect ratio */
             background-color: #e0e0e0;
             display: flex;
             align-items: center;
@@ -156,7 +156,7 @@
     <div class="info-item">
         <span class="info-title">Số tiền:</span>
         <div class="info-content-wrapper">
-            <span class="info-content" id="amount" th:text="${xrecharge.payAmount}"></span>
+            <span class="info-content" id="amount" th:text="${amount}"></span>
             <button class="copy-btn" onclick="copyText('amount')">sao chép</button>
         </div>
     </div>
@@ -192,8 +192,8 @@
     let code  = "[[${code}]]";
     var qrcode = new QRCode(document.getElementById("qrcode"), {
         text: code,
-        width: 450,
-        height: 450
+        width: document.querySelector('.image-display').offsetWidth,
+        height: document.querySelector('.image-display').offsetWidth
     });
 
     function copyText(elementId) {
@@ -229,7 +229,6 @@
             countdownTime--;
         }
     }
-
 
     var timerInterval = setInterval(updateTimer, 1000);
 </script>

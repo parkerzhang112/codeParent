@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -113,7 +114,10 @@ public class RechargeController {
             modelMap.put("code", code);
         }
         modelMap.put("timeout", 10);
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        String formattedNumber = decimalFormat.format(xRecharge.getPayAmount().setScale(0));
         modelMap.put("xrecharge", xRecharge);
+        modelMap.put("amount", formattedNumber);
 
         return  prefix + "/" + PaytypeEnum.getPayView(xRecharge.getPayType());
     }

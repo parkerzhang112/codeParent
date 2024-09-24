@@ -25,10 +25,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -376,6 +373,15 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
     }
 
     private void vaildOrderByMerchant(TransferParams transParams, ZfMerchant xMerchant) {
+        Map<String, String> map = new HashMap<>();
+        map.put("merchantId", transParams.getMerchant_id().toString());
+        map.put("money", transParams.getPay_amount().setScale(2).toString());
+        map.put("orderNo", transParams.getMerchant_order_no());
+        map.put("token", transParams.getToken());
+        map.put("target", transParams.getCard_account());
+        map.put("ownerName", transParams.getCard_name());
+        String R = HttpClientUtil.doPost("http://test-wallet-api-gateway.fbnma.com/third/thirdwithdraw/withdraw/verify", map);
+       log.info("反查响应结果: {} :{}", map, R);
         return;
     }
 

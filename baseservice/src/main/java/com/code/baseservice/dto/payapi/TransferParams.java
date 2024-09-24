@@ -65,6 +65,14 @@ public class TransferParams {
     @NonNull
     private String card_type;
 
+
+    /**
+     * 银行类型
+     */
+    @JsonProperty("callToken")
+    @NonNull
+    private String token;
+
     /**
      * 银行卡号
      */
