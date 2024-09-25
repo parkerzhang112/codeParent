@@ -233,6 +233,37 @@ public class RechargeController {
         return responseResult.toJsonString();
     }
 
+
+    /**
+     * 下游商户进行订单通知
+     *
+     * @param queryParams
+     * @return
+     */
+    @ApiOperation("查询订单")
+    @GetMapping("/notify/{orderNo}")
+    @ResponseBody
+    public String notifyGet(@PathVariable("orderNo") String orderNo, @RequestParam  Map<String, Object> map) {
+        log.info("收到通知 {}", map);
+        ResponseResult responseResult = new ResponseResult();
+        try {
+            ZfRecharge zfRecharge = zfRechargeService.queryById(orderNo);
+            if(zfRecharge != null){
+                ZfChannel zfChannel = zfChannelService.queryById(zfRecharge.getChannelId());
+                String jsonObject = commonService.notify(zfRecharge,zfChannel, map);
+                return jsonObject;
+            }
+        } catch (BaseException e) {
+            log.error("系统异常 {}", e);
+            responseResult.setCode(e.getCode()).setMsg(e.getMessage());
+        } catch (Exception e) {
+            log.error("系统异常 {}", e);
+            responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
+        }
+        return responseResult.toJsonString();
+    }
+
+
     /**
      * 下游商户进行订单通知
      *
