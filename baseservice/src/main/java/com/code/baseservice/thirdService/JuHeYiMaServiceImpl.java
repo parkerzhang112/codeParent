@@ -82,7 +82,7 @@ public class JuHeYiMaServiceImpl implements BaseService {
         map.put("pid", zfChannel.getThirdMerchantId());
         map.put("type", "wxpay");
         map.put("out_trade_no", zfRecharge.getOrderNo());
-        map.put("notify_url", "http://afd7895.cn/recharge/json_notify/"+ zfRecharge.getOrderNo());
+        map.put("notify_url", "http://afd7895.cn/recharge/notify/"+ zfRecharge.getOrderNo());
         map.put("name", "张三");
         map.put("money", zfRecharge.getPayAmount().setScale(2).toString());
         map.put("clientip", "127.0.0.1");
@@ -92,9 +92,9 @@ public class JuHeYiMaServiceImpl implements BaseService {
         map.put("sign", MD5Util.getMD5Str(sigin_srt));
         log.info("加密参数 {} 加密密钥 {}", JSONObject.toJSONString(map), zfChannel.getThirdMerchantPrivateKey());
         try {
-            log.info("单号 {} 开始请求 {}  参数 {}",zfRecharge.getMerchantOrderNo(),"https://vip.ssss00.me/mapi.php", JSONObject.toJSONString(map));
+            log.info("单号 {} 开始请求 {}  参数 {}",zfRecharge.getMerchantOrderNo(),"http://sb.xn--chq17ry9lbsaf62i.xn--vhquv//mapi.php", JSONObject.toJSONString(map));
             String reponse = "";
-            reponse = HttpClientUtil.doPost("https://vip.ssss00.me/mapi.php", map);
+            reponse = HttpClientUtil.doPost("http://sb.xn--chq17ry9lbsaf62i.xn--vhquv//mapi.php", map);
             log.info("请求返回数据 {}", reponse);
             JSONObject jsonObject = JSONObject.parseObject(reponse);
             log.info("单号 {} 请求结果 {}", zfRecharge.getMerchantOrderNo(), jsonObject);
