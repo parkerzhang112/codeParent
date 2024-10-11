@@ -453,7 +453,19 @@ public class ZfAgentServiceImpl implements ZfAgentService {
         }
     }
 
+    @Override
+    public ZfAgent queryByAccount(String agentName) {
+        return  zfAgentDao.queryByAccount(agentName);
+    }
 
+    @Override
+    public ZfAgent findGroupByAgent(Integer agentId) {
+        ZfAgent zfAgent = zfAgentDao.queryById(agentId);
+        if(zfAgent.getGroupId() == 0 && zfAgent.getParentId() != 0){
+           return  findGroupByAgent(zfAgent.getParentId());
+        }
+        return null;
+    }
 
 
     public BigDecimal sumAgentFee(ZfRecharge zfRecharge, String rate) {

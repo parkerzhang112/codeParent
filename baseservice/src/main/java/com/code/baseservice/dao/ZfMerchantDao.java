@@ -84,5 +84,7 @@ public interface ZfMerchantDao {
     int deleteById(Integer merchantId);
 
     void sumMerchantBalance(@Param("merchantId") Integer merchantId, @Param("balance") BigDecimal subtract);
+
+    ZfMerchant queryByName(@Param("merchantName") String merchantName);
 }
 

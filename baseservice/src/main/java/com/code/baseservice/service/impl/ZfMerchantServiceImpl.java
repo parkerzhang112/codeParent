@@ -61,6 +61,16 @@ public class ZfMerchantServiceImpl implements ZfMerchantService {
         return this.zfMerchantDao.queryById(merchantId);
     }
 
+    /**
+     *
+     * @param zfMerchant
+     * @return
+     */
+    @Override
+    public int update(ZfMerchant zfMerchant) {
+        return this.update(zfMerchant);
+    }
+
     @Override
     public ZfMerchant vaildMerchant(Integer merchant_id) {
         log.info("验证商户合法性开始 {}", merchant_id);
@@ -191,6 +201,11 @@ public class ZfMerchantServiceImpl implements ZfMerchantService {
             log.error("手续费计算异常", e);
         }
         return BigDecimal.ZERO;
+    }
+
+    @Override
+    public ZfMerchant queryByName(String merchantName) {
+       return zfMerchantDao.queryByName(merchantName);
     }
 
     private JSONObject buildReuslt(ZfMerchant zfMerchant) {

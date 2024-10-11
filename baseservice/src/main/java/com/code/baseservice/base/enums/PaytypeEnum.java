@@ -41,8 +41,14 @@ public enum PaytypeEnum {
                 break;
             case 4:
                 view = "yunshanfu";
+                break;
             case 10:
                 view = "vn_card";
+                break;
+            case 6:
+            case 7:
+                view = "weixin";
+                break;
             default:
                 break;
         }

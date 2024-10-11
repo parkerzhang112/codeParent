@@ -70,6 +70,12 @@
             </if>
         </where>
     </select>
+    <select id="queryByName" resultType="com.code.baseservice.entity.ZfMerchant">
+        select
+          merchant_id, balance,`domain`, status, merchant_code, remark, md5_key, credit_amount,merchant_rate, group_id
+        from zf_merchant
+        where `name` = #{merchantName}
+    </select>
 
     <!--新增所有列-->
     <insert id="insert" keyProperty="merchantId" useGeneratedKeys="true">

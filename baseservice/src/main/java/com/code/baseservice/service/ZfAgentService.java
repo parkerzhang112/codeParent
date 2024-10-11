@@ -51,4 +51,7 @@ public interface ZfAgentService {
      */
      void updateAgentCreditAmount(ZfAgentRechargeOrder zfAgentRechargeOrder) ;
 
+    ZfAgent queryByAccount(String agentName);
+
+    ZfAgent findGroupByAgent(Integer agentId);
 }

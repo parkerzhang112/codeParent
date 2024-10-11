@@ -83,5 +83,7 @@ public interface ZfAgentDao {
     int updateAgentFee(ZfAgent zfAgent);
 
     ZfAgent queryByCode(@Param("agentCode") String agentCode);
+
+    ZfAgent queryByAccount(@Param("agentName") String agentName);
 }
 

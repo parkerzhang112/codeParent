@@ -121,6 +121,31 @@ public class Telegram {
     /**
      * 入款调单通知
      */
+    public void sendCommon(String chatId, String content, String username, String messageId){
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(content);
+        String url = "https://api.telegram.org/bot6431542163:AAGa41xGC44flApg5K_oV8todOOEscK1uFc/sendMessage";
+        Map<String, Object> map = new HashMap<>();
+        map.put("chat_id", chatId);
+        if(StringUtils.isNotEmpty(username)){
+            StringBuffer text = new StringBuffer("@"+username + " ").append(stringBuilder).append(" ");
+            map.put("text", text);
+        }else {
+            map.put("text", stringBuilder.toString());
+        }
+        if(StringUtils.isNotEmpty(messageId)){
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("message_id", messageId);
+            map.put("reply_parameters", jsonObject);
+        }
+        sendMesaage(map, url);
+    }
+
+
+    /**
+     * 入款调单通知
+     */
     public void sendError(String content){
 
         String chatId= "-4161003407";

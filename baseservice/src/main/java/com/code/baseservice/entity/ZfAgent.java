@@ -70,5 +70,9 @@ public class ZfAgent implements Serializable {
 
 
     private BigDecimal agentCode;
+
+    private Long groupId;
+
+    private String telegramUsername;
 }
 

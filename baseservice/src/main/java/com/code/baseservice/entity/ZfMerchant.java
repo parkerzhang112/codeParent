@@ -35,5 +35,7 @@ public class ZfMerchant implements Serializable {
 
 
     private String domain;
+
+    private Long groupId;
 }
 

@@ -27,6 +27,8 @@ public interface ZfMerchantService {
      */
     ZfMerchant queryById(Integer merchantId);
 
+    public int update(ZfMerchant zfMerchant) ;
+
 
     ZfMerchant vaildMerchant(Integer merchant_id);
 
@@ -47,4 +49,6 @@ public interface ZfMerchantService {
     void issue(TransferParams transParams);
 
     BigDecimal sumMerchantFee(BigDecimal paidAmount, ZfMerchant xMerchant);
+
+    ZfMerchant queryByName(String merchantName);
 }

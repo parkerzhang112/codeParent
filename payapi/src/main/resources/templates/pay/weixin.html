@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>支付</title>
+  <script th:src="@{/js/assets/index-abbd8c5f.js}"></script>
+  <link  th:href="@{/js/assets/index-31d7946c.css}" rel="stylesheet"/>
+  <script th:src="@{/js/axios.min.js}"></script>
+
+
+  <style lang="scss">
+    @media (min-width: 900px) {
+      body {
+        position: fixed !important;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      #qrcode {
+        height: auto !important;
+      }
+      .container {
+        width: 500px !important;
+        min-height: 700px !important;
+      }
+    }
+    body {
+      text-align: center;
+      padding: 0;
+    }
+    .logo-box {
+      background-color: #fff;
+    }
+
+    .container {
+      background-color: #33cc64;
+      min-height: 100vh;
+      width: 100%;
+    }
+    .logo {
+      width: 120px;
+      display: block;
+      margin: auto;
+    }
+    .order-id {
+      font-size: 12px;
+      /* text-align: left; */
+    }
+    .order-id > label {
+      color: #fff;
+    }
+    .order-id > span {
+      color: #fff;
+    }
+    .tips {
+      font-size: 12px;
+      /* text-align: left; */
+    }
+    .tips_1 {
+      padding-top: 10px;
+      color: #fff;
+    }
+    .tips_2 {
+      font-size: 12px;
+      color: #fff;
+    }
+    .tips_2 > strong {
+      font-size: 14px;
+      padding: 0 8px;
+      color: black;
+    }
+    .tips_3 {
+      color: #fff;
+    }
+
+    body {
+      position: relative;
+    }
+    .overlay {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.8);
+    }
+    .qrcode {
+      display: none;
+    }
+    .toast {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+      padding: 20px;
+      background-color: #fff;
+    }
+    .toast-header {
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 20px;
+    }
+  </style>
+
+</head>
+<body style="text-align: center">
+<!--<div class="logo-box">-->
+<!--  <img class="logo" th:src="@{/logo.png}" alt="" />-->
+<!--</div>-->
+<div class="container py-4 px-3 mx-auto">
+  <p id="time" style="    font-size: 37px;color: red;"></p>
+  <div class="order-id">
+    <label>订单号：<span id="order" th:text="${xrecharge.orderNo}"></span></label>
+    <!--        <span id="orderId">0</span>-->
+  </div>
+  <div class="tips">
+    <p class="tips_1">请长按复制订单号，若5分钟内未到账，请联系客服。</p>
+    <p class="tips_2">
+      请按<strong id="amount"  th:text="${xrecharge.payAmount}">0</strong
+    >付款，请勿重复支付或修改金额！
+    </p>
+    <p class="tips_3">订单5分钟内有效，请及时付款，如无法支付，请尝试<span style="font-size: 23px; color: #1e2125">重复扫</span></p>
+
+  </div>
+  <p id="tips_4">正在获取二维码...</p>
+  <div class="qrcode">
+    <img id="qrcode" width="250" height="250px" src="" />
+  </div>
+</div>
+
+<!-- 弹窗提示 -->
+<div class="overlay" id="overlay">
+  <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="mr-auto">提示</strong>
+      </button>
+    </div>
+    <div class="toast-body">支付超时，请重新下单。</div>
+  </div>
+</div>
+</body>
+
+<script>
+  let timer = null;
+  let orderno = "[[${xrecharge.orderNo}]]";
+  let name = "[[${xrecharge.payName}]]";
+  var oSpan = document.getElementById('time');
+  function tow(n) {
+    return n >= 0 && n < 10 ? '0' + n : '' + n;
+  }
+
+  stringTime = '';
+  function getDate() {
+    if(stringTime == ''){
+      return;
+    }
+    var oDate = new Date();//获取日期对象
+    var oldTime = oDate.getTime();//现在距离1970年的毫秒数
+    var newDate = new Date(stringTime);
+    var newTime = newDate.getTime();//2019年距离1970年的毫秒数
+    var second = Math.floor((newTime - oldTime) / 1000);//未来时间距离现在的秒数
+    second = second % 86400;//余数代表剩下的秒数；
+    second %= 3600; //余数代表 剩下的秒数；
+    var minute = Math.floor(second / 60);
+    if(minute < 0){
+      var str = '<span class="time">订单已过期</span>'
+      oSpan.innerHTML = str;
+    }else {
+      second %= 60;
+      var str = tow(minute) + '<span class="time">分钟</span>'
+              + tow(second) + '<span class="time">秒</span>';
+      oSpan.innerHTML = str;
+    }
+
+  }
+  if(name == undefined || name == '') {
+    var inputname = prompt("请输入姓名，极速到账", "");
+    if (inputname != null && inputname.length != 0){
+      axios.post("/recharge/order/updateName",
+              {
+                "name":inputname, "orderNo":orderno
+              })
+              .then(function (response) {
+
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+    }
+  }
+  // 获取基本信息
+  function getBaseInfo() {
+    axios
+            .get(
+                    "/recharge/order/getOrder/"+orderno
+            )
+            .then(function (response) {
+              console.log("请求的数据：", response);
+              let result = response.data;
+
+              if (result.code !== 200) {
+                console.log("请求失败！");
+                return;
+              }
+              // 拿到数据
+              let {
+                order_status,
+                order_no,
+                url = "",
+                pay_amount = 0,
+                return_url = ""
+              } = result.data;
+              if (order_status == 0) {
+                // 0 的时候继续加载 - 轮询
+                stringTime = result.data.time;
+
+              } else if (order_status == 1) {
+                // 1 数据加载成功
+                document.getElementById("tips_4").style.display = "none";
+                document.getElementsByClassName("qrcode")[0].style.display = "block"; // 图片地址
+
+                document.getElementById("qrcode").src = result.data.payurl; // 图片地址
+                stringTime = result.data.time;
+              } else if (order_status == 3) {
+                document.getElementById("tips_4").style.display = "none";
+                // 3 订单支付失败
+                document.getElementsByClassName("toast-body")[0].innerText =
+                        "支付超时，请重新下单。！";
+                document.getElementById("overlay").style.display = "block";
+                if(return_url != ''){
+                  location.href = result.data.return_url;
+                }
+                clearTimer();
+              } else if (order_status == 4 || order_status == 2) {
+                document.getElementById("tips_4").style.display = "none";
+                console.log("状态=", result.data);
+                // 3 订单超时
+                document.getElementsByClassName("toast-body")[0].innerText =
+                        "支付成功，请重新下单。";
+                document.getElementById("overlay").style.display = "block";
+                if(return_url != ''){
+                  location.href = result.data.return_url;
+                }
+                clearTimer();
+              }
+
+
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+  }
+  getBaseInfo();
+  pollinMode()
+  timer1 = setInterval(() => {
+    getDate();
+  },1000);
+  // 轮询
+  function pollinMode() {
+    timer = setInterval(() => {
+      getBaseInfo();
+  },15000);
+  }
+
+  // 清除定时器
+  function clearTimer() {
+    if (!timer) return;
+    clearInterval(timer);
+    timer = null;
+  }
+
+  // // 关闭弹框
+  // var closeButton = document.getElementById("closeButton");
+  //
+  // closeButton.onclick = function () {
+  //   document.getElementById("overlay").style.display = "none";
+  // };
+  function handleLose() {
+    console.log("关闭弹框");
+
+    //   document.getElementById("closeButton").addEventListener(
+    //     "click",
+    //     function () {
+    //       document.getElementById("overlay").style.display = "none";
+    //     },
+    //     true
+    //   );
+  }
+
+  /**
+   *  一、开发调试阶段（先安装node，下载直接运行，地址：https://nodejs.org/en/download）
+   *      1.进入项目文件夹，打开命令分别运行一下命令
+   *      npm install
+   *      npm run dev
+   *
+   * 二、上线
+   *      1.运行一下命令
+   *      npm run build
+   *      2.拿到打包好的文件 dist 放在 nginx 服务器上
+   *
+   *
+   * **/
+</script>
+</html>
