@@ -175,21 +175,36 @@
       }
 
     }
-    if(name == undefined || name == '') {
-      var inputname = prompt("请输入姓名，极速到账", "");
-      if (inputname != null && inputname.length != 0){
-        axios.post("/recharge/order/updateName",
-                {
-                  "name":inputname, "orderNo":orderno
-                })
-                .then(function (response) {
 
-                })
-                .catch(function (error) {
-                  console.log(error);
-                });
+    async function handleNameInput() {
+      // 如果 name 是 undefined 或 空字符串
+      if (name === undefined || name === '') {
+        var inputname = prompt("请输入姓名，极速到账", "");
+
+        // 判断用户是否输入了有效的名字
+        if (inputname != null && inputname.length !== 0) {
+          try {
+            // 等待 axios.post 执行完成
+            const response = await axios.post("/recharge/order/updateName", {
+              "name": inputname,
+              "orderNo": orderno
+            });
+
+            // 请求成功后的处理逻辑
+            console.log('更新姓名成功', response.data);
+
+            // 这里可以写你希望在请求完成后执行的逻辑
+            // 后续逻辑在此处继续
+          } catch (error) {
+            // 错误处理
+            console.error('更新姓名失败', error);
+          }
+        }
       }
     }
+
+    // 调用函数
+    handleNameInput();
     // 获取基本信息
     function getBaseInfo() {
       axios

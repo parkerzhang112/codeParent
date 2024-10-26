@@ -1,12 +1,12 @@
 package com.code.baseservice.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.base.constant.PayTypeRateConstans;
 import com.code.baseservice.base.constant.RedisConstant;
 import com.code.baseservice.base.enums.CommonStatusEnum;
 import com.code.baseservice.base.enums.ResultEnum;
 import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dao.ZfMerchantDao;
-import com.code.baseservice.dto.XChannelRate;
 import com.code.baseservice.dto.backapi.OperaBalanceParams;
 import com.code.baseservice.dto.payapi.MerchantParams;
 import com.code.baseservice.dto.payapi.QueryParams;
@@ -68,7 +68,7 @@ public class ZfMerchantServiceImpl implements ZfMerchantService {
      */
     @Override
     public int update(ZfMerchant zfMerchant) {
-        return this.update(zfMerchant);
+        return zfMerchantDao.update(zfMerchant);
     }
 
     @Override
@@ -184,28 +184,46 @@ public class ZfMerchantServiceImpl implements ZfMerchantService {
     }
 
     @Override
-    public BigDecimal sumMerchantFee(BigDecimal paidAmount, ZfMerchant xMerchant) {
-        try {
-            if (Strings.isEmpty(xMerchant.getMerchantRate())) {
-                return BigDecimal.ZERO;
+    public BigDecimal sumMerchantFee(ZfRecharge zfRecharge, ZfMerchant xMerchant) {
+        String rate = xMerchant.getMerchantRate();
+        try{
+            if(Strings.isEmpty(rate)){
+                return  BigDecimal.ZERO;
             }
-            XChannelRate xChannelRate = JSONObject.parseObject(xMerchant.getMerchantRate(), XChannelRate.class);
-            if (xChannelRate.getRate_type() == 0) {
-                return BigDecimal.valueOf(xChannelRate.getRate_value());
-            } else {
-                BigDecimal rate = BigDecimal.valueOf(xChannelRate.getRate_value()).divide(new BigDecimal("100"));
-                return paidAmount.multiply(rate);
+            JSONObject jsonObject = JSONObject.parseObject(rate);
+            if(jsonObject.containsKey("recharge")){
+                JSONObject rechargeRate = jsonObject.getJSONObject("recharge");
+                String rate_prex = PayTypeRateConstans.getMerchantRateString(zfRecharge.getPayType(),zfRecharge.getPaidAmount());
+                log.info("结算支付方式费率 {}", rate_prex);
+                String rate_type_key = "rate_type" + rate_prex;
+                String rate_value_key = "rate_value" + rate_prex;
+                if(!Strings.isEmpty(rechargeRate.getString(rate_type_key))&& !Strings.isEmpty(rechargeRate.getString(rate_type_key))){
+                    Integer rate_type = rechargeRate.getInteger(rate_type_key);
+                    Double rate_value = rechargeRate.getDoubleValue(rate_value_key);
+                    if(rate_type == 0){
+                        return BigDecimal.valueOf(rate_value);
+                    }else{
+                        BigDecimal rate1 = BigDecimal.valueOf(rate_value).divide(new BigDecimal("100"));
+                        return zfRecharge.getPaidAmount().multiply(rate1);
+                    }
+                }
             }
-
-        } catch (Exception e) {
-            log.error("手续费计算异常", e);
+            return BigDecimal.ZERO;
+        }catch (Exception e){
+            log.info("商户手续费异常", e);
+            return BigDecimal.ZERO;
         }
-        return BigDecimal.ZERO;
     }
 
     @Override
     public ZfMerchant queryByName(String merchantName) {
        return zfMerchantDao.queryByName(merchantName);
+    }
+
+    @Override
+    public ZfMerchant queryByGroup(Long chatid) {
+        return zfMerchantDao.queryByGroup(chatid);
+
     }
 
     private JSONObject buildReuslt(ZfMerchant zfMerchant) {

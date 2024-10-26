@@ -12,6 +12,7 @@
         <result property="creditAmount" column="credit_amount" />
         <result property="domain" column="domain" />
         <result property="merchantRate" column="merchant_rate" />
+        <result property="groupId" column="group_id" />
 
     </resultMap>
 
@@ -70,11 +71,17 @@
             </if>
         </where>
     </select>
-    <select id="queryByName" resultType="com.code.baseservice.entity.ZfMerchant">
+    <select id="queryByName" resultMap="ZfMerchantMap">
         select
           merchant_id, balance,`domain`, status, merchant_code, remark, md5_key, credit_amount,merchant_rate, group_id
         from zf_merchant
         where `name` = #{merchantName}
+    </select>
+    <select id="queryByGroup" resultType="com.code.baseservice.entity.ZfMerchant">
+        select
+          merchant_id, balance,`domain`, status, merchant_code, remark, md5_key, credit_amount,merchant_rate, group_id
+        from zf_merchant
+        where `group_id` = #{chatid}
     </select>
 
     <!--新增所有列-->
@@ -119,6 +126,9 @@
             </if>
             <if test="remark != null and remark != ''">
                 remark = #{remark},
+            </if>
+            <if test="groupId != null">
+                group_id = #{groupId},
             </if>
         </set>
         where merchant_id = #{merchantId}

@@ -99,6 +99,7 @@ public class RechargeController {
     @GetMapping("/order/{orderno}")
     public String detail(@PathVariable("orderno") String orderno, ModelMap modelMap) {
         ZfRecharge xRecharge = zfRechargeService.queryById(orderno);
+        String page = PaytypeEnum.getPayView(xRecharge.getPayType());
         if(xRecharge.getPayType().equals(PaytypeEnum.CARD.getValue())){
             ZfCode zfCode = zfCodeService.queryById(xRecharge.getCodeId());
             List<String> infos = Arrays.asList(zfCode.getAccount().split("\\|"));
@@ -112,14 +113,16 @@ public class RechargeController {
             modelMap.put("second", second);
             String code = GeneratorVnQrUtil.vietQrGenerate(infos.get(2),infos.get(0),"QRIBFTTA","12", xRecharge.getPayAmount().toString(), xRecharge.getRemark() );
             modelMap.put("code", code);
+            if(infos.get(2).contains("CAKE")){
+                page = "vn_cake_card";
+            }
         }
         modelMap.put("timeout", 10);
         DecimalFormat decimalFormat = new DecimalFormat("#,###");
         String formattedNumber = decimalFormat.format(xRecharge.getPayAmount().setScale(0));
         modelMap.put("xrecharge", xRecharge);
         modelMap.put("amount", formattedNumber);
-
-        return  prefix + "/" + PaytypeEnum.getPayView(xRecharge.getPayType());
+        return  prefix + "/" + page;
     }
 
 

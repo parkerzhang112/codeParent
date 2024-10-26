@@ -86,5 +86,7 @@ public interface ZfMerchantDao {
     void sumMerchantBalance(@Param("merchantId") Integer merchantId, @Param("balance") BigDecimal subtract);
 
     ZfMerchant queryByName(@Param("merchantName") String merchantName);
+
+    ZfMerchant queryByGroup(@Param("chatid") Long chatid);
 }
 

@@ -1,6 +1,8 @@
 package com.code.baseservice.util;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.code.baseservice.base.enums.PaytypeEnum;
 import com.code.baseservice.dto.AgentConfig;
 import com.code.baseservice.dto.payapi.RechareParams;
 import com.code.baseservice.entity.*;
@@ -134,6 +136,66 @@ public class Telegram {
         }else {
             map.put("text", stringBuilder.toString());
         }
+        if(StringUtils.isNotEmpty(messageId)){
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("message_id", messageId);
+            map.put("reply_parameters", jsonObject);
+        }
+        sendMesaage(map, url);
+    }
+
+    /**
+     * 入款调单通知
+     */
+    public void sendOrderCreate(String chatId, ZfRecharge zfRecharge, String username, String messageId){
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("【订单提醒】\n");
+        stringBuilder.append("订单号:" + zfRecharge.getMerchantOrderNo() + "\n");
+        stringBuilder.append("存款人："+zfRecharge.getPayName()+"\n");
+        stringBuilder.append("金额："+zfRecharge.getPayAmount()+"\n");
+        stringBuilder.append("存款方式："+ PaytypeEnum.getPayViewName( zfRecharge.getPayType()) );
+        String url = "https://api.telegram.org/bot6431542163:AAGa41xGC44flApg5K_oV8todOOEscK1uFc/sendMessage";
+        Map<String, Object> map = new HashMap<>();
+        map.put("chat_id", chatId);
+        if(StringUtils.isNotEmpty(username)){
+            StringBuffer text = new StringBuffer("@"+username + "\n").append(stringBuilder).append(" ");
+            map.put("text", text);
+        }else {
+            map.put("text", stringBuilder.toString());
+        }
+        JSONObject inline_keyboard = new JSONObject();
+        JSONObject button  = new JSONObject();
+        button.put("text","确认订单");
+        button.put("callback_data",AesEncryptionUtil.encrypt(zfRecharge.getMerchantOrderNo()));
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.add(button);
+        JSONArray jsonArray1 = new JSONArray();
+        jsonArray1.add(jsonArray);
+        inline_keyboard.put("inline_keyboard", jsonArray1);
+        map.put("reply_markup", inline_keyboard);
+        sendMesaage(map, url);
+    }
+
+
+    /**
+     * 入款调单通知
+     */
+    public void sendPic(String chatId, String content, String username, String messageId, String photo){
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(content);
+        String url = "https://api.telegram.org/bot6431542163:AAGa41xGC44flApg5K_oV8todOOEscK1uFc/sendPhoto";
+        Map<String, Object> map = new HashMap<>();
+        map.put("chat_id", chatId);
+        if(StringUtils.isNotEmpty(username)){
+            StringBuffer text = new StringBuffer("查单 @"+username + " ").append(stringBuilder).append(" ");
+            map.put("caption", text);
+        }else {
+            map.put("caption", "查单 " + stringBuilder.toString());
+        }
+        map.put("photo", photo);
+
         if(StringUtils.isNotEmpty(messageId)){
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("message_id", messageId);

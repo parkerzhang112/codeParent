@@ -462,8 +462,18 @@ public class ZfAgentServiceImpl implements ZfAgentService {
     public ZfAgent findGroupByAgent(Integer agentId) {
         ZfAgent zfAgent = zfAgentDao.queryById(agentId);
         if(zfAgent.getGroupId() == 0 && zfAgent.getParentId() != 0){
+            log.info("未设置代理群: {}, 开始找上级", agentId);
            return  findGroupByAgent(zfAgent.getParentId());
         }
+        if(zfAgent.getGroupId() != 0){
+            log.info("设置了代理群: {}", agentId);
+            return zfAgent;
+        }
+        if(zfAgent.getParentId() == 0){
+            log.info("找不到代理群 : {}", agentId);
+            return null;
+        }
+        log.info("未找到代理: {}", agentId);
         return null;
     }
 

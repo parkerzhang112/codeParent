@@ -48,7 +48,9 @@ public interface ZfMerchantService {
 
     void issue(TransferParams transParams);
 
-    BigDecimal sumMerchantFee(BigDecimal paidAmount, ZfMerchant xMerchant);
+    BigDecimal sumMerchantFee(ZfRecharge zfRecharge, ZfMerchant xMerchant);
 
     ZfMerchant queryByName(String merchantName);
+
+    ZfMerchant queryByGroup(Long chatid);
 }

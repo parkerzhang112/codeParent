@@ -43,6 +43,24 @@ public class PayTypeRateConstans {
         return map.get(code);
     }
 
+    public static String getMerchantRateString(Integer code, BigDecimal paidAmount){
+        Map<Integer,String> map = new HashMap<>();
+        map.put(0, "");
+        map.put(1, "_trans");
+        map.put(2, "_s_code");
+        map.put(3, "_s_shuzi");
+        map.put(4, "_s_yunshanfu");
+        map.put(5, "_yunshanfu");
+        map.put(6, "_s_weixin");
+        map.put(7, "_weixin");
+        map.put(9, "_card");
+        map.put(11, "_b_code");
+        map.put(12, "_g_code");
+        map.put(13, "_d_code");
+        return map.get(code);
+    }
+
+
     public static boolean isAliPay(int pay_type){
         if(PaytypeEnum.CODE.getValue() == pay_type
             || PaytypeEnum.TRANS.getValue() == pay_type

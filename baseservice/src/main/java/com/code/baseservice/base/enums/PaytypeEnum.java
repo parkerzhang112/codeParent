@@ -30,6 +30,32 @@ public enum PaytypeEnum {
         return name;
     }
 
+
+    public static String getPayViewName(Integer paytype){
+        String view  = "index";
+        switch (paytype){
+            case 1:
+                view = "支付宝转账";
+                break;
+            case 3:
+                view = "数字人名币";
+                break;
+            case 4:
+                view = "云闪付";
+                break;
+            case 10:
+                view = "银行卡";
+                break;
+            case 6:
+            case 7:
+                view = "微信支付";
+                break;
+            default:
+                break;
+        }
+        return  view;
+    }
+
     public static String getPayView(Integer paytype){
         String view  = "index";
         switch (paytype){

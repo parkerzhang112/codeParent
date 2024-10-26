@@ -14,13 +14,15 @@
         <result property="acceptAmount" column="accept_amount" />
         <result property="notice" column="notice" />
         <result property="weight" column="weight" />
+        <result property="groupId" column="group_id" />
+        <result property="telegramUsername" column="telegram_username" />
 
     </resultMap>
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfAgentMap">
         select
-          agent_id,weight, balance, name, rate, parent_id, pwd, google_code, agent_account,accept_amount
+          agent_id,weight, balance, name, rate, parent_id, pwd, google_code, agent_account,accept_amount,group_id,telegram_username
         from zf_agent
         where agent_id = #{agentId}
     </select>
@@ -96,7 +98,7 @@
         from zf_agent
         where agent_code = #{agentCode}
     </select>
-    <select id="queryByAccount" resultType="com.code.baseservice.entity.ZfAgent">
+    <select id="queryByAccount" resultMap="ZfAgentMap">
         select
           agent_id,weight, balance, name, rate, parent_id, pwd, google_code, agent_account,accept_amount,telegram_username,group_id
         from zf_agent
