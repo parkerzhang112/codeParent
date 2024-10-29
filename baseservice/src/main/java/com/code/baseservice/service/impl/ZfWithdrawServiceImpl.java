@@ -296,7 +296,7 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         zfWithdraw.setMerchantId(xMerchant.getMerchantId());
         BigDecimal fee = BigDecimal.ZERO;
 //        BigDecimal fee = zfMerchantService.sumMerchantFee(transParams,xMerchant);
-        zfWithdraw.setChannelFee(fee.add(new BigDecimal(2)));
+        zfWithdraw.setChannelFee(fee.add(new BigDecimal(2000)));
         zfWithdrawDao.insert(zfWithdraw);
 
         return zfWithdraw;

@@ -130,6 +130,8 @@
     <div class="title">CAKE Thông tin chuyển khoản</div>
 
     <div id="qrcode" class="image-display"></div>
+    <!-- 新增的“保存二维码”按钮 -->
+    <button onclick="downloadQRCode()" class="copy-btn" style="display: block; margin: 10px auto;">Lưu mã QR</button>
 
     <div class="info-item">
         <span class="info-title">Tên người nhận:</span>
@@ -190,11 +192,42 @@
 
     let time = "[[${second}]]";
     let code  = "[[${code}]]";
+    const qrcodeElement = document.getElementById("qrcode");
     var qrcode = new QRCode(document.getElementById("qrcode"), {
         text: code,
         width: document.querySelector('.image-display').offsetWidth,
         height: document.querySelector('.image-display').offsetWidth
     });
+
+
+    // 下载二维码功能，带有白色边距
+    function downloadQRCode() {
+        const qrCanvas = qrcodeElement.querySelector('canvas');
+        if (qrCanvas) {
+            // 创建一个临时canvas，设置白色边距
+            const margin = 20; // 预留边距大小
+            const canvas = document.createElement('canvas');
+            const size = qrCanvas.width + 2 * margin; // 加上边距后的尺寸
+            canvas.width = size;
+            canvas.height = size;
+            const context = canvas.getContext('2d');
+
+            // 填充白色背景
+            context.fillStyle = "#ffffff";
+            context.fillRect(0, 0, size, size);
+
+            // 绘制二维码在中心位置
+            context.drawImage(qrCanvas, margin, margin);
+
+            // 触发下载
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL("image/png");
+            link.download = "qrcode_with_margin.png";
+            link.click();
+        } else {
+            alert("二维码生成失败");
+        }
+    }
 
     function copyText(elementId) {
         var text = document.getElementById(elementId).innerText;

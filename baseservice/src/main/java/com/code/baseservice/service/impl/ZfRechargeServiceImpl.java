@@ -139,18 +139,21 @@ public class ZfRechargeServiceImpl implements ZfRechargeService {
         }
         //入单
         ZfRecharge zfRecharge = createOrder(zfChannel, rechareParams, zfMerchant);
-        if(rechareParams.getPay_type().equals(PaytypeEnum.CARD.getValue())){
-            //查码
-            List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(rechareParams,channels.get(0));
-            //轮码
-            ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfRecharge);
-            zfRecharge.setMerchantOrderNo(zfRecharge.getMerchantOrderNo());
-            zfRecharge.setAgentId(zfCode.getAgentId());
-            zfRecharge.setCodeId(zfCode.getCodeId());
-            zfRecharge.setUpdateTime(new Date());
-            zfRecharge.setOrderStatus(1);
-            zfRechargeDao.updateProcess(zfRecharge);
+        //查码
+        List<ZfCode> zfCodes = zfCodeService.queryCodeByParamAndChannel(rechareParams,channels.get(0));
+        if(zfCodes.size() == 0){
+            throw  new BaseException(ResultEnum.NO_CODE);
         }
+        //轮码
+        ZfCode  zfCode = selectOneCardByRobin(zfCodes, zfRecharge);
+        zfRecharge.setMerchantOrderNo(zfRecharge.getMerchantOrderNo());
+        zfRecharge.setAgentId(zfCode.getAgentId());
+        zfRecharge.setCodeId(zfCode.getCodeId());
+        zfRecharge.setUpdateTime(new Date());
+        zfRecharge.setOrderStatus(1);
+        zfRechargeDao.updateProcess(zfRecharge);
+        redisUtilService.set("notice:agent:" + zfCode.getAgentId(), 1,1200);
+        zfAgentService.updateAgentCreditAmount(zfRecharge, zfCode.getAgentId());
         JSONObject jsonObject =  buildReuslt(zfMerchant,zfRecharge);
         jsonObject.put("have_code", isHaveCode);
         return jsonObject;

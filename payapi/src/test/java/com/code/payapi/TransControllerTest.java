@@ -85,7 +85,7 @@ public class TransControllerTest extends PayapiApplicationTests {
         transParams.setMerchant_id(895468);
         transParams.setCard_type("ABC");
         transParams.setNotify_url("http://127.0.0.1");
-        int amount = new Random().nextInt(100);
+        int amount = new Random().nextInt(100000);
         transParams.setPay_amount(new BigDecimal(amount));
 //        transParams.setRemark(StringUtil.createRandomStr1(3));
         String encod_str = "card_account=" + transParams.getCard_account()

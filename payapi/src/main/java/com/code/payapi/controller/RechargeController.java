@@ -113,8 +113,13 @@ public class RechargeController {
             modelMap.put("second", second);
             String code = GeneratorVnQrUtil.vietQrGenerate(infos.get(2),infos.get(0),"QRIBFTTA","12", xRecharge.getPayAmount().toString(), xRecharge.getRemark() );
             modelMap.put("code", code);
-            if(infos.get(2).contains("CAKE")){
+            if(infos.get(1).toUpperCase().contains("CAKE")){
                 page = "vn_cake_card";
+            }
+        }else {
+            if(xRecharge.getCodeId() != 0){
+                ZfCode zfCode = zfCodeService.queryById(xRecharge.getCodeId());
+                modelMap.put("code", zfCode);
             }
         }
         modelMap.put("timeout", 10);

@@ -53,7 +53,7 @@ public class PayTypeRateConstans {
         map.put(5, "_yunshanfu");
         map.put(6, "_s_weixin");
         map.put(7, "_weixin");
-        map.put(9, "_card");
+        map.put(10, "_card");
         map.put(11, "_b_code");
         map.put(12, "_g_code");
         map.put(13, "_d_code");
