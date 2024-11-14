@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fef2e0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+        }
+        .left {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column; /* 默认布局为 column */
+            align-items: center;
+        }
+        .left p {
+            background-color: #f8c17a;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .qrcode {
+            width: 200px;
+            height: 200px;
+            background-color: #f00; /* Placeholder until QR code generates */
+            margin-bottom: 10px;
+        }
+        .save-btn {
+            background-color: #f8c17a;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .right {
+            flex: 2;
+            padding: 20px;
+        }
+        .info-item {
+            margin-bottom: 15px;
+        }
+        .info-item label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .info-item .info-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .info-item input {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            background-color: #fff;
+            margin-right: 10px;
+            border-radius: 5px;
+            background-color: #f9e7d3;
+        }
+        .copy-btn {
+            background-color: #f8c17a;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .warning {
+            color: #d9534f;
+            background-color: #f9d6d5;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #d9534f;
+            text-align: center;
+        }
+        /* Timer Styles */
+        #timer {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff5722;
+            margin-bottom: 10px;
+        }
+
+        /* 移动端样式调整 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column; /* 垂直方向布局 */
+            }
+            .left {
+                flex-direction: column-reverse; /* 将二维码部分移到上方 */
+            }
+            .qrcode {
+                margin-bottom: 0;
+                margin-top: 10px; /* 确保上移时有间距 */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 左侧 QR码 生成和下载 -->
+    <div class="left">
+        <!-- 倒计时显示 -->
+        <div id="timer">Thời gian hiệu lực: 60:00</div>
+        <div id="qrcode" class="qrcode"></div>
+        <button class="save-btn" onclick="downloadQRCode()">Lưu mã QR</button>
+    </div>
+
+    <!-- 右侧表单 -->
+    <div class="right">
+        <div class="info-item">
+            <label for="order-number">Số đơn hàng</label>
+            <div class="info-content">
+                <input id="order-number" type="text" th:value="${xrecharge.merchantOrderNo}" readonly>
+                <button class="copy-btn" onclick="copyText(this.previousElementSibling.value)">Sao Chép</button>
+            </div>
+        </div>
+        <div class="info-item">
+            <label for="bank-name">Tên ngân hàng</label>
+            <div class="info-content">
+                <input id="bank-name" type="text" th:value="${bank_card_type}" readonly>
+                <button class="copy-btn" onclick="copyText(this.previousElementSibling.value)">Sao Chép</button>
+            </div>
+        </div>
+        <div class="info-item">
+            <label for="account-name">Tên tài khoản</label>
+            <div class="info-content">
+                <input id="account-name" type="text" th:value="${bank_card_name}" readonly>
+                <button class="copy-btn" onclick="copyText(this.previousElementSibling.value)">Sao Chép</button>
+            </div>
+        </div>
+        <div class="info-item">
+            <label for="account-number">Số Tài Khoản Ngân Hàng</label>
+            <div class="info-content">
+                <input id="account-number" type="text" th:value="${bank_card_num}" readonly>
+                <button class="copy-btn" onclick="copyText(this.previousElementSibling.value)">Sao Chép</button>
+            </div>
+        </div>
+        <div class="info-item">
+            <label for="amount">Số tiền chi trả</label>
+            <div class="info-content">
+                <input id="amount" type="text" th:value="${amount}" readonly>
+                <button class="copy-btn" onclick="copyText(this.previousElementSibling.value)">Sao Chép</button>
+            </div>
+        </div>
+        <div class="info-item">
+            <label for="note">Nội dung lời nhắn</label>
+            <div class="info-content">
+                <input id="note" type="text" th:value="${xrecharge.remark}" readonly>
+                <button class="copy-btn" onclick="copyText(this.previousElementSibling.value)">Sao Chép</button>
+            </div>
+        </div>
+
+        <div class="warning">Nội dung chuyển khoản không được để trống</div>
+    </div>
+</div>
+<script th:src="@{/js/qrcode.min.js}"></script>
+<script>
+    // 生成二维码
+
+    let countdownTime = "[[${second}]]";
+    let code  = "[[${code}]]";
+    const qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: code,
+        width: 200,
+        height: 200
+    });
+
+    // 下载带白边的二维码
+    function downloadQRCode() {
+        const qrCanvas = document.querySelector('#qrcode canvas');
+        if (qrCanvas) {
+            const margin = 20; // 白边大小
+            const canvas = document.createElement('canvas');
+            const size = qrCanvas.width + margin * 2; // 加上白边后的新尺寸
+            canvas.width = size;
+            canvas.height = size;
+            const context = canvas.getContext('2d');
+
+            // 填充白色背景
+            context.fillStyle = "#ffffff";
+            context.fillRect(0, 0, size, size);
+
+            // 绘制二维码到新的 canvas 中，居中显示
+            context.drawImage(qrCanvas, margin, margin);
+
+            // 触发下载
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL("image/png");
+            link.download = "qrcode_with_margin.png";
+            link.click();
+        } else {
+            alert("二维码生成失败");
+        }
+    }
+
+    function copyText(text) {
+        navigator.clipboard.writeText(text).then(() => {
+        }).catch(err => {
+        });
+    }
+
+    const timerElement = document.getElementById('timer');
+
+    function updateTimer() {
+        const minutes = Math.floor(countdownTime / 60);
+        const seconds = countdownTime % 60;
+        timerElement.innerText = `Thời gian hiệu lực: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        if (countdownTime <= 0) {
+            clearInterval(timerInterval);
+            alert("Hết thời gian hiệu lực");
+        } else {
+            countdownTime--;
+        }
+    }
+
+    const timerInterval = setInterval(updateTimer, 1000); // 每秒更新一次倒计时
+</script>
+
+</body>
+</html>

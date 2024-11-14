@@ -100,9 +100,9 @@ public class GeneratorVnQrUtil {
 
     public static  void main(String[] args){
         String desc = "hello_motor";
-        String amount = "180000.000000";
+        String amount = "1000";
         System.out.println("SHB vietQrGenerate: "+vietQrGenerate("970403", "050103601093", "QRIBFTTA", "12", amount, desc));
         System.out.println("SeA vietQrGenerate2: "+vietQrGenerate("970440", "0968414222", "QRIBFTTA", "12", amount, desc));
-        System.out.println("MSB vietQrGenerate3: "+vietQrGenerate("970426", "80000240868", "QRIBFTTA", "12", amount, desc));
+        System.out.println("MSB vietQrGenerate3: "+vietQrGenerate("546034", "0964693545", "QRIBFTTA", "12", amount, desc));
     }
 }

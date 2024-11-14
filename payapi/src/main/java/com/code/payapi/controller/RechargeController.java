@@ -11,6 +11,7 @@ import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.service.ZfCodeService;
 import com.code.baseservice.service.ZfRechargeService;
+import com.code.baseservice.util.DeviceUtils;
 import com.code.baseservice.util.GeneratorVnQrUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -97,7 +99,7 @@ public class RechargeController {
     }
 
     @GetMapping("/order/{orderno}")
-    public String detail(@PathVariable("orderno") String orderno, ModelMap modelMap) {
+    public String detail(@PathVariable("orderno") String orderno, ModelMap modelMap, HttpServletRequest request) {
         ZfRecharge xRecharge = zfRechargeService.queryById(orderno);
         String page = PaytypeEnum.getPayView(xRecharge.getPayType());
         if(xRecharge.getPayType().equals(PaytypeEnum.CARD.getValue())){
@@ -111,10 +113,14 @@ public class RechargeController {
             long createTime = xRecharge.getCreateTime().getTime();
             long second =  15*60 -(now - createTime)/1000l ;
             modelMap.put("second", second);
-            String code = GeneratorVnQrUtil.vietQrGenerate(infos.get(2),infos.get(0),"QRIBFTTA","12", xRecharge.getPayAmount().toString(), xRecharge.getRemark() );
+            String code = GeneratorVnQrUtil.vietQrGenerate(infos.get(2),infos.get(0),"QRIBFTTA","12", xRecharge.getPayAmount().setScale(0).toString(), xRecharge.getRemark() );
             modelMap.put("code", code);
             if(infos.get(1).toUpperCase().contains("CAKE")){
-                page = "vn_cake_card";
+                if(DeviceUtils.isMobileDevice(request)){
+                    page = "vn_cake_card";
+                }else {
+                    page = "vn_cake_card_pc";
+                }
             }
         }else {
             if(xRecharge.getCodeId() != 0){
