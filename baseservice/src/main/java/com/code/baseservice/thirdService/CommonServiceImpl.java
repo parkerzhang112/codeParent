@@ -53,6 +53,9 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     private JuHeYiMaServiceImpl juHeYiMaService;
 
+    @Autowired
+    private ZiJiServiceImpl ziJiService;
+
     public BaseService transToService(String channelCode){
         switch (channelCode){
             case "SANSHI":
@@ -77,6 +80,8 @@ public class CommonServiceImpl implements CommonService {
                 return wanHaoService;
             case "JuHeYiMa":
                 return juHeYiMaService;
+            case "ZiJi":
+                return ziJiService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
@@ -106,6 +111,8 @@ public class CommonServiceImpl implements CommonService {
                 return wanHaoService;
             case "JuHeYiMa":
                 return juHeYiMaService;
+            case "ZiJi":
+                return ziJiService;
             default:
                 throw new BaseException(ResultEnum.ERROR);
         }
