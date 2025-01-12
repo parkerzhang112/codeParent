@@ -1,5 +1,7 @@
 package com.code.payapi.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.code.baseservice.base.enums.PaytypeEnum;
 import com.code.baseservice.base.enums.ResultEnum;
@@ -21,11 +23,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @Slf4j
@@ -188,6 +189,86 @@ public class RechargeController {
             responseResult.setCode(ResultEnum.ERROR.getCode()).setMsg("系统异常");
         }
         return responseResult.toJsonString();
+    }
+
+
+
+    // 获取币安现货市场价格数据
+    public static JSONArray getBinanceSpotMarketData() {
+        String urlString = "https://api.binance.com/api/v1/ticker/24hr";
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.connect();
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode != 200) {
+                System.out.println("HTTP Error Code: " + responseCode);
+                return null;
+            }
+
+            Scanner sc = new Scanner(url.openStream());
+            StringBuilder inline = new StringBuilder();
+            while (sc.hasNext()) {
+                inline.append(sc.nextLine());
+            }
+            sc.close();
+
+            // 使用 FastJSON 解析 JSON 数据
+            return JSON.parseArray(inline.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // 计算涨幅
+    public static double calculatePriceChange(double openPrice, double currentPrice) {
+        return (currentPrice - openPrice) / openPrice;
+    }
+
+    // 获取1小时前的时间戳
+    public static long getOneHourAgoTimestamp() {
+        long currentTimestamp = System.currentTimeMillis();
+        return currentTimestamp - 1 * 60 * 60 * 1000; // 1小时前
+    }
+
+    // 找到涨幅超过6%的币种及其涨幅
+    public static void findCoinsWithSignificantChange() {
+        JSONArray marketData = getBinanceSpotMarketData();
+        if (marketData == null) {
+            System.out.println("无法获取市场数据。");
+            return;
+        }
+
+        long oneHourAgoTimestamp = getOneHourAgoTimestamp();
+        boolean hasSignificantCoins = false;
+
+        System.out.println("过去1小时内涨幅超过6%的币种及涨幅：");
+        for (int i = 0; i < marketData.size(); i++) {
+            JSONObject coinData = marketData.getJSONObject(i);
+            double openPrice = coinData.getDouble("openPrice");
+            double currentPrice = coinData.getDouble("lastPrice");
+            long closeTime = coinData.getLong("closeTime");
+
+            // 计算涨幅
+            double priceChange = calculatePriceChange(openPrice, currentPrice);
+
+            // 如果是1小时内的数据且涨幅超过6%
+            if (closeTime > oneHourAgoTimestamp && priceChange > 0.06) { // 6% = 0.06
+                hasSignificantCoins = true;
+                System.out.printf("币种: %s, 涨幅: %.2f%%\n", coinData.getString("symbol"), priceChange * 100);
+            }
+        }
+
+        if (!hasSignificantCoins) {
+            System.out.println("过去1小时内没有涨幅超过6%的币种。");
+        }
+    }
+
+    public static void main(String[] args) {
+        findCoinsWithSignificantChange();
     }
 
 }

@@ -10,7 +10,6 @@ import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.entity.ZfWithdraw;
 import com.code.baseservice.service.RedisUtilService;
 import com.code.baseservice.service.ZfCodeService;
-import com.code.baseservice.util.Telegram;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -117,6 +116,9 @@ public class ZfCodeServiceImpl implements ZfCodeService {
 //        if(payType == 9){
 //            codeType = 4;
 //        }
+        if(payType == PaytypeEnum.TRANS.getValue()){
+            codeType =6;
+        }
         if(payType == PaytypeEnum.CARD.getValue()){
             codeType =4;
         }

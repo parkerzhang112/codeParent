@@ -307,4 +307,18 @@ public class Telegram {
         map.put("text", stringBuilder.toString());
         sendMesaage(map, url);
     }
+
+    public void sendYdoubaoMessage(String  notice) {
+        String chatId= "-4612319814";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("收到支付宝流水\n" );
+        stringBuilder.append(notice);
+        String url = "https://api.telegram.org/bot8141078520:AAH9rf_Ph6NHjbLxAWKRgrMEdrdYRX79VRI/sendMessage";
+        Map<String, Object> map = new HashMap<>();
+        map.put("chat_id",chatId);
+        map.put("text", stringBuilder.toString());
+        sendMesaage(map, url);
+
+
+    }
 }
