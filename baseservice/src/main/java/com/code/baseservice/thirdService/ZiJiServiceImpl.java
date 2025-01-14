@@ -42,7 +42,7 @@ public class ZiJiServiceImpl implements BaseService {
     public String notify(ZfRecharge zfRecharge,ZfChannel zfChannel, Map<String,Object> map) {
         log.info("自己微信通知 {}", map.toString());
         JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSONString(map));
-        if(jsonObject.getString("status").equals("2")){
+        if(jsonObject.getString("status").equals("1")){
             if(!jsonObject.getString("orderNo").equals(zfRecharge.getOrderNo())){
                 return "fail";
             }
@@ -67,7 +67,7 @@ public class ZiJiServiceImpl implements BaseService {
         map.put("channelCode", "WECHAT_CLOUD");
         map.put("orderNo", zfRecharge.getOrderNo());
         map.put("amount", zfRecharge.getPayAmount().setScale(0));
-        map.put("notifyUrl", "http://afd7895.cn/recharge/notify/"+ zfRecharge.getOrderNo());
+        map.put("notifyUrl", "http://afd7895.cn/recharge/json_notify/"+ zfRecharge.getOrderNo());
         String signTemp = new CommonUtil().getSign(map);
         signTemp = signTemp.substring(0, signTemp.length()-1);
         try {
@@ -93,7 +93,7 @@ public class ZiJiServiceImpl implements BaseService {
                 map1.put("merchant_order_no", zfRecharge.getMerchantOrderNo());
                 map1.put("order_no", zfRecharge.getOrderNo());
                 map1.put("pay_amount", zfRecharge.getPayAmount());
-                map1.put("payurl",jsonObject.getJSONObject("data").getString("url"));
+                map1.put("payurl",jsonObject.getJSONObject("data").getString("payUrl"));
                 return new JSONObject(map1);
             }
             throw new BaseException(ResultEnum.ERROR);
