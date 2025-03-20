@@ -478,6 +478,11 @@ public class ZfAgentServiceImpl implements ZfAgentService {
         if(!zfAgent.getPwd().equals(encryptPassword(loginDto.getUserName(),loginDto.getPassword(),"11111"))){
             throw  new BaseException(ResultEnum.LOGIN_ERR);
         }
+        GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
+        log.info("验证 密钥 {} 验证码 {}", zfAgent.getGoogleCode(), loginDto.getCode());
+        if(!googleAuthenticator.authorize(zfAgent.getGoogleCode(), loginDto.getCode())){
+            throw  new BaseException(ResultEnum.VAILD_CODE_ERROR);
+        }
         return zfAgent.getAgentAccount();
     }
 

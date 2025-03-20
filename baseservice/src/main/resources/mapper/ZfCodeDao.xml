@@ -18,7 +18,6 @@
         <result property="channelId" column="channe_id" />
         <result property="account" column="account" />
         <result property="codeType" column="code_type" />
-
     </resultMap>
 
     <resultMap type="com.code.baseservice.vo.ZfCodeVo" id="ZfCodeVoMap">
@@ -38,13 +37,17 @@
         <result property="account" column="account" />
         <result property="rechargeTimes" column="recharge_times" />
         <result property="rechargeAmount" column="recharge_amount" />
-
     </resultMap>
+    <delete id="delete">
+        delete from zf_code
+        where code_id = #{codeId}
+        and agent_id = #{agentId}
+    </delete>
 
     <!--查询单个-->
     <select id="queryById" resultMap="ZfCodeMap">
         select
-          code_id, agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times, name,account
+          code_id, agent_id, min_amount, max_amount, image, status, is_open, create_time, update_time, day_limit_amount, day_limit_times,code_type, name,account
         from zf_code
         where code_id = #{codeId}
     </select>
@@ -61,7 +64,6 @@
 --      #要求卡在线，开启
         where zc.is_open=1 and zc.status=100
         and za.status =1
-        and zc.balance <![CDATA[ < ]]> zc.max_balance
         and (zc.day_limit_amount <![CDATA[ > ]]> zcr.recharge_amount or zc.day_limit_amount=0 or zcr.recharge_amount is null)
         and (zc.day_limit_times <![CDATA[ > ]]> zcr.recharge_times or zc.day_limit_times =0 or zcr.recharge_times is null )
         and zf_channel_code.channe_id in
@@ -143,6 +145,9 @@
         <where>
             <if test="account != null and account != '' ">
                 and zc.account = #{account}
+            </if>
+            <if test="name != null and name != '' ">
+                and zc.name = #{name}
             </if>
             <if test="isOpen != null ">
                 and zc.is_open = #{isOpen}

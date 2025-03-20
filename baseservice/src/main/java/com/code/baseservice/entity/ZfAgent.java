@@ -73,6 +73,8 @@ public class ZfAgent implements Serializable {
 
     private String agentCode;
 
+    private String status;
+
     /**
      *  一级代理
      */

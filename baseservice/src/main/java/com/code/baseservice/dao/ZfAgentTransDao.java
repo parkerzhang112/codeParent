@@ -1,6 +1,8 @@
 package com.code.baseservice.dao;
 
+import com.code.baseservice.dto.frontapi.trans.QueryTransDto;
 import com.code.baseservice.entity.ZfAgentTrans;
+import com.code.baseservice.entity.ZfRecharge;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.domain.Pageable;
 
@@ -86,5 +88,7 @@ public interface ZfAgentTransDao {
 
 
     List<ZfAgentTrans> queryAddTransBySubNear(String merchantOrderNo);
+
+    List<ZfAgentTrans> queryByQueryTrans(QueryTransDto queryTransDto);
 }
 

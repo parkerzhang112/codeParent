@@ -25,10 +25,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -297,8 +294,9 @@ public class ZfWithdrawServiceImpl implements ZfWithdrawService {
         zfWithdraw.setChannelId(zfChannel.getChannelId());
         zfWithdraw.setOrderNo(orderNo);
         zfWithdraw.setMerchantId(xMerchant.getMerchantId());
-        BigDecimal fee = zfMerchantService.sumMerchantFee(transParams.getPay_amount(),xMerchant);
-        zfWithdraw.setChannelFee(fee.add(new BigDecimal(2)));
+        BigDecimal fee = BigDecimal.ZERO;
+//        BigDecimal fee = zfMerchantService.sumMerchantFee(transParams,xMerchant);
+        zfWithdraw.setChannelFee(fee.add(new BigDecimal(2000)));
         zfWithdrawDao.insert(zfWithdraw);
 
         return zfWithdraw;

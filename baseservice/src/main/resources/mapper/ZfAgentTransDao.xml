@@ -11,6 +11,8 @@
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time" />
         <result property="remark" column="remark" />
+        <result property="transType" column="trans_type" />
+        <result property="acceptAmount" column="accept_amount" />
     </resultMap>
 
     <!--查询单个-->
@@ -105,6 +107,36 @@
         select *
         from zf_agent_trans
         where merchant_order_no = #{merchantOrderNo}   and create_time   &lt;= DATE_SUB(now(), INTERVAL 10 MINUTE);
+    </select>
+    <select id="queryByQueryTrans" resultMap="ZfAgentTransMap">
+        SELECT
+        t.agent_id,
+        t.pre_balance,
+        t.balance,
+        t.amount,
+        t.merchant_order_no,
+        DATE_FORMAT(t.create_time, '%Y-%m-%d %H:%i:%s') AS create_time,
+        DATE_FORMAT(t.update_time, '%Y-%m-%d %H:%i:%s') AS update_time,
+        t.remark,
+        t.accept_amount,
+        t.trans_type
+        FROM
+        zf_agent_trans t
+        WHERE
+        t.agent_id = #{agentId}
+        <if test="startTime != null">
+            AND t.create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND t.create_time &lt;= #{endTime}
+        </if>
+        <if test="orderNo != null and orderNo != ''">
+            AND t.merchant_order_no = #{orderNo}
+        </if>
+        <if test="remark != null and remark != ''">
+            t.remark LIKE CONCAT('%', #{remark}, '%')
+        </if>
+        order by t.create_time desc
     </select>
     <insert id="insert" keyProperty="agentId" useGeneratedKeys="true">
         insert into zf_agent_trans

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>支付</title>
+  <script th:src="@{/js/assets/index-abbd8c5f.js}"></script>
+  <link th:href="@{/js/assets/index-31d7946c.css}" rel="stylesheet" />
+  <script th:src="@{/js/axios.min.js}"></script>
+
+  <style lang="scss">
+    body {
+      text-align: center;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-color: #1479ff;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      min-height: 400px; /* Adjusted height */
+    }
+    .logo {
+      width: 120px;
+      display: block;
+      margin: 20px auto;
+    }
+    .info {
+      text-align: left;
+      margin-bottom: 20px;
+      background-color: #f9f9f9; /* Light background color */
+      padding: 15px;
+      border-radius: 5px;
+    }
+    .info .item {
+      font-size: 14px;
+      margin-bottom: 15px; /* Increased line spacing */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .info .item > label {
+      color: #333;
+    }
+    .info .item > span {
+      color: #333;
+    }
+    .copy-btn {
+      cursor: pointer;
+      color: blue;
+      text-decoration: underline;
+    }
+    .qrcode {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+    }
+    .qrcode img {
+      width: 250px;
+      height: 250px;
+      cursor: pointer;
+    }
+    .save-btn {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #1479ff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .alipay-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #00a1e9;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .overlay {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+    }
+    .overlay img {
+      max-width: 90%;
+      max-height: 90%;
+    }
+    .toast {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+      padding: 20px;
+      background-color: #fff;
+    }
+    .toast-header {
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 20px;
+    }
+    @media (min-width: 600px) {
+      .container {
+        flex-direction: row;
+      }
+      .info, .qrcode {
+        flex: 1;
+      }
+      .info {
+        margin-right: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="logo-box">
+  <img class="logo" th:src="@{/logo.png}" alt="" />
+</div>
+<div class="container">
+  <div class="info">
+    <div class="item name">
+      <label>姓名：<span id="name" th:text="${code.name}"></span></label>
+      <span class="copy-btn" onclick="copyToClipboard('name')">复制</span>
+    </div>
+    <div class="item account">
+      <label>账号：<span id="account" th:text="${code.account}"></span></label>
+      <span class="copy-btn" onclick="copyToClipboard('account')">复制</span>
+    </div>
+    <div class="item amount">
+      <label>金额：<span id="amount" th:text="${xrecharge.payAmount}">0</span></label>
+      <span class="copy-btn" onclick="copyToClipboard('amount')">复制</span>
+    </div>
+    <div class="item order-id">
+      <label>订单号：<span id="order" th:text="${xrecharge.orderNo}"></span></label>
+      <span class="copy-btn" onclick="copyToClipboard('order')">复制</span>
+    </div>
+  </div>
+  <div class="qrcode">
+    <img id="qrcode" src="" alt="QR Code" onclick="enlargeImage(this)" />
+    <button class="save-btn" onclick="saveImage()">保存到相框</button>
+  </div>
+</div>
+<button class="alipay-btn" onclick="openAlipay()">打开支付宝</button>
+
+<div class="overlay" id="image-overlay" onclick="closeOverlay()">
+  <img id="overlay-img" src="" alt="Enlarged QR Code" />
+</div>
+
+<div class="overlay" id="toast-overlay">
+  <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="mr-auto">提示</strong>
+    </div>
+    <div class="toast-body">支付超时，请重新下单。</div>
+  </div>
+</div>
+
+<script>
+  function copyToClipboard(elementId) {
+    var copyText = document.getElementById(elementId).innerText;
+    var textarea = document.createElement("textarea");
+    textarea.value = copyText;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+  }
+
+  function enlargeImage(img) {
+    var overlay = document.getElementById('image-overlay');
+    var overlayImg = document.getElementById('overlay-img');
+    overlayImg.src = img.src;
+    overlay.style.display = 'flex';
+  }
+
+  function closeOverlay() {
+    var overlay = document.getElementById('image-overlay');
+    overlay.style.display = 'none';
+  }
+
+  function saveImage() {
+    var img = document.getElementById('qrcode');
+    var link = document.createElement('a');
+    link.href = img.src;
+    link.download = 'qrcode.png';
+    link.click();
+  }
+
+  function openAlipay() {
+    window.open('alipays://platformapi/startapp', '_blank');
+  }
+
+  let timer = null;
+  let orderno = "[[${xrecharge.orderNo}]]";
+  let name = "[[${xrecharge.payName}]]";
+  var oSpan = document.getElementById('time');
+  function tow(n) {
+    return n >= 0 && n < 10 ? '0' + n : '' + n;
+  }
+
+  stringTime = '';
+  function getDate() {
+    if (stringTime == '') {
+      return;
+    }
+    var oDate = new Date();
+    var oldTime = oDate.getTime();
+    var newDate = new Date(stringTime);
+    var newTime = newDate.getTime();
+    var second = Math.floor((newTime - oldTime) / 1000);
+    second = second % 86400;
+    second %= 3600;
+    var minute = Math.floor(second / 60);
+    if (minute < 0) {
+      var str = '<span class="time">订单已过期</span>';
+      oSpan.innerHTML = str;
+    } else {
+      second %= 60;
+      var str = tow(minute) + '<span class="time">分钟</span>' + tow(second) + '<span class="time">秒</span>';
+      oSpan.innerHTML = str;
+    }
+  }
+  if (name == undefined || name == '') {
+    var inputname = prompt('请输入姓名，极速到账', '');
+    if (inputname != null && inputname.length != 0) {
+      axios
+              .post('/recharge/order/updateName', {
+                name: inputname,
+                orderNo: orderno,
+              })
+              .then(function (response) {})
+              .catch(function (error) {
+                console.log(error);
+              });
+    }
+  }
+  function getBaseInfo() {
+    axios
+            .get('/recharge/order/getOrder/' + orderno)
+            .then(function (response) {
+              let result = response.data;
+              if (result.code !== 200) {
+                return;
+              }
+              let order_status = result.data['order_status'];
+              if (order_status == 1) {
+                document.getElementsByClassName('qrcode')[0].style.display = 'block';
+                document.getElementById('qrcode').src = result.data['payurl'];
+                stringTime = result.data.time;
+              } else {
+                if (document.getElementById('tips_4')) {
+                  document.getElementById('tips_4').style.display = 'none';
+                }
+                if (order_status == 0) {
+                  stringTime = result.data.time;
+                } else if (order_status == 3) {
+                  document.getElementsByClassName('toast-body')[0].innerText = '支付超时，请重新下单。！';
+                  document.getElementById('toast-overlay').style.display = 'block';
+                  if (return_url != '') {
+                    location.href = result.data.return_url;
+                  }
+                  clearTimer();
+                } else if (order_status == 4 || order_status == 2) {
+                  document.getElementsByClassName('toast-body')[0].innerText = '支付成功，请重新下单。';
+                  document.getElementById('toast-overlay').style.display = 'block';
+                  if (return_url != '') {
+                    location.href = result.data.return_url;
+                  }
+                  clearTimer();
+                }
+              }
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+  }
+  getBaseInfo();
+  pollinMode();
+  timer1 = setInterval(() => {
+    getDate();
+  }, 1000);
+  function pollinMode() {
+    timer = setInterval(() => {
+      getBaseInfo();
+    }, 15000);
+  }
+  function clearTimer() {
+    if (!timer) return;
+    clearInterval(timer);
+    timer = null;
+  }
+</script>
+</body>
+</html>

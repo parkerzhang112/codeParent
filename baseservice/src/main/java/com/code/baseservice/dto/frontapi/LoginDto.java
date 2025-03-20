@@ -26,8 +26,8 @@ public class LoginDto {
     private String password;
 
     /**
-     * 二维码地址
+     * 验证码
      */
     @JsonProperty("code")
-    private String code;
+    private Integer code;
 }

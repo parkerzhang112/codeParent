@@ -1,6 +1,8 @@
 package com.code.baseservice.service;
 
+import com.code.baseservice.dto.frontapi.trans.QueryTransDto;
 import com.code.baseservice.entity.ZfAgentTrans;
+import com.code.baseservice.entity.ZfRecharge;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -67,4 +69,6 @@ public interface ZfAgentTransService {
 
 
     List<ZfAgentTrans> queryAddTransBySubNear(String merchantOrderNo);
+
+    List<ZfAgentTrans> queryByQueryTrans(QueryTransDto queryTransDto);
 }

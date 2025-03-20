@@ -202,4 +202,9 @@ public class ZfCodeServiceImpl implements ZfCodeService {
         return;
     }
 
+    @Override
+    public int delete(ZfCode zfCode) {
+        return  zfCodeDao.delete(zfCode);
+    }
+
 }

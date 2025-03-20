@@ -23,6 +23,8 @@
         <result property="returnUrl" column="return_url"/>
         <result property="name" column="name"/>
 
+
+
     </resultMap>
 
     <!--查询单个-->
@@ -131,15 +133,16 @@
         z_r.order_no,
         z_r.notify_url,
         z_r.code_id,
-        z_r.create_time,
-        z_r.update_time,
+        DATE_FORMAT(z_r.create_time, '%Y-%m-%d %H:%i:%s') AS create_time,
+        DATE_FORMAT(z_r.update_time, '%Y-%m-%d %H:%i:%s') AS update_time,
         z_r.merchant_id,
         z_r.channel_id,
         z_r.agent_id,
         z_r.order_status,
         z_r.notify_status,
         z_r.merchant_fee,
-        z_c.name
+        z_c.name,
+        z_r.pay_name
         from zf_recharge z_r
         left join zf_code z_c on z_r.code_id = z_c.code_id
         <where>
@@ -153,8 +156,8 @@
             <if test="endTime != null and endTime != ''"><!-- 结束时间检索 -->
                 and z_r.create_time &lt;= #{endTime}
             </if>
-
         </where>
+        order by z_r.order_status asc, z_r.create_time desc
     </select>
 
     <!--新增所有列-->

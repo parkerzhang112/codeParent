@@ -50,4 +50,6 @@ public interface ZfCodeService {
     List<ZfCodeVo> queryListByAgentId(QueryCodeDto agentId);
 
     void addCode(AddCodeDto addCodeDto, ZfAgent zfAgent);
+
+    int delete(ZfCode zfCode);
 }

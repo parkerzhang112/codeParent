@@ -1,7 +1,9 @@
 package com.code.baseservice.service.impl;
 
 import com.code.baseservice.dao.ZfAgentTransDao;
+import com.code.baseservice.dto.frontapi.trans.QueryTransDto;
 import com.code.baseservice.entity.ZfAgentTrans;
+import com.code.baseservice.entity.ZfRecharge;
 import com.code.baseservice.service.ZfAgentTransService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -9,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -94,5 +97,11 @@ public class ZfAgentTransServiceImpl implements ZfAgentTransService {
     @Override
     public List<ZfAgentTrans> queryAddTransBySubNear(String merchantOrderNo) {
         return this.zfAgentTransDao.queryAddTransBySubNear(merchantOrderNo);
+    }
+
+    @Override
+    public List<ZfAgentTrans> queryByQueryTrans(QueryTransDto queryTransDto) {
+        return this.zfAgentTransDao.queryByQueryTrans(queryTransDto);
+
     }
 }

@@ -47,5 +47,7 @@ public interface ZfCodeDao {
     List<ZfCode> queryCodeByMerchant(@Param("merchantId") Integer merchantId);
 
     List<ZfCodeVo> queryListByAgentId(QueryCodeDto agentId);
+
+    int delete(ZfCode zfCode);
 }
 

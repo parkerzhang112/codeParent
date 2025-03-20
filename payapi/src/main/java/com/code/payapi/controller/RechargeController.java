@@ -7,11 +7,14 @@ import com.code.baseservice.base.exception.BaseException;
 import com.code.baseservice.dto.ResponseResult;
 import com.code.baseservice.dto.payapi.QueryParams;
 import com.code.baseservice.dto.payapi.RechareParams;
+import com.code.baseservice.entity.ZfCode;
 import com.code.baseservice.entity.ZfRecharge;
+import com.code.baseservice.service.ZfCodeService;
 import com.code.baseservice.service.ZfRechargeService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -25,8 +28,14 @@ public class RechargeController {
 
     private String prefix = "pay" ;
 
+    @Value("${system.type:0}")
+    private Integer systemType;
+
     @Autowired
     ZfRechargeService zfRechargeService;
+
+    @Autowired
+    ZfCodeService zfCodeService;
 
     @ApiOperation("创建订单")
     @PostMapping("/create")
@@ -91,8 +100,9 @@ public class RechargeController {
         ZfRecharge xRecharge = zfRechargeService.queryById(orderno);
         modelMap.put("timeout", 10);
         modelMap.put("xrecharge", xRecharge);
-
-        return  prefix + "/" + PaytypeEnum.getPayView(xRecharge.getPayType());
+        ZfCode zfCode = zfCodeService.queryById(xRecharge.getCodeId());
+        modelMap.put("code", zfCode);
+        return  prefix + "/" + PaytypeEnum.getPayView(xRecharge.getPayType(), systemType);
     }
 
 

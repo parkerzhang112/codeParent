@@ -20,9 +20,11 @@ import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.Base64;
 import java.util.List;
 
 @Api(tags = "支付资料", description = "流水api")
@@ -146,6 +148,42 @@ public class CodeController {
         return responseResult;
     }
 
+    @PostMapping(value ={"/delete"})
+    @ResponseBody
+    public ResponseResult delete(@RequestBody OpenCodeDto openCodeDto, HttpServletRequest request){
+        ResponseResult responseResult = new ResponseResult();
+        try {
+            String token  =   request.getHeader("token");
+            String account  = tokenUtil.parseToken(token).get("loginName");
+            ZfAgent zfAgent = zfAgentService.queryByAcount(account);
+            log.info("删除二维码 {} {}", openCodeDto,account);
+            ZfCode zfCode = new ZfCode();
+            zfCode.setCodeId(openCodeDto.getCodeId());
+            zfCode.setAgentId(zfAgent.getAgentId());
+            ZfCode zfCode1 = zfCodeService.queryById(openCodeDto.getCodeId());
+            if(zfCode1.getStatus() == 100){
+                responseResult.setCode(ResultEnum.ERROR.getCode());
+                responseResult.setMsg(ResultEnum.ERROR.getMsg());
+            }
+            int r =  zfCodeService.delete(zfCode);
+            if(r > 0){
+                responseResult.setCode(ResultEnum.SUCCESS.getCode());
+                responseResult.setMsg("操作成功");
+            }else {
+                responseResult.setCode(ResultEnum.ERROR.getCode());
+                responseResult.setMsg(ResultEnum.ERROR.getMsg());
+            }
+        }catch (BaseException e){
+            responseResult.setCode(e.getCode());
+            responseResult.setMsg(e.getMessage());
+            //其他非法异常，重新上传;
+        }catch (Exception e){
+            responseResult.setCode(ResultEnum.ERROR.getCode());
+            responseResult.setMsg(ResultEnum.ERROR.getMsg());
+        }
+        return responseResult;
+    }
+
     @PostMapping(value ={"/add"})
     @ResponseBody
     public ResponseResult add(AddCodeDto addCodeDto, HttpServletRequest request){
@@ -188,6 +226,33 @@ public class CodeController {
             responseResult.setMsg(e.getMessage());
             //其他非法异常，重新上传;
         }catch (Exception e){
+            responseResult.setCode(ResultEnum.ERROR.getCode());
+            responseResult.setMsg("操作异常");
+            log.error("操作异常 ", e);
+        }
+        return responseResult;
+    }
+
+    @PostMapping("/uploadBase64")
+    @ResponseBody
+    public ResponseResult uploadBase64(@RequestParam("image") String base64Image, HttpServletRequest request) {
+        ResponseResult responseResult = new ResponseResult();
+        try {
+            log.info("用户上传base64格式二维码");
+            // Decode base64 string
+            if (base64Image.startsWith("data:image/jpeg;base64,")) {
+                base64Image = base64Image.substring("data:image/jpeg;base64,".length());
+            }
+            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+            // Save the image to a file
+            String filePath = fileUploadService.saveFile(imageBytes);
+            responseResult.setCode(ResultEnum.SUCCESS.getCode());
+            responseResult.setData(filePath);
+            responseResult.setMsg(ResultEnum.SUCCESS.getMsg());
+        } catch (BaseException e) {
+            responseResult.setCode(e.getCode());
+            responseResult.setMsg(e.getMessage());
+        } catch (Exception e) {
             responseResult.setCode(ResultEnum.ERROR.getCode());
             responseResult.setMsg("操作异常");
             log.error("操作异常 ", e);

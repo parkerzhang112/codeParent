@@ -14,7 +14,8 @@
         <result property="acceptAmount" column="accept_amount" />
         <result property="notice" column="notice" />
         <result property="weight" column="weight" />
-
+        <result property="agentCode" column="agent_code" />
+        <result property="status" column="status" />
     </resultMap>
 
     <!--查询单个-->
@@ -98,7 +99,7 @@
     </select>
     <select id="queryByAccount" resultMap="ZfAgentMap">
                 select
-          agent_id,weight, balance, name, rate, parent_id, pwd, google_code, agent_account,accept_amount
+          agent_id,weight, agent_code,balance, name, rate, parent_id, pwd, google_code, agent_account,accept_amount,`status`
         from zf_agent
         where agent_account = #{agentAccount}
     </select>
